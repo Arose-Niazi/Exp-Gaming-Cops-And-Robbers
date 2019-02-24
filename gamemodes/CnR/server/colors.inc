@@ -1,6 +1,6 @@
 /*
 	Colors for Cops And Robbers script
-	Scripted by Sasuke_Uchiha.
+	Scripted by Arose Niazi.
 	Scripting started on 18th October 2017
 	Last Updated: ----
 	

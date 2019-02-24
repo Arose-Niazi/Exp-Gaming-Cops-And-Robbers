@@ -1,7 +1,7 @@
 /*
 
 	Defines for Cops And Robbers script
-	Scripted by Sasuke_Uchiha.
+	Scripted by Arose Niazi.
 	Scripting started on 11th October 2017
 	Last Updated: 18/10/2017
 	

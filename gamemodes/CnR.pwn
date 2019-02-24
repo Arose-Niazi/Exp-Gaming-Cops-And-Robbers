@@ -1,7 +1,7 @@
 /*
 
 	Cops and Robebrs Script.
-	Scripted by Sasuke_Uchiha.
+	Scripted by Arose Niazi.
 	Scripting started on 11th October 2017
 	Last Updated: ---
 	
@@ -93,7 +93,7 @@ main()
 	print("  |---------------------------------------------------");
 	print("  |--- Cops and Robbers");
     printf("  |--  Script v%s",VERSION);
-    print("  |--  Sasuke_Uchiha");
+    print("  |--  Arose Niazi");
 	print("  |---------------------------------------------------");
 }
 

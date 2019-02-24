@@ -1,7 +1,7 @@
 /*
 
 	Peds Script
-	Scripted by Sasuke_Uchiha.
+	Scripted by Arose Niazi.
 	Scripting started on 13th October 2017
 	Last Updated: 17/10/2017
 	

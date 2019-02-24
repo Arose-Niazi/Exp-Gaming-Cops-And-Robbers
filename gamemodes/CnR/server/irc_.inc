@@ -1,7 +1,7 @@
 /*
 
 	IRC Script
-	Scripted by Sasuke_Uchiha.
+	Scripted by Arose Niazi.
 	Scripting started on 24th October 2017
 	Last Updated: ----
 	

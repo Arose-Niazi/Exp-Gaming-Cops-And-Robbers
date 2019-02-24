@@ -1,7 +1,7 @@
 /*
 
 	Interiors/Teleports Script
-	Scripted by Sasuke_Uchiha.
+	Scripted by Arose Niazi.
 	Scripting started on 20th October 2017
 	Last Updated: -----
 	

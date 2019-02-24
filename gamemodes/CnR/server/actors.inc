@@ -1,7 +1,7 @@
 /*
 
 	Actors Script
-	Scripted by Sasuke_Uchiha.
+	Scripted by Arose Niazi.
 	Scripting started on 30th October 2017
 	Last Updated: -----
 	
