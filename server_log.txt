@@ -1,0 +1,3453 @@
+
+----------
+Loaded log file: "server_log.txt".
+----------
+
+SA-MP Dedicated Server
+----------------------
+v0.3.7-R2, (C)2005-2015 SA-MP Team
+
+[13:09:10] 
+[13:09:10] Server Plugins
+[13:09:10] --------------
+[13:09:10]  Loading plugin: crashdetect
+[13:09:10]   CrashDetect v4.17 is OK.
+[13:09:10]   Loaded.
+[13:09:10]  Loading plugin: log-plugin
+[13:09:10]  >> plugin.log: v0.3 successfully loaded.
+[13:09:10]   Loaded.
+[13:09:10]  Loading plugin: streamer
+[13:09:10] 
+
+*** Streamer Plugin v2.9.1 by Incognito loaded ***
+
+[13:09:10]   Loaded.
+[13:09:10]  Loading plugin: sscanf
+[13:09:10] 
+
+[13:09:10]  ===============================
+
+[13:09:10]       sscanf plugin loaded.     
+
+[13:09:10]          Version:  2.8.2        
+
+[13:09:10]    (c) 2012 Alex "Y_Less" Cole  
+
+[13:09:10]  ===============================
+
+[13:09:10]   Loaded.
+[13:09:10]  Loading plugin: irc
+[13:09:10] 
+
+*** IRC Plugin v1.4.8 by Incognito loaded ***
+
+[13:09:10]   Loaded.
+[13:09:10]  Loading plugin: mysql
+[13:09:10]  >> plugin.mysql: R41-2 successfully loaded.
+[13:09:10]   Loaded.
+[13:09:10]  Loading plugin: whirlpool
+[13:09:10]  
+[13:09:10]  ==================
+[13:09:10]  
+[13:09:10]   Whirlpool loaded
+[13:09:10]  
+[13:09:10]  ==================
+[13:09:10]  
+[13:09:10]   Loaded.
+[13:09:10]  Loading plugin: pawncmd
+[13:09:10] Pawn.CMD plugin v3.1.4 by urShadow loaded
+[13:09:10]   Loaded.
+[13:09:10]  Loading plugin: nativechecker
+[13:09:10]   Loaded.
+[13:09:10]  Loaded 9 plugins.
+
+[13:09:10] 
+[13:09:10] Filterscripts
+[13:09:10] ---------------
+[13:09:10]   Loading filterscript 'Bans.amx'...
+[13:09:10] --------------------------------------
+[13:09:10]  MM/MG Ban system loaded. 
+[13:09:10] --------------------------------------
+
+[13:09:12]   Loading filterscript 'vspawner.amx'...
+[13:09:13] 
+--Admin Vehicle Spawner Loaded
+
+[13:09:13]   Loading filterscript 'int.amx'...
+[13:09:13]   Loaded 3 filterscripts.
+
+[13:09:17] Contine to next floor called
+[13:09:17] Checking upwards
+[13:09:17] Floor to be called is 1
+[13:09:17] Moving to floor
+[13:09:17] 
+
+[13:09:17]   |---------------------------------------------------
+[13:09:17]   |--- Cops and Robbers
+[13:09:17]   |--  Script v0.01
+[13:09:17]   |--  Sasuke_Uchiha
+[13:09:17]   |---------------------------------------------------
+[13:09:17] Number of vehicle models: 91
+[13:09:23] On Object Moved Elevator Reached next floor
+[13:09:23] On Object Moved Elevator Reached next floor
+[13:09:23] On Object Moved Floor is in queue
+[13:09:23] On Object Moved Floor is in queue
+[13:09:23] On Object Moved Floor doors 1
+[13:09:23] On Object Moved Floor doors 1 (-1178.93 | -1179.43)
+[13:09:23] On Object Moved Floor doors are closed passed.
+[13:09:23] Contine to next floor called
+[13:09:23] Checking upwards
+[13:09:23] Checking downward
+[13:09:23] No floor found
+[13:09:34] [connection] incoming connection: 127.0.0.1:50562 id: 0
+[13:09:35] [join] Sasuke_Uchiha has joined the server (0:127.0.0.1)
+[13:09:39] Cleared
+[13:10:06] lINES 11
+[13:10:08] Adding floor to quene 0
+[13:10:08] Added floor to quene 0
+[13:10:08] Checking for next
+[13:10:08] Checking for next eleavtor is on 1
+[13:10:08] Checking for next next floor found
+[13:10:08] lINES 11
+[13:10:08] lINES 11
+[13:10:08] On Object Moved Floor doors 1
+[13:10:08] On Object Moved Floor doors 1 (-1180.55 | -1179.43)
+
+----------
+Loaded log file: "server_log.txt".
+----------
+
+SA-MP Dedicated Server
+----------------------
+v0.3.7-R2, (C)2005-2015 SA-MP Team
+
+[13:14:36] 
+[13:14:36] Server Plugins
+[13:14:36] --------------
+[13:14:36]  Loading plugin: crashdetect
+[13:14:36]   CrashDetect v4.17 is OK.
+[13:14:36]   Loaded.
+[13:14:36]  Loading plugin: log-plugin
+[13:14:36]  >> plugin.log: v0.3 successfully loaded.
+[13:14:36]   Loaded.
+[13:14:36]  Loading plugin: streamer
+[13:14:36] 
+
+*** Streamer Plugin v2.9.1 by Incognito loaded ***
+
+[13:14:36]   Loaded.
+[13:14:36]  Loading plugin: sscanf
+[13:14:36] 
+
+[13:14:36]  ===============================
+
+[13:14:36]       sscanf plugin loaded.     
+
+[13:14:36]          Version:  2.8.2        
+
+[13:14:36]    (c) 2012 Alex "Y_Less" Cole  
+
+[13:14:36]  ===============================
+
+[13:14:36]   Loaded.
+[13:14:36]  Loading plugin: irc
+[13:14:36] 
+
+*** IRC Plugin v1.4.8 by Incognito loaded ***
+
+[13:14:36]   Loaded.
+[13:14:36]  Loading plugin: mysql
+[13:14:36]  >> plugin.mysql: R41-2 successfully loaded.
+[13:14:36]   Loaded.
+[13:14:36]  Loading plugin: whirlpool
+[13:14:36]  
+[13:14:36]  ==================
+[13:14:36]  
+[13:14:36]   Whirlpool loaded
+[13:14:36]  
+[13:14:36]  ==================
+[13:14:36]  
+[13:14:36]   Loaded.
+[13:14:36]  Loading plugin: pawncmd
+[13:14:36] Pawn.CMD plugin v3.1.4 by urShadow loaded
+[13:14:36]   Loaded.
+[13:14:36]  Loading plugin: nativechecker
+[13:14:36]   Loaded.
+[13:14:36]  Loaded 9 plugins.
+
+[13:14:36] 
+[13:14:36] Filterscripts
+[13:14:36] ---------------
+[13:14:36]   Loading filterscript 'Bans.amx'...
+[13:14:36] --------------------------------------
+[13:14:36]  MM/MG Ban system loaded. 
+[13:14:36] --------------------------------------
+
+[13:14:39]   Loading filterscript 'vspawner.amx'...
+[13:14:39] 
+--Admin Vehicle Spawner Loaded
+
+[13:14:39]   Loading filterscript 'int.amx'...
+[13:14:39]   Loaded 3 filterscripts.
+
+[13:14:43] Contine to next floor called
+[13:14:43] Checking upwards
+[13:14:43] Floor to be called is 1
+[13:14:43] Moving to floor
+[13:14:43] 
+
+[13:14:43]   |---------------------------------------------------
+[13:14:43]   |--- Cops and Robbers
+[13:14:43]   |--  Script v0.01
+[13:14:43]   |--  Sasuke_Uchiha
+[13:14:43]   |---------------------------------------------------
+[13:14:43] Number of vehicle models: 90
+[13:14:49] On Object Moved Elevator Reached next floor
+[13:14:49] On Object Moved Elevator Reached next floor
+[13:14:49] On Object Moved Floor is in queue
+[13:14:49] On Object Moved Floor is in queue
+[13:14:49] On Object Moved Floor doors 1
+[13:14:49] On Object Moved Floor doors 1 (-1178.93 | -1179.43)
+
+----------
+Loaded log file: "server_log.txt".
+----------
+
+SA-MP Dedicated Server
+----------------------
+v0.3.7-R2, (C)2005-2015 SA-MP Team
+
+[13:16:48] 
+[13:16:48] Server Plugins
+[13:16:48] --------------
+[13:16:48]  Loading plugin: crashdetect
+[13:16:48]   CrashDetect v4.17 is OK.
+[13:16:48]   Loaded.
+[13:16:48]  Loading plugin: log-plugin
+[13:16:48]  >> plugin.log: v0.3 successfully loaded.
+[13:16:48]   Loaded.
+[13:16:48]  Loading plugin: streamer
+[13:16:48] 
+
+*** Streamer Plugin v2.9.1 by Incognito loaded ***
+
+[13:16:48]   Loaded.
+[13:16:48]  Loading plugin: sscanf
+[13:16:48] 
+
+[13:16:48]  ===============================
+
+[13:16:48]       sscanf plugin loaded.     
+
+[13:16:48]          Version:  2.8.2        
+
+[13:16:48]    (c) 2012 Alex "Y_Less" Cole  
+
+[13:16:48]  ===============================
+
+[13:16:48]   Loaded.
+[13:16:48]  Loading plugin: irc
+[13:16:48] 
+
+*** IRC Plugin v1.4.8 by Incognito loaded ***
+
+[13:16:48]   Loaded.
+[13:16:48]  Loading plugin: mysql
+[13:16:48]  >> plugin.mysql: R41-2 successfully loaded.
+[13:16:48]   Loaded.
+[13:16:48]  Loading plugin: whirlpool
+[13:16:48]  
+[13:16:48]  ==================
+[13:16:48]  
+[13:16:48]   Whirlpool loaded
+[13:16:48]  
+[13:16:48]  ==================
+[13:16:48]  
+[13:16:48]   Loaded.
+[13:16:48]  Loading plugin: pawncmd
+[13:16:48] Pawn.CMD plugin v3.1.4 by urShadow loaded
+[13:16:48]   Loaded.
+[13:16:48]  Loading plugin: nativechecker
+[13:16:48]   Loaded.
+[13:16:48]  Loaded 9 plugins.
+
+[13:16:48] 
+[13:16:48] Filterscripts
+[13:16:48] ---------------
+[13:16:48]   Loading filterscript 'Bans.amx'...
+[13:16:48] --------------------------------------
+[13:16:48]  MM/MG Ban system loaded. 
+[13:16:48] --------------------------------------
+
+[13:16:51]   Loading filterscript 'vspawner.amx'...
+[13:16:51] 
+--Admin Vehicle Spawner Loaded
+
+[13:16:51]   Loading filterscript 'int.amx'...
+[13:16:51]   Loaded 3 filterscripts.
+
+[13:16:55] Contine to next floor called
+[13:16:55] Checking upwards
+[13:16:55] Floor to be called is 1
+[13:16:55] Moving to floor
+[13:16:55] 
+
+[13:16:55]   |---------------------------------------------------
+[13:16:55]   |--- Cops and Robbers
+[13:16:55]   |--  Script v0.01
+[13:16:55]   |--  Sasuke_Uchiha
+[13:16:55]   |---------------------------------------------------
+[13:16:55] Number of vehicle models: 89
+[13:17:01] On Object Moved Elevator Reached next floor
+[13:17:01] On Object Moved Floor is in queue
+[13:17:01] On Object Moved Floor is in queue timer set pass
+[13:17:01] On Object Moved Floor doors 1
+[13:17:01] On Object Moved Floor doors 1 (-1178.93 | -1179.43)
+
+----------
+Loaded log file: "server_log.txt".
+----------
+
+SA-MP Dedicated Server
+----------------------
+v0.3.7-R2, (C)2005-2015 SA-MP Team
+
+[13:18:22] 
+[13:18:22] Server Plugins
+[13:18:22] --------------
+[13:18:22]  Loading plugin: crashdetect
+[13:18:22]   CrashDetect v4.17 is OK.
+[13:18:22]   Loaded.
+[13:18:22]  Loading plugin: log-plugin
+[13:18:22]  >> plugin.log: v0.3 successfully loaded.
+[13:18:22]   Loaded.
+[13:18:22]  Loading plugin: streamer
+[13:18:22] 
+
+*** Streamer Plugin v2.9.1 by Incognito loaded ***
+
+[13:18:22]   Loaded.
+[13:18:22]  Loading plugin: sscanf
+[13:18:22] 
+
+[13:18:22]  ===============================
+
+[13:18:22]       sscanf plugin loaded.     
+
+[13:18:22]          Version:  2.8.2        
+
+[13:18:22]    (c) 2012 Alex "Y_Less" Cole  
+
+[13:18:22]  ===============================
+
+[13:18:22]   Loaded.
+[13:18:22]  Loading plugin: irc
+[13:18:22] 
+
+*** IRC Plugin v1.4.8 by Incognito loaded ***
+
+[13:18:22]   Loaded.
+[13:18:22]  Loading plugin: mysql
+[13:18:22]  >> plugin.mysql: R41-2 successfully loaded.
+[13:18:22]   Loaded.
+[13:18:22]  Loading plugin: whirlpool
+[13:18:22]  
+[13:18:22]  ==================
+[13:18:22]  
+[13:18:22]   Whirlpool loaded
+[13:18:22]  
+[13:18:22]  ==================
+[13:18:22]  
+[13:18:22]   Loaded.
+[13:18:22]  Loading plugin: pawncmd
+[13:18:22] Pawn.CMD plugin v3.1.4 by urShadow loaded
+[13:18:22]   Loaded.
+[13:18:22]  Loading plugin: nativechecker
+[13:18:22]   Loaded.
+[13:18:22]  Loaded 9 plugins.
+
+[13:18:22] 
+[13:18:22] Filterscripts
+[13:18:22] ---------------
+[13:18:22]   Loading filterscript 'Bans.amx'...
+[13:18:22] --------------------------------------
+[13:18:22]  MM/MG Ban system loaded. 
+[13:18:22] --------------------------------------
+
+[13:18:25]   Loading filterscript 'vspawner.amx'...
+[13:18:25] 
+--Admin Vehicle Spawner Loaded
+
+[13:18:25]   Loading filterscript 'int.amx'...
+[13:18:25]   Loaded 3 filterscripts.
+
+[13:18:29] Contine to next floor called
+[13:18:29] Checking upwards
+[13:18:29] Floor to be called is 1
+[13:18:29] Moving to floor
+[13:18:29] 
+
+[13:18:29]   |---------------------------------------------------
+[13:18:29]   |--- Cops and Robbers
+[13:18:29]   |--  Script v0.01
+[13:18:29]   |--  Sasuke_Uchiha
+[13:18:29]   |---------------------------------------------------
+[13:18:29] Number of vehicle models: 93
+[13:18:35] On Object Moved Elevator Reached next floor
+[13:18:35] On Object Moved Floor is in queue
+[13:18:35] On Object Moved Floor is in queue timer set pass
+[13:18:35] On Object Moved Floor doors 1
+[13:18:35] On Object Moved Floor doors 1 (-1178.93 | -1179.43)
+[13:18:40] Checking for next
+[13:18:40] Checking for next eleavtor is on 1
+[13:18:40] Checking for next no other floors requested
+[13:18:48] [connection] incoming connection: 127.0.0.1:55110 id: 0
+[13:18:48] [join] Sasuke_Uchiha has joined the server (0:127.0.0.1)
+[13:18:53] Cleared
+[13:19:16] CALLED from floor 1
+[13:19:19] lINES 11
+[13:19:21] Adding floor to quene 0
+[13:19:21] Added floor to quene 0
+[13:19:21] Checking for next
+[13:19:21] Checking for next eleavtor is on 1
+[13:19:21] Checking for next next floor found
+[13:19:21] lINES 11
+[13:19:21] lINES 11
+[13:19:22] On Object Moved Floor doors 1
+[13:19:22] On Object Moved Floor doors 1 (-1180.55 | -1179.43)
+[13:19:22] On Object Moved Floor doors are closed passed.
+[13:19:22] Contine to next floor called
+[13:19:22] Checking upwards
+[13:19:22] Checking downward
+[13:19:22] No floor found
+[13:19:59] lINES 11
+[13:20:00] lINES 11
+[13:20:00] lINES 11
+[13:20:02] Adding floor to quene 3
+[13:20:02] Added floor to quene 3
+[13:20:02] Checking for next
+[13:20:02] Checking for next eleavtor is on 1
+[13:20:02] Checking for next next floor found
+[13:20:02] lINES 11
+[13:20:02] lINES 11
+[13:20:02] On Object Moved Floor doors 1
+[13:20:02] On Object Moved Floor doors 1 (-1180.55 | -1179.43)
+[13:20:02] On Object Moved Floor doors are closed passed.
+[13:20:02] Contine to next floor called
+[13:20:02] Checking upwards
+[13:20:02] Floor to be called is 3
+[13:20:02] Moving to floor
+[13:20:05] On Object Moved Elevator Reached next floor
+[13:20:05] Contine to next floor called
+[13:20:05] Checking upwards
+[13:20:05] Floor to be called is 3
+[13:20:05] Moving to floor
+[13:20:09] On Object Moved Elevator Reached next floor
+[13:20:09] On Object Moved Floor is in queue
+[13:20:09] On Object Moved Floor is in queue timer set pass
+[13:20:10] On Object Moved Floor doors 3
+[13:20:10] On Object Moved Floor doors 3 (-1178.93 | -1179.43)
+[13:20:15] Checking for next
+[13:20:15] Checking for next next floor found
+[13:20:15] On Object Moved Floor doors 3
+[13:20:15] On Object Moved Floor doors 3 (-1180.55 | -1179.43)
+[13:20:15] On Object Moved Floor doors are closed passed.
+[13:20:15] Contine to next floor called
+[13:20:15] Checking upwards
+[13:20:15] Checking downward
+[13:20:15] Floor to be called is 2 (Set floorid =)
+[13:20:15] Moving to floor
+[13:20:19] On Object Moved Elevator Reached next floor
+[13:20:19] Contine to next floor called
+[13:20:19] Checking downward
+[13:20:19] Floor to be called is 1 (Set floorid =)
+[13:20:19] Moving to floor
+[13:20:23] On Object Moved Elevator Reached next floor
+[13:20:23] On Object Moved Floor is in queue
+[13:20:23] On Object Moved Floor is in queue timer set pass
+[13:20:24] On Object Moved Floor doors 1
+[13:20:24] On Object Moved Floor doors 1 (-1178.93 | -1179.43)
+[13:20:29] Checking for next
+[13:20:29] Checking for next eleavtor is on 1
+[13:20:29] Checking for next next floor found
+[13:20:29] On Object Moved Floor doors 1
+[13:20:29] On Object Moved Floor doors 1 (-1180.55 | -1179.43)
+[13:20:29] On Object Moved Floor doors are closed passed.
+[13:20:29] Contine to next floor called
+[13:20:29] Checking downward
+[13:20:29] No floor found
+
+----------
+Loaded log file: "server_log.txt".
+----------
+
+SA-MP Dedicated Server
+----------------------
+v0.3.7-R2, (C)2005-2015 SA-MP Team
+
+[13:25:21] 
+[13:25:21] Server Plugins
+[13:25:21] --------------
+[13:25:21]  Loading plugin: crashdetect
+[13:25:21]   CrashDetect v4.17 is OK.
+[13:25:21]   Loaded.
+[13:25:21]  Loading plugin: log-plugin
+[13:25:21]  >> plugin.log: v0.3 successfully loaded.
+[13:25:21]   Loaded.
+[13:25:21]  Loading plugin: streamer
+[13:25:21] 
+
+*** Streamer Plugin v2.9.1 by Incognito loaded ***
+
+[13:25:21]   Loaded.
+[13:25:21]  Loading plugin: sscanf
+[13:25:21] 
+
+[13:25:21]  ===============================
+
+[13:25:21]       sscanf plugin loaded.     
+
+[13:25:21]          Version:  2.8.2        
+
+[13:25:21]    (c) 2012 Alex "Y_Less" Cole  
+
+[13:25:21]  ===============================
+
+[13:25:21]   Loaded.
+[13:25:21]  Loading plugin: irc
+[13:25:21] 
+
+*** IRC Plugin v1.4.8 by Incognito loaded ***
+
+[13:25:21]   Loaded.
+[13:25:21]  Loading plugin: mysql
+[13:25:21]  >> plugin.mysql: R41-2 successfully loaded.
+[13:25:21]   Loaded.
+[13:25:21]  Loading plugin: whirlpool
+[13:25:21]  
+[13:25:21]  ==================
+[13:25:21]  
+[13:25:21]   Whirlpool loaded
+[13:25:21]  
+[13:25:21]  ==================
+[13:25:21]  
+[13:25:21]   Loaded.
+[13:25:21]  Loading plugin: pawncmd
+[13:25:21] Pawn.CMD plugin v3.1.4 by urShadow loaded
+[13:25:21]   Loaded.
+[13:25:21]  Loading plugin: nativechecker
+[13:25:21]   Loaded.
+[13:25:21]  Loaded 9 plugins.
+
+[13:25:21] 
+[13:25:21] Filterscripts
+[13:25:21] ---------------
+[13:25:21]   Loading filterscript 'Bans.amx'...
+[13:25:21] --------------------------------------
+[13:25:21]  MM/MG Ban system loaded. 
+[13:25:21] --------------------------------------
+
+[13:25:24]   Loading filterscript 'vspawner.amx'...
+[13:25:24] 
+--Admin Vehicle Spawner Loaded
+
+[13:25:24]   Loading filterscript 'int.amx'...
+[13:25:24]   Loaded 3 filterscripts.
+
+[13:25:28] Contine to next floor called 0 current floor
+[13:25:28] Checking upwards
+[13:25:28] Floor to be called is 1
+[13:25:28] Moving to floor
+[13:25:28] 
+
+[13:25:28]   |---------------------------------------------------
+[13:25:28]   |--- Cops and Robbers
+[13:25:28]   |--  Script v0.01
+[13:25:28]   |--  Sasuke_Uchiha
+[13:25:28]   |---------------------------------------------------
+[13:25:28] Number of vehicle models: 92
+[13:25:34] On Object Moved Elevator Reached next floor
+[13:25:34] On Object Moved Floor is in queue
+[13:25:34] On Object Moved Floor is in queue timer set pass
+[13:25:35] On Object Moved Floor doors 1
+[13:25:35] On Object Moved Floor doors 1 (-1178.93 | -1179.43)
+[13:25:37] [connection] incoming connection: 127.0.0.1:62750 id: 0
+[13:25:38] [join] Sasuke_Uchiha has joined the server (0:127.0.0.1)
+[13:25:40] Checking for next
+[13:25:40] Checking for next eleavtor is on 1
+[13:25:40] Checking for next no other floors requested
+[13:25:42] Cleared
+[13:26:04] CALLED from floor 1
+[13:26:10] CALLED from floor 1
+[13:26:11] CALLED from floor 1
+[13:26:11] CALLED from floor 1
+[13:26:11] CALLED from floor 1
+[13:26:12] CALLED from floor 1
+[13:26:12] CALLED from floor 1
+
+----------
+Loaded log file: "server_log.txt".
+----------
+
+SA-MP Dedicated Server
+----------------------
+v0.3.7-R2, (C)2005-2015 SA-MP Team
+
+[13:28:33] 
+[13:28:33] Server Plugins
+[13:28:33] --------------
+[13:28:33]  Loading plugin: crashdetect
+[13:28:33]   CrashDetect v4.17 is OK.
+[13:28:33]   Loaded.
+[13:28:33]  Loading plugin: log-plugin
+[13:28:33]  >> plugin.log: v0.3 successfully loaded.
+[13:28:33]   Loaded.
+[13:28:33]  Loading plugin: streamer
+[13:28:33] 
+
+*** Streamer Plugin v2.9.1 by Incognito loaded ***
+
+[13:28:33]   Loaded.
+[13:28:33]  Loading plugin: sscanf
+[13:28:33] 
+
+[13:28:33]  ===============================
+
+[13:28:33]       sscanf plugin loaded.     
+
+[13:28:33]          Version:  2.8.2        
+
+[13:28:33]    (c) 2012 Alex "Y_Less" Cole  
+
+[13:28:33]  ===============================
+
+[13:28:33]   Loaded.
+[13:28:33]  Loading plugin: irc
+[13:28:33] 
+
+*** IRC Plugin v1.4.8 by Incognito loaded ***
+
+[13:28:33]   Loaded.
+[13:28:33]  Loading plugin: mysql
+[13:28:33]  >> plugin.mysql: R41-2 successfully loaded.
+[13:28:33]   Loaded.
+[13:28:33]  Loading plugin: whirlpool
+[13:28:33]  
+[13:28:33]  ==================
+[13:28:33]  
+[13:28:33]   Whirlpool loaded
+[13:28:33]  
+[13:28:33]  ==================
+[13:28:33]  
+[13:28:33]   Loaded.
+[13:28:33]  Loading plugin: pawncmd
+[13:28:33] Pawn.CMD plugin v3.1.4 by urShadow loaded
+[13:28:33]   Loaded.
+[13:28:33]  Loading plugin: nativechecker
+[13:28:33]   Loaded.
+[13:28:33]  Loaded 9 plugins.
+
+[13:28:33] 
+[13:28:33] Filterscripts
+[13:28:33] ---------------
+[13:28:33]   Loading filterscript 'Bans.amx'...
+[13:28:33] --------------------------------------
+[13:28:33]  MM/MG Ban system loaded. 
+[13:28:33] --------------------------------------
+
+[13:28:35]   Loading filterscript 'vspawner.amx'...
+[13:28:36] 
+--Admin Vehicle Spawner Loaded
+
+[13:28:36]   Loading filterscript 'int.amx'...
+[13:28:36]   Loaded 3 filterscripts.
+
+[13:28:41] Contine to next floor called 0 current floor
+[13:28:41] Checking upwards
+[13:28:41] Floor to be called is 1
+[13:28:41] Moving to floor
+[13:28:41] 
+
+[13:28:41]   |---------------------------------------------------
+[13:28:41]   |--- Cops and Robbers
+[13:28:41]   |--  Script v0.01
+[13:28:41]   |--  Sasuke_Uchiha
+[13:28:41]   |---------------------------------------------------
+[13:28:41] Number of vehicle models: 91
+[13:28:46] [connection] incoming connection: 127.0.0.1:49152 id: 0
+[13:28:46] [join] Sasuke_Uchiha has joined the server (0:127.0.0.1)
+[13:28:47] On Object Moved Elevator Reached next floor
+[13:28:47] On Object Moved Floor is in queue
+[13:28:47] On Object Moved Floor is in queue timer set pass
+[13:28:47] On Object Moved Floor doors 1
+[13:28:47] On Object Moved Floor doors 1 (-1178.93 | -1179.43)
+[13:28:51] Cleared
+[13:28:53] Checking for next
+[13:28:53] Checking for next eleavtor is on 1
+[13:28:53] Checking for next no other floors requested
+[13:32:05] lINES 11
+[13:32:06] Adding floor to quene 0
+[13:32:06] Added floor to quene 0
+[13:32:06] Checking for next
+[13:32:06] Checking for next eleavtor is on 1
+[13:32:06] Checking for next next floor found
+[13:32:06] lINES 11
+[13:32:06] lINES 11
+[13:32:07] On Object Moved Floor doors 1
+[13:32:07] On Object Moved Floor doors 1 (-1180.55 | -1179.43)
+[13:32:07] On Object Moved Floor doors are closed passed.
+[13:32:07] Contine to next floor called 1 current floor
+[13:32:07] Checking upwards
+[13:32:07] Checking downward
+[13:32:07] No floor found
+
+----------
+Loaded log file: "server_log.txt".
+----------
+
+SA-MP Dedicated Server
+----------------------
+v0.3.7-R2, (C)2005-2015 SA-MP Team
+
+[13:33:32] 
+[13:33:32] Server Plugins
+[13:33:32] --------------
+[13:33:32]  Loading plugin: crashdetect
+[13:33:32]   CrashDetect v4.17 is OK.
+[13:33:32]   Loaded.
+[13:33:32]  Loading plugin: log-plugin
+[13:33:32]  >> plugin.log: v0.3 successfully loaded.
+[13:33:32]   Loaded.
+[13:33:32]  Loading plugin: streamer
+[13:33:32] 
+
+*** Streamer Plugin v2.9.1 by Incognito loaded ***
+
+[13:33:32]   Loaded.
+[13:33:32]  Loading plugin: sscanf
+[13:33:32] 
+
+[13:33:32]  ===============================
+
+[13:33:32]       sscanf plugin loaded.     
+
+[13:33:32]          Version:  2.8.2        
+
+[13:33:32]    (c) 2012 Alex "Y_Less" Cole  
+
+[13:33:32]  ===============================
+
+[13:33:32]   Loaded.
+[13:33:32]  Loading plugin: irc
+[13:33:32] 
+
+*** IRC Plugin v1.4.8 by Incognito loaded ***
+
+[13:33:32]   Loaded.
+[13:33:32]  Loading plugin: mysql
+[13:33:32]  >> plugin.mysql: R41-2 successfully loaded.
+[13:33:32]   Loaded.
+[13:33:32]  Loading plugin: whirlpool
+[13:33:32]  
+[13:33:32]  ==================
+[13:33:32]  
+[13:33:32]   Whirlpool loaded
+[13:33:32]  
+[13:33:32]  ==================
+[13:33:32]  
+[13:33:32]   Loaded.
+[13:33:32]  Loading plugin: pawncmd
+[13:33:32] Pawn.CMD plugin v3.1.4 by urShadow loaded
+[13:33:32]   Loaded.
+[13:33:32]  Loading plugin: nativechecker
+[13:33:32]   Loaded.
+[13:33:32]  Loaded 9 plugins.
+
+[13:33:32] 
+[13:33:32] Filterscripts
+[13:33:32] ---------------
+[13:33:32]   Loading filterscript 'Bans.amx'...
+[13:33:32] --------------------------------------
+[13:33:32]  MM/MG Ban system loaded. 
+[13:33:32] --------------------------------------
+
+[13:33:34]   Loading filterscript 'vspawner.amx'...
+[13:33:35] 
+--Admin Vehicle Spawner Loaded
+
+[13:33:35]   Loading filterscript 'int.amx'...
+[13:33:35]   Loaded 3 filterscripts.
+
+[13:33:39] Contine to next floor called 0 current floor
+[13:33:39] Checking upwards
+[13:33:39] Floor to be called is 1
+[13:33:39] Moving to floor
+[13:33:39] 
+
+[13:33:39]   |---------------------------------------------------
+[13:33:39]   |--- Cops and Robbers
+[13:33:39]   |--  Script v0.01
+[13:33:39]   |--  Sasuke_Uchiha
+[13:33:39]   |---------------------------------------------------
+[13:33:39] Number of vehicle models: 95
+[13:33:45] On Object Moved Elevator Reached next floor
+[13:33:45] On Object Moved Floor is in queue
+[13:33:45] On Object Moved Floor is in queue timer set pass
+[13:33:45] On Object Moved Floor doors 1
+[13:33:45] On Object Moved Floor doors 1 (-1178.93 | -1179.43)
+[13:33:50] Checking for next
+[13:33:50] Checking for next eleavtor is on 1
+[13:33:50] Checking for next no other floors requested
+[13:33:53] [connection] incoming connection: 127.0.0.1:61486 id: 0
+[13:33:53] [join] Sasuke_Uchiha has joined the server (0:127.0.0.1)
+[13:33:58] Cleared
+[13:34:26] Floor called check 0
+[13:34:27] Floor called check 0
+[13:34:41] Floor called check 0
+[13:34:41] Floor called check 0
+[13:34:42] Floor called check 0
+[13:34:51] Floor called check 1
+[13:34:51] CALLED from floor 2
+[13:34:51] Adding floor to quene 2
+[13:34:51] Added floor to quene 2
+[13:34:51] Checking for next
+[13:34:51] Checking for next eleavtor is on 1
+[13:34:51] Checking for next next floor found
+[13:34:52] On Object Moved Floor doors 1
+[13:34:52] On Object Moved Floor doors 1 (-1180.55 | -1179.43)
+[13:34:52] On Object Moved Floor doors are closed passed.
+[13:34:52] Contine to next floor called 1 current floor
+[13:34:52] Checking upwards
+[13:34:52] Floor to be called is 2
+[13:34:52] Moving to floor
+[13:34:56] On Object Moved Elevator Reached next floor
+[13:34:56] On Object Moved Floor is in queue
+[13:34:56] On Object Moved Floor is in queue timer set pass
+[13:34:57] On Object Moved Floor doors 2
+[13:34:57] On Object Moved Floor doors 2 (-1178.93 | -1179.43)
+[13:35:02] Checking for next
+[13:35:02] Checking for next next floor found
+[13:35:02] On Object Moved Floor doors 2
+[13:35:02] On Object Moved Floor doors 2 (-1180.55 | -1179.43)
+[13:35:02] On Object Moved Floor doors are closed passed.
+[13:35:02] Contine to next floor called 2 current floor
+[13:35:02] Checking upwards
+[13:35:02] Checking downward
+[13:35:02] Floor to be called is 1 (Set floorid =)
+[13:35:02] Moving to floor
+[13:35:06] On Object Moved Elevator Reached next floor
+[13:35:06] On Object Moved Floor is in queue
+[13:35:06] On Object Moved Floor is in queue timer set pass
+[13:35:07] On Object Moved Floor doors 1
+[13:35:07] On Object Moved Floor doors 1 (-1178.93 | -1179.43)
+[13:35:12] Checking for next
+[13:35:12] Checking for next eleavtor is on 1
+[13:35:12] Checking for next no other floors requested
+
+----------
+Loaded log file: "server_log.txt".
+----------
+
+SA-MP Dedicated Server
+----------------------
+v0.3.7-R2, (C)2005-2015 SA-MP Team
+
+[13:36:38] 
+[13:36:38] Server Plugins
+[13:36:38] --------------
+[13:36:38]  Loading plugin: crashdetect
+[13:36:38]   CrashDetect v4.17 is OK.
+[13:36:38]   Loaded.
+[13:36:38]  Loading plugin: log-plugin
+[13:36:38]  >> plugin.log: v0.3 successfully loaded.
+[13:36:38]   Loaded.
+[13:36:38]  Loading plugin: streamer
+[13:36:38] 
+
+*** Streamer Plugin v2.9.1 by Incognito loaded ***
+
+[13:36:38]   Loaded.
+[13:36:38]  Loading plugin: sscanf
+[13:36:38] 
+
+[13:36:38]  ===============================
+
+[13:36:38]       sscanf plugin loaded.     
+
+[13:36:38]          Version:  2.8.2        
+
+[13:36:38]    (c) 2012 Alex "Y_Less" Cole  
+
+[13:36:38]  ===============================
+
+[13:36:38]   Loaded.
+[13:36:38]  Loading plugin: irc
+[13:36:38] 
+
+*** IRC Plugin v1.4.8 by Incognito loaded ***
+
+[13:36:38]   Loaded.
+[13:36:38]  Loading plugin: mysql
+[13:36:38]  >> plugin.mysql: R41-2 successfully loaded.
+[13:36:38]   Loaded.
+[13:36:38]  Loading plugin: whirlpool
+[13:36:38]  
+[13:36:38]  ==================
+[13:36:38]  
+[13:36:38]   Whirlpool loaded
+[13:36:38]  
+[13:36:38]  ==================
+[13:36:38]  
+[13:36:38]   Loaded.
+[13:36:38]  Loading plugin: pawncmd
+[13:36:38] Pawn.CMD plugin v3.1.4 by urShadow loaded
+[13:36:38]   Loaded.
+[13:36:38]  Loading plugin: nativechecker
+[13:36:38]   Loaded.
+[13:36:38]  Loaded 9 plugins.
+
+[13:36:38] 
+[13:36:38] Filterscripts
+[13:36:38] ---------------
+[13:36:38]   Loading filterscript 'Bans.amx'...
+[13:36:38] --------------------------------------
+[13:36:38]  MM/MG Ban system loaded. 
+[13:36:38] --------------------------------------
+
+[13:36:41]   Loading filterscript 'vspawner.amx'...
+[13:36:41] 
+--Admin Vehicle Spawner Loaded
+
+[13:36:41]   Loading filterscript 'int.amx'...
+[13:36:41]   Loaded 3 filterscripts.
+
+[13:36:45] Contine to next floor called 0 current floor
+[13:36:45] Checking upwards
+[13:36:45] Floor to be called is 1
+[13:36:45] Moving to floor
+[13:36:45] 
+
+[13:36:45]   |---------------------------------------------------
+[13:36:45]   |--- Cops and Robbers
+[13:36:45]   |--  Script v0.01
+[13:36:45]   |--  Sasuke_Uchiha
+[13:36:45]   |---------------------------------------------------
+[13:36:45] Number of vehicle models: 92
+[13:36:45] [connection] incoming connection: 127.0.0.1:57563 id: 0
+[13:36:45] [join] Sasuke_Uchiha has joined the server (0:127.0.0.1)
+[13:36:49] Cleared
+[13:36:51] On Object Moved Elevator Reached next floor
+[13:36:51] On Object Moved Floor is in queue
+[13:36:51] On Object Moved Floor is in queue timer set pass
+[13:36:52] On Object Moved Floor doors 1
+[13:36:52] On Object Moved Floor doors 1 (-1178.93 | -1179.43)
+[13:36:57] Checking for next
+[13:36:57] Checking for next eleavtor is on 1
+[13:36:57] Checking for next no other floors requested
+[13:37:00] [debug] Run time error 4: "Array index out of bounds"
+[13:37:00] [debug]  Attempted to read/write array element at negative index -1
+[13:37:00] [debug] AMX backtrace:
+[13:37:00] [debug] #0 00096a30 in public Float:GetDoorsZCoordForFloorG (floorid=-1) at CnR\players\elevator_golden.inc:563
+[13:37:00] [debug] #1 0009623c in IsPlayerOnGRINFloor (playerid=0) at CnR\players\elevator_golden.inc:513
+[13:37:00] [debug] #2 0009259c in Check_GRIN_Elevator (playerid=0) at CnR\players\elevator_golden.inc:166
+[13:37:00] [debug] #3 0009e7c4 in public OnPlayerKeyStateChange (playerid=0, newkeys=65536, oldkeys=0) at CnR.pwn:553
+[13:37:01] [debug] Run time error 4: "Array index out of bounds"
+[13:37:01] [debug]  Attempted to read/write array element at negative index -1
+[13:37:01] [debug] AMX backtrace:
+[13:37:01] [debug] #0 00096a30 in public Float:GetDoorsZCoordForFloorG (floorid=-1) at CnR\players\elevator_golden.inc:563
+[13:37:01] [debug] #1 0009623c in IsPlayerOnGRINFloor (playerid=0) at CnR\players\elevator_golden.inc:513
+[13:37:01] [debug] #2 0009259c in Check_GRIN_Elevator (playerid=0) at CnR\players\elevator_golden.inc:166
+[13:37:01] [debug] #3 0009e7c4 in public OnPlayerKeyStateChange (playerid=0, newkeys=65536, oldkeys=0) at CnR.pwn:553
+[13:37:01] [debug] Run time error 4: "Array index out of bounds"
+[13:37:01] [debug]  Attempted to read/write array element at negative index -1
+[13:37:01] [debug] AMX backtrace:
+[13:37:01] [debug] #0 00096a30 in public Float:GetDoorsZCoordForFloorG (floorid=-1) at CnR\players\elevator_golden.inc:563
+[13:37:01] [debug] #1 0009623c in IsPlayerOnGRINFloor (playerid=0) at CnR\players\elevator_golden.inc:513
+[13:37:01] [debug] #2 0009259c in Check_GRIN_Elevator (playerid=0) at CnR\players\elevator_golden.inc:166
+[13:37:01] [debug] #3 0009e7c4 in public OnPlayerKeyStateChange (playerid=0, newkeys=65536, oldkeys=0) at CnR.pwn:553
+[13:37:01] [debug] Run time error 4: "Array index out of bounds"
+[13:37:01] [debug]  Attempted to read/write array element at negative index -1
+[13:37:01] [debug] AMX backtrace:
+[13:37:01] [debug] #0 00096a30 in public Float:GetDoorsZCoordForFloorG (floorid=-1) at CnR\players\elevator_golden.inc:563
+[13:37:01] [debug] #1 0009623c in IsPlayerOnGRINFloor (playerid=0) at CnR\players\elevator_golden.inc:513
+[13:37:01] [debug] #2 0009259c in Check_GRIN_Elevator (playerid=0) at CnR\players\elevator_golden.inc:166
+[13:37:01] [debug] #3 0009e7c4 in public OnPlayerKeyStateChange (playerid=0, newkeys=65536, oldkeys=0) at CnR.pwn:553
+[13:37:02] [debug] Run time error 4: "Array index out of bounds"
+[13:37:02] [debug]  Attempted to read/write array element at negative index -1
+[13:37:02] [debug] AMX backtrace:
+[13:37:02] [debug] #0 00096a30 in public Float:GetDoorsZCoordForFloorG (floorid=-1) at CnR\players\elevator_golden.inc:563
+[13:37:02] [debug] #1 0009623c in IsPlayerOnGRINFloor (playerid=0) at CnR\players\elevator_golden.inc:513
+[13:37:02] [debug] #2 0009259c in Check_GRIN_Elevator (playerid=0) at CnR\players\elevator_golden.inc:166
+[13:37:02] [debug] #3 0009e7c4 in public OnPlayerKeyStateChange (playerid=0, newkeys=65536, oldkeys=0) at CnR.pwn:553
+[13:37:02] [debug] Run time error 4: "Array index out of bounds"
+[13:37:02] [debug]  Attempted to read/write array element at negative index -1
+[13:37:02] [debug] AMX backtrace:
+[13:37:02] [debug] #0 00096a30 in public Float:GetDoorsZCoordForFloorG (floorid=-1) at CnR\players\elevator_golden.inc:563
+[13:37:02] [debug] #1 0009623c in IsPlayerOnGRINFloor (playerid=0) at CnR\players\elevator_golden.inc:513
+[13:37:02] [debug] #2 0009259c in Check_GRIN_Elevator (playerid=0) at CnR\players\elevator_golden.inc:166
+[13:37:02] [debug] #3 0009e7c4 in public OnPlayerKeyStateChange (playerid=0, newkeys=65536, oldkeys=0) at CnR.pwn:553
+[13:37:02] [debug] Run time error 4: "Array index out of bounds"
+[13:37:02] [debug]  Attempted to read/write array element at negative index -1
+[13:37:02] [debug] AMX backtrace:
+[13:37:02] [debug] #0 00096a30 in public Float:GetDoorsZCoordForFloorG (floorid=-1) at CnR\players\elevator_golden.inc:563
+[13:37:02] [debug] #1 0009623c in IsPlayerOnGRINFloor (playerid=0) at CnR\players\elevator_golden.inc:513
+[13:37:02] [debug] #2 0009259c in Check_GRIN_Elevator (playerid=0) at CnR\players\elevator_golden.inc:166
+[13:37:02] [debug] #3 0009e7c4 in public OnPlayerKeyStateChange (playerid=0, newkeys=65536, oldkeys=0) at CnR.pwn:553
+[13:37:03] [debug] Run time error 4: "Array index out of bounds"
+[13:37:03] [debug]  Attempted to read/write array element at negative index -1
+[13:37:03] [debug] AMX backtrace:
+[13:37:03] [debug] #0 00096a30 in public Float:GetDoorsZCoordForFloorG (floorid=-1) at CnR\players\elevator_golden.inc:563
+[13:37:03] [debug] #1 0009623c in IsPlayerOnGRINFloor (playerid=0) at CnR\players\elevator_golden.inc:513
+[13:37:03] [debug] #2 0009259c in Check_GRIN_Elevator (playerid=0) at CnR\players\elevator_golden.inc:166
+[13:37:03] [debug] #3 0009e7c4 in public OnPlayerKeyStateChange (playerid=0, newkeys=65536, oldkeys=0) at CnR.pwn:553
+
+----------
+Loaded log file: "server_log.txt".
+----------
+
+SA-MP Dedicated Server
+----------------------
+v0.3.7-R2, (C)2005-2015 SA-MP Team
+
+[13:41:04] 
+[13:41:04] Server Plugins
+[13:41:04] --------------
+[13:41:04]  Loading plugin: crashdetect
+[13:41:04]   CrashDetect v4.17 is OK.
+[13:41:04]   Loaded.
+[13:41:04]  Loading plugin: log-plugin
+[13:41:04]  >> plugin.log: v0.3 successfully loaded.
+[13:41:04]   Loaded.
+[13:41:04]  Loading plugin: streamer
+[13:41:04] 
+
+*** Streamer Plugin v2.9.1 by Incognito loaded ***
+
+[13:41:04]   Loaded.
+[13:41:04]  Loading plugin: sscanf
+[13:41:04] 
+
+[13:41:04]  ===============================
+
+[13:41:04]       sscanf plugin loaded.     
+
+[13:41:04]          Version:  2.8.2        
+
+[13:41:04]    (c) 2012 Alex "Y_Less" Cole  
+
+[13:41:04]  ===============================
+
+[13:41:04]   Loaded.
+[13:41:04]  Loading plugin: irc
+[13:41:04] 
+
+*** IRC Plugin v1.4.8 by Incognito loaded ***
+
+[13:41:04]   Loaded.
+[13:41:04]  Loading plugin: mysql
+[13:41:04]  >> plugin.mysql: R41-2 successfully loaded.
+[13:41:04]   Loaded.
+[13:41:04]  Loading plugin: whirlpool
+[13:41:04]  
+[13:41:04]  ==================
+[13:41:04]  
+[13:41:04]   Whirlpool loaded
+[13:41:04]  
+[13:41:04]  ==================
+[13:41:04]  
+[13:41:04]   Loaded.
+[13:41:04]  Loading plugin: pawncmd
+[13:41:04] Pawn.CMD plugin v3.1.4 by urShadow loaded
+[13:41:04]   Loaded.
+[13:41:04]  Loading plugin: nativechecker
+[13:41:04]   Loaded.
+[13:41:04]  Loaded 9 plugins.
+
+[13:41:04] 
+[13:41:04] Filterscripts
+[13:41:04] ---------------
+[13:41:04]   Loading filterscript 'Bans.amx'...
+[13:41:04] --------------------------------------
+[13:41:04]  MM/MG Ban system loaded. 
+[13:41:04] --------------------------------------
+
+[13:41:06]   Loading filterscript 'vspawner.amx'...
+[13:41:06] 
+--Admin Vehicle Spawner Loaded
+
+[13:41:06]   Loading filterscript 'int.amx'...
+[13:41:06]   Loaded 3 filterscripts.
+
+[13:41:10] Contine to next floor called 0 current floor
+[13:41:10] Checking upwards
+[13:41:10] Floor to be called is 1
+[13:41:10] Moving to floor
+[13:41:10] 
+
+[13:41:10]   |---------------------------------------------------
+[13:41:10]   |--- Cops and Robbers
+[13:41:10]   |--  Script v0.01
+[13:41:10]   |--  Sasuke_Uchiha
+[13:41:10]   |---------------------------------------------------
+[13:41:10] Number of vehicle models: 91
+[13:41:10] [connection] incoming connection: 127.0.0.1:58063 id: 0
+[13:41:10] [join] Sasuke_Uchiha has joined the server (0:127.0.0.1)
+[13:41:14] Cleared
+[13:41:16] On Object Moved Elevator Reached next floor
+[13:41:16] On Object Moved Floor is in queue
+[13:41:16] On Object Moved Floor is in queue timer set pass
+[13:41:17] On Object Moved Floor doors 1
+[13:41:17] On Object Moved Floor doors 1 (-1178.93 | -1179.43)
+[13:41:22] Checking for next
+[13:41:22] Checking for next eleavtor is on 1
+[13:41:22] Checking for next no other floors requested
+
+----------
+Loaded log file: "server_log.txt".
+----------
+
+SA-MP Dedicated Server
+----------------------
+v0.3.7-R2, (C)2005-2015 SA-MP Team
+
+[13:45:52] 
+[13:45:52] Server Plugins
+[13:45:52] --------------
+[13:45:52]  Loading plugin: crashdetect
+[13:45:52]   CrashDetect v4.17 is OK.
+[13:45:52]   Loaded.
+[13:45:52]  Loading plugin: log-plugin
+[13:45:52]  >> plugin.log: v0.3 successfully loaded.
+[13:45:52]   Loaded.
+[13:45:52]  Loading plugin: streamer
+[13:45:52] 
+
+*** Streamer Plugin v2.9.1 by Incognito loaded ***
+
+[13:45:52]   Loaded.
+[13:45:52]  Loading plugin: sscanf
+[13:45:52] 
+
+[13:45:52]  ===============================
+
+[13:45:52]       sscanf plugin loaded.     
+
+[13:45:52]          Version:  2.8.2        
+
+[13:45:52]    (c) 2012 Alex "Y_Less" Cole  
+
+[13:45:52]  ===============================
+
+[13:45:52]   Loaded.
+[13:45:52]  Loading plugin: irc
+[13:45:52] 
+
+*** IRC Plugin v1.4.8 by Incognito loaded ***
+
+[13:45:52]   Loaded.
+[13:45:52]  Loading plugin: mysql
+[13:45:52]  >> plugin.mysql: R41-2 successfully loaded.
+[13:45:52]   Loaded.
+[13:45:52]  Loading plugin: whirlpool
+[13:45:52]  
+[13:45:52]  ==================
+[13:45:52]  
+[13:45:52]   Whirlpool loaded
+[13:45:52]  
+[13:45:52]  ==================
+[13:45:52]  
+[13:45:52]   Loaded.
+[13:45:52]  Loading plugin: pawncmd
+[13:45:52] Pawn.CMD plugin v3.1.4 by urShadow loaded
+[13:45:52]   Loaded.
+[13:45:52]  Loading plugin: nativechecker
+[13:45:52]   Loaded.
+[13:45:52]  Loaded 9 plugins.
+
+[13:45:52] 
+[13:45:52] Filterscripts
+[13:45:52] ---------------
+[13:45:52]   Loading filterscript 'Bans.amx'...
+[13:45:52] --------------------------------------
+[13:45:52]  MM/MG Ban system loaded. 
+[13:45:52] --------------------------------------
+
+[13:45:55]   Loading filterscript 'vspawner.amx'...
+[13:45:55] 
+--Admin Vehicle Spawner Loaded
+
+[13:45:55]   Loading filterscript 'int.amx'...
+[13:45:55]   Loaded 3 filterscripts.
+
+[13:45:59] Contine to next floor called 0 current floor
+[13:45:59] Checking upwards
+[13:45:59] Floor to be called is 1
+[13:45:59] Moving to floor
+[13:45:59] 
+
+[13:45:59]   |---------------------------------------------------
+[13:45:59]   |--- Cops and Robbers
+[13:45:59]   |--  Script v0.01
+[13:45:59]   |--  Sasuke_Uchiha
+[13:45:59]   |---------------------------------------------------
+[13:45:59] Number of vehicle models: 95
+[13:45:59] [connection] incoming connection: 127.0.0.1:57536 id: 0
+[13:45:59] [join] Sasuke_Uchiha has joined the server (0:127.0.0.1)
+[13:46:03] Cleared
+[13:46:05] On Object Moved Elevator Reached next floor
+[13:46:05] On Object Moved Floor is in queue
+[13:46:05] On Object Moved Floor is in queue timer set pass
+[13:46:06] On Object Moved Floor doors 1
+[13:46:06] On Object Moved Floor doors 1 (-1178.93 | -1179.43)
+[13:46:11] Checking for next
+[13:46:11] Checking for next eleavtor is on 1
+[13:46:11] Checking for next no other floors requested
+[13:46:37] Floor called check 0 (33.710 | 22.938) false
+[13:46:45] Floor called check 0 (20.046 | 22.938) True
+[13:46:48] Floor called check 0 (20.046 | 22.938) True
+[13:46:49] Floor called check 0 (20.046 | 22.938) True
+[13:46:50] Floor called check 0 (20.046 | 22.938) True
+[13:46:50] Floor called check 0 (20.046 | 22.938) True
+[13:48:31] lINES 11
+[13:48:32] Adding floor to quene 0
+[13:48:32] Added floor to quene 0
+[13:48:32] Checking for next
+[13:48:32] Checking for next eleavtor is on 1
+[13:48:32] Checking for next next floor found
+[13:48:32] lINES 11
+[13:48:32] lINES 11
+[13:48:33] On Object Moved Floor doors 1
+[13:48:33] On Object Moved Floor doors 1 (-1180.55 | -1179.43)
+[13:48:33] On Object Moved Floor doors are closed passed.
+[13:48:33] Contine to next floor called 1 current floor
+[13:48:33] Checking upwards
+[13:48:33] Checking downward
+[13:48:33] Floor to be called is 0 (Set floorid =)
+[13:48:33] Moving to floor
+[13:48:39] On Object Moved Elevator Reached next floor
+[13:48:39] On Object Moved Floor is in queue
+[13:48:39] On Object Moved Floor is in queue timer set pass
+[13:48:39] On Object Moved Floor doors 0
+[13:48:39] On Object Moved Floor doors 0 (-1178.93 | -1179.43)
+[13:48:41] lINES 11
+[13:48:44] Checking for next
+[13:48:44] Checking for next next floor found
+[13:48:45] On Object Moved Floor doors 0
+[13:48:45] On Object Moved Floor doors 0 (-1180.55 | -1179.43)
+[13:48:45] On Object Moved Floor doors are closed passed.
+[13:48:45] Contine to next floor called 0 current floor
+[13:48:45] Checking downward
+[13:48:45] Moving to floor
+[13:48:51] On Object Moved Elevator Reached next floor
+[13:48:51] On Object Moved Floor is in queue
+[13:48:51] On Object Moved Floor is in queue timer set pass
+[13:48:51] On Object Moved Floor doors 1
+[13:48:51] On Object Moved Floor doors 1 (-1178.93 | -1179.43)
+[13:48:52] lINES 11
+[13:48:55] lINES 11
+[13:48:56] Checking for next
+[13:48:56] Checking for next eleavtor is on 1
+[13:48:56] Checking for next no other floors requested
+[13:48:57] Adding floor to quene 10
+[13:48:57] Added floor to quene 10
+[13:48:57] Checking for next
+[13:48:57] Checking for next eleavtor is on 1
+[13:48:57] Checking for next next floor found
+[13:48:57] lINES 11
+[13:48:57] lINES 11
+[13:48:57] On Object Moved Floor doors 1
+[13:48:57] On Object Moved Floor doors 1 (-1180.55 | -1179.43)
+[13:48:57] On Object Moved Floor doors are closed passed.
+[13:48:57] Contine to next floor called 1 current floor
+[13:48:57] Checking downward
+[13:48:57] Floor to be called is 0 (Set floorid =)
+[13:48:57] Moving to floor
+[13:49:03] On Object Moved Elevator Reached next floor
+[13:49:03] Contine to next floor called 0 current floor
+[13:49:03] Checking downward
+[13:49:03] Moving to floor
+[13:49:10] On Object Moved Elevator Reached next floor
+[13:49:10] On Object Moved Floor is in queue
+[13:49:10] On Object Moved Floor is in queue timer set pass
+[13:49:10] On Object Moved Floor doors 1
+[13:49:10] On Object Moved Floor doors 1 (-1178.93 | -1179.43)
+[13:49:15] Checking for next
+[13:49:15] Checking for next eleavtor is on 1
+[13:49:15] Checking for next next floor found
+[13:49:16] On Object Moved Floor doors 1
+[13:49:16] On Object Moved Floor doors 1 (-1180.55 | -1179.43)
+[13:49:16] On Object Moved Floor doors are closed passed.
+[13:49:16] Contine to next floor called 1 current floor
+[13:49:16] Checking downward
+[13:49:16] Floor to be called is 0 (Set floorid =)
+[13:49:16] Moving to floor
+[13:49:22] On Object Moved Elevator Reached next floor
+[13:49:22] Contine to next floor called 0 current floor
+[13:49:22] Checking downward
+[13:49:22] Moving to floor
+[13:49:29] On Object Moved Elevator Reached next floor
+[13:49:29] On Object Moved Floor is in queue
+[13:49:29] On Object Moved Floor is in queue timer set pass
+[13:49:29] On Object Moved Floor doors 1
+[13:49:29] On Object Moved Floor doors 1 (-1178.93 | -1179.43)
+[13:49:34] Checking for next
+[13:49:34] Checking for next eleavtor is on 1
+[13:49:34] Checking for next next floor found
+[13:49:35] On Object Moved Floor doors 1
+[13:49:35] On Object Moved Floor doors 1 (-1180.55 | -1179.43)
+[13:49:35] On Object Moved Floor doors are closed passed.
+[13:49:35] Contine to next floor called 1 current floor
+[13:49:35] Checking downward
+[13:49:35] Floor to be called is 0 (Set floorid =)
+[13:49:35] Moving to floor
+[13:49:41] On Object Moved Elevator Reached next floor
+[13:49:41] Contine to next floor called 0 current floor
+[13:49:41] Checking downward
+[13:49:41] Moving to floor
+[13:49:47] On Object Moved Elevator Reached next floor
+[13:49:47] On Object Moved Floor is in queue
+[13:49:47] On Object Moved Floor is in queue timer set pass
+[13:49:48] On Object Moved Floor doors 1
+[13:49:48] On Object Moved Floor doors 1 (-1178.93 | -1179.43)
+[13:49:53] Checking for next
+[13:49:53] Checking for next eleavtor is on 1
+[13:49:53] Checking for next next floor found
+[13:49:53] On Object Moved Floor doors 1
+[13:49:53] On Object Moved Floor doors 1 (-1180.55 | -1179.43)
+[13:49:53] On Object Moved Floor doors are closed passed.
+[13:49:53] Contine to next floor called 1 current floor
+[13:49:53] Checking downward
+[13:49:53] Floor to be called is 0 (Set floorid =)
+[13:49:53] Moving to floor
+[13:49:59] On Object Moved Elevator Reached next floor
+[13:49:59] Contine to next floor called 0 current floor
+[13:49:59] Checking downward
+[13:49:59] Moving to floor
+[13:50:05] On Object Moved Elevator Reached next floor
+[13:50:05] On Object Moved Floor is in queue
+[13:50:05] On Object Moved Floor is in queue timer set pass
+[13:50:06] On Object Moved Floor doors 1
+[13:50:06] On Object Moved Floor doors 1 (-1178.93 | -1179.43)
+[13:50:11] Checking for next
+[13:50:11] Checking for next eleavtor is on 1
+[13:50:11] Checking for next next floor found
+[13:50:11] On Object Moved Floor doors 1
+[13:50:11] On Object Moved Floor doors 1 (-1180.55 | -1179.43)
+[13:50:11] On Object Moved Floor doors are closed passed.
+[13:50:11] Contine to next floor called 1 current floor
+[13:50:11] Checking downward
+[13:50:11] Floor to be called is 0 (Set floorid =)
+[13:50:11] Moving to floor
+
+----------
+Loaded log file: "server_log.txt".
+----------
+
+SA-MP Dedicated Server
+----------------------
+v0.3.7-R2, (C)2005-2015 SA-MP Team
+
+[13:52:23] 
+[13:52:23] Server Plugins
+[13:52:23] --------------
+[13:52:23]  Loading plugin: crashdetect
+[13:52:23]   CrashDetect v4.17 is OK.
+[13:52:23]   Loaded.
+[13:52:23]  Loading plugin: log-plugin
+[13:52:23]  >> plugin.log: v0.3 successfully loaded.
+[13:52:23]   Loaded.
+[13:52:23]  Loading plugin: streamer
+[13:52:23] 
+
+*** Streamer Plugin v2.9.1 by Incognito loaded ***
+
+[13:52:23]   Loaded.
+[13:52:23]  Loading plugin: sscanf
+[13:52:23] 
+
+[13:52:23]  ===============================
+
+[13:52:23]       sscanf plugin loaded.     
+
+[13:52:23]          Version:  2.8.2        
+
+[13:52:23]    (c) 2012 Alex "Y_Less" Cole  
+
+[13:52:23]  ===============================
+
+[13:52:23]   Loaded.
+[13:52:23]  Loading plugin: irc
+[13:52:23] 
+
+*** IRC Plugin v1.4.8 by Incognito loaded ***
+
+[13:52:23]   Loaded.
+[13:52:23]  Loading plugin: mysql
+[13:52:23]  >> plugin.mysql: R41-2 successfully loaded.
+[13:52:23]   Loaded.
+[13:52:23]  Loading plugin: whirlpool
+[13:52:23]  
+[13:52:23]  ==================
+[13:52:23]  
+[13:52:23]   Whirlpool loaded
+[13:52:23]  
+[13:52:23]  ==================
+[13:52:23]  
+[13:52:23]   Loaded.
+[13:52:23]  Loading plugin: pawncmd
+[13:52:23] Pawn.CMD plugin v3.1.4 by urShadow loaded
+[13:52:23]   Loaded.
+[13:52:23]  Loading plugin: nativechecker
+[13:52:23]   Loaded.
+[13:52:23]  Loaded 9 plugins.
+
+[13:52:23] 
+[13:52:23] Filterscripts
+[13:52:23] ---------------
+[13:52:23]   Loading filterscript 'Bans.amx'...
+[13:52:23] --------------------------------------
+[13:52:23]  MM/MG Ban system loaded. 
+[13:52:23] --------------------------------------
+
+[13:52:25]   Loading filterscript 'vspawner.amx'...
+[13:52:25] 
+--Admin Vehicle Spawner Loaded
+
+[13:52:25]   Loading filterscript 'int.amx'...
+[13:52:25]   Loaded 3 filterscripts.
+
+[13:52:29] Contine to next floor called 0 current floor
+[13:52:29] Checking upwards
+[13:52:29] Floor to be called is 1
+[13:52:29] Moving to floor
+[13:52:29] 
+
+[13:52:29]   |---------------------------------------------------
+[13:52:29]   |--- Cops and Robbers
+[13:52:29]   |--  Script v0.01
+[13:52:29]   |--  Sasuke_Uchiha
+[13:52:29]   |---------------------------------------------------
+[13:52:29] Number of vehicle models: 95
+[13:52:35] On Object Moved Elevator Reached next floor
+[13:52:35] On Object Moved Floor is in queue
+[13:52:35] On Object Moved Floor is in queue timer set pass
+[13:52:35] On Object Moved Floor doors 1
+[13:52:35] On Object Moved Floor doors 1 (-1178.93 | -1179.43)
+[13:52:41] Checking for next
+[13:52:41] Checking for next eleavtor is on 1
+[13:52:41] Checking for next no other floors requested
+[13:52:49] [connection] incoming connection: 127.0.0.1:54949 id: 0
+[13:52:59] [connection] incoming connection: 127.0.0.1:56957 id: 0
+[13:53:12] [connection] incoming connection: 127.0.0.1:56960 id: 0
+[13:53:12] [join] Sasuke_Uchiha has joined the server (0:127.0.0.1)
+[13:53:16] Cleared
+[13:53:35] CALLED from floor 0
+[13:53:35] Adding floor to quene 0
+[13:53:35] Added floor to quene 0
+[13:53:35] Checking for next
+[13:53:35] Checking for next eleavtor is on 1
+[13:53:35] Checking for next next floor found
+[13:53:35] On Object Moved Floor doors 1
+[13:53:35] On Object Moved Floor doors 1 (-1180.55 | -1179.43)
+[13:53:35] On Object Moved Floor doors are closed passed.
+[13:53:35] Contine to next floor called 1 current floor
+[13:53:35] Checking upwards
+[13:53:35] Checking downward
+[13:53:35] Floor to be called is 0 (Set floorid =)
+[13:53:35] Moving to floor
+[13:53:41] On Object Moved Elevator Reached next floor
+[13:53:41] On Object Moved Floor is in queue
+[13:53:41] On Object Moved Floor is in queue timer set pass
+[13:53:42] On Object Moved Floor doors 0
+[13:53:42] On Object Moved Floor doors 0 (-1178.93 | -1179.43)
+[13:53:44] lINES 11
+[13:53:47] Checking for next
+[13:53:47] Checking for next next floor found
+[13:53:47] On Object Moved Floor doors 0
+[13:53:47] On Object Moved Floor doors 0 (-1180.55 | -1179.43)
+[13:53:47] On Object Moved Floor doors are closed passed.
+[13:53:47] Contine to next floor called 0 current floor
+[13:53:47] Checking downward
+[13:53:47] Moving to floor
+[13:53:54] On Object Moved Elevator Reached next floor
+[13:53:54] On Object Moved Floor is in queue
+[13:53:54] On Object Moved Floor is in queue timer set pass
+[13:53:54] On Object Moved Floor doors 1
+[13:53:54] On Object Moved Floor doors 1 (-1178.93 | -1179.43)
+[13:53:55] Adding floor to quene 10
+[13:53:55] Added floor to quene 10
+[13:53:55] lINES 11
+[13:53:55] lINES 11
+[13:53:59] Checking for next
+[13:53:59] Checking for next eleavtor is on 1
+[13:53:59] Checking for next next floor found
+[13:54:00] On Object Moved Floor doors 1
+[13:54:00] On Object Moved Floor doors 1 (-1180.55 | -1179.43)
+[13:54:00] On Object Moved Floor doors are closed passed.
+[13:54:00] Contine to next floor called 1 current floor
+[13:54:00] Checking downward
+[13:54:00] Floor to be called is 0 (Set floorid =)
+[13:54:00] Moving to floor
+[13:54:06] On Object Moved Elevator Reached next floor
+[13:54:06] Contine to next floor called 0 current floor
+[13:54:06] Checking downward
+[13:54:06] Moving to floor
+[13:54:12] On Object Moved Elevator Reached next floor
+[13:54:12] On Object Moved Floor is in queue
+[13:54:12] On Object Moved Floor is in queue timer set pass
+[13:54:12] On Object Moved Floor doors 1
+[13:54:12] On Object Moved Floor doors 1 (-1178.93 | -1179.43)
+[13:54:17] Checking for next
+[13:54:17] Checking for next eleavtor is on 1
+[13:54:17] Checking for next next floor found
+[13:54:18] On Object Moved Floor doors 1
+[13:54:18] On Object Moved Floor doors 1 (-1180.55 | -1179.43)
+[13:54:18] On Object Moved Floor doors are closed passed.
+[13:54:18] Contine to next floor called 1 current floor
+[13:54:18] Checking downward
+[13:54:18] Floor to be called is 0 (Set floorid =)
+[13:54:18] Moving to floor
+[13:54:24] On Object Moved Elevator Reached next floor
+[13:54:24] Contine to next floor called 0 current floor
+[13:54:24] Checking downward
+[13:54:24] Moving to floor
+
+----------
+Loaded log file: "server_log.txt".
+----------
+
+SA-MP Dedicated Server
+----------------------
+v0.3.7-R2, (C)2005-2015 SA-MP Team
+
+[13:57:04] 
+[13:57:04] Server Plugins
+[13:57:04] --------------
+[13:57:04]  Loading plugin: crashdetect
+[13:57:04]   CrashDetect v4.17 is OK.
+[13:57:04]   Loaded.
+[13:57:04]  Loading plugin: log-plugin
+[13:57:04]  >> plugin.log: v0.3 successfully loaded.
+[13:57:04]   Loaded.
+[13:57:04]  Loading plugin: streamer
+[13:57:04] 
+
+*** Streamer Plugin v2.9.1 by Incognito loaded ***
+
+[13:57:04]   Loaded.
+[13:57:04]  Loading plugin: sscanf
+[13:57:04] 
+
+[13:57:04]  ===============================
+
+[13:57:04]       sscanf plugin loaded.     
+
+[13:57:04]          Version:  2.8.2        
+
+[13:57:04]    (c) 2012 Alex "Y_Less" Cole  
+
+[13:57:04]  ===============================
+
+[13:57:04]   Loaded.
+[13:57:04]  Loading plugin: irc
+[13:57:04] 
+
+*** IRC Plugin v1.4.8 by Incognito loaded ***
+
+[13:57:04]   Loaded.
+[13:57:04]  Loading plugin: mysql
+[13:57:04]  >> plugin.mysql: R41-2 successfully loaded.
+[13:57:04]   Loaded.
+[13:57:04]  Loading plugin: whirlpool
+[13:57:04]  
+[13:57:04]  ==================
+[13:57:04]  
+[13:57:04]   Whirlpool loaded
+[13:57:04]  
+[13:57:04]  ==================
+[13:57:04]  
+[13:57:04]   Loaded.
+[13:57:04]  Loading plugin: pawncmd
+[13:57:04] Pawn.CMD plugin v3.1.4 by urShadow loaded
+[13:57:04]   Loaded.
+[13:57:04]  Loading plugin: nativechecker
+[13:57:04]   Loaded.
+[13:57:04]  Loaded 9 plugins.
+
+[13:57:05] 
+[13:57:05] Filterscripts
+[13:57:05] ---------------
+[13:57:05]   Loading filterscript 'Bans.amx'...
+[13:57:05] --------------------------------------
+[13:57:05]  MM/MG Ban system loaded. 
+[13:57:05] --------------------------------------
+
+[13:57:07]   Loading filterscript 'vspawner.amx'...
+[13:57:07] 
+--Admin Vehicle Spawner Loaded
+
+[13:57:07]   Loading filterscript 'int.amx'...
+[13:57:07]   Loaded 3 filterscripts.
+
+[13:57:11] Contine to next floor called 0 current floor
+[13:57:11] Checking upwards
+[13:57:11] Floor to be called is 1
+[13:57:11] Moving to floor
+[13:57:11] 
+
+[13:57:11]   |---------------------------------------------------
+[13:57:11]   |--- Cops and Robbers
+[13:57:11]   |--  Script v0.01
+[13:57:11]   |--  Sasuke_Uchiha
+[13:57:11]   |---------------------------------------------------
+[13:57:11] Number of vehicle models: 91
+[13:57:11] [connection] incoming connection: 127.0.0.1:57489 id: 0
+[13:57:17] On Object Moved Elevator Reached next floor
+[13:57:17] On Object Moved Floor is in queue
+[13:57:17] On Object Moved Floor is in queue timer set pass
+[13:57:17] On Object Moved Floor doors 1
+[13:57:17] On Object Moved Floor doors 1 (-1178.93 | -1179.43)
+[13:57:19] [connection] incoming connection: 127.0.0.1:57492 id: 0
+[13:57:19] [join] Sasuke_Uchiha has joined the server (0:127.0.0.1)
+[13:57:23] Cleared
+[13:57:23] Checking for next
+[13:57:23] Checking for next eleavtor is on 1
+[13:57:23] Checking for next no other floors requested
+[13:57:39] CALLED from floor 0
+[13:57:39] Adding floor to quene 0
+[13:57:39] Added floor to quene 0
+[13:57:39] Checking for next
+[13:57:39] Checking for next eleavtor is on 1
+[13:57:39] Checking for next next floor found
+[13:57:40] On Object Moved Floor doors 1
+[13:57:40] On Object Moved Floor doors 1 (-1180.55 | -1179.43)
+[13:57:40] On Object Moved Floor doors are closed passed.
+[13:57:40] Contine to next floor called 1 current floor
+[13:57:40] Checking upwards
+[13:57:40] Checking downward
+[13:57:40] Checking downward c floor is 1
+[13:57:40] Moving to floor
+[13:57:46] On Object Moved Elevator Reached next floor
+[13:57:46] On Object Moved Floor is in queue
+[13:57:46] On Object Moved Floor is in queue timer set pass
+[13:57:46] On Object Moved Floor doors 0
+[13:57:46] On Object Moved Floor doors 0 (-1178.93 | -1179.43)
+[13:57:51] Checking for next
+[13:57:51] Checking for next next floor found
+[13:57:52] On Object Moved Floor doors 0
+[13:57:52] On Object Moved Floor doors 0 (-1180.55 | -1179.43)
+[13:57:52] On Object Moved Floor doors are closed passed.
+[13:57:52] Contine to next floor called 0 current floor
+[13:57:52] Checking downward
+[13:57:52] Checking downward c floor is 0
+[13:57:52] Moving to floor
+[13:57:58] On Object Moved Elevator Reached next floor
+[13:57:58] On Object Moved Floor is in queue
+[13:57:58] On Object Moved Floor is in queue timer set pass
+[13:57:59] On Object Moved Floor doors 1
+[13:57:59] On Object Moved Floor doors 1 (-1178.93 | -1179.43)
+[13:58:04] Checking for next
+[13:58:04] Checking for next eleavtor is on 1
+[13:58:04] Checking for next no other floors requested
+[13:58:06] lINES 11
+[13:58:08] Adding floor to quene 10
+[13:58:08] Added floor to quene 10
+[13:58:08] Checking for next
+[13:58:08] Checking for next eleavtor is on 1
+[13:58:08] Checking for next next floor found
+[13:58:08] lINES 11
+[13:58:08] lINES 11
+[13:58:09] On Object Moved Floor doors 1
+[13:58:09] On Object Moved Floor doors 1 (-1180.55 | -1179.43)
+[13:58:09] On Object Moved Floor doors are closed passed.
+[13:58:09] Contine to next floor called 1 current floor
+[13:58:09] Checking downward
+[13:58:09] Checking downward c floor is 1
+[13:58:09] No floor found
+[13:58:09] Floor to be called is 10
+[13:58:09] Moving to floor
+[13:58:13] On Object Moved Elevator Reached next floor
+[13:58:13] Contine to next floor called 2 current floor
+[13:58:13] Checking upwards
+[13:58:13] Floor to be called is 10
+[13:58:13] Moving to floor
+[13:58:17] On Object Moved Elevator Reached next floor
+[13:58:17] Contine to next floor called 3 current floor
+[13:58:17] Checking upwards
+[13:58:17] Floor to be called is 10
+[13:58:17] Moving to floor
+[13:58:21] On Object Moved Elevator Reached next floor
+[13:58:21] Contine to next floor called 4 current floor
+[13:58:21] Checking upwards
+[13:58:21] Floor to be called is 10
+[13:58:21] Moving to floor
+[13:58:24] On Object Moved Elevator Reached next floor
+[13:58:24] Contine to next floor called 5 current floor
+[13:58:24] Checking upwards
+[13:58:24] Floor to be called is 10
+[13:58:24] Moving to floor
+[13:58:28] On Object Moved Elevator Reached next floor
+[13:58:28] Contine to next floor called 6 current floor
+[13:58:28] Checking upwards
+[13:58:28] Floor to be called is 10
+[13:58:28] Moving to floor
+[13:58:32] On Object Moved Elevator Reached next floor
+[13:58:32] Contine to next floor called 7 current floor
+[13:58:32] Checking upwards
+[13:58:32] Floor to be called is 10
+[13:58:32] Moving to floor
+[13:58:36] On Object Moved Elevator Reached next floor
+[13:58:36] Contine to next floor called 8 current floor
+[13:58:36] Checking upwards
+[13:58:36] Floor to be called is 10
+[13:58:36] Moving to floor
+[13:58:40] On Object Moved Elevator Reached next floor
+[13:58:40] Contine to next floor called 9 current floor
+[13:58:40] Checking upwards
+[13:58:40] Floor to be called is 10
+[13:58:40] Moving to floor
+[13:58:44] On Object Moved Elevator Reached next floor
+[13:58:44] On Object Moved Floor is in queue
+[13:58:44] On Object Moved Floor is in queue timer set pass
+[13:58:44] On Object Moved Floor doors 10
+[13:58:44] On Object Moved Floor doors 10 (-1178.93 | -1179.43)
+[13:58:49] lINES 11
+[13:58:49] Checking for next
+[13:58:49] Checking for next next floor found
+[13:58:50] On Object Moved Floor doors 10
+[13:58:50] On Object Moved Floor doors 10 (-1180.55 | -1179.43)
+[13:58:50] On Object Moved Floor doors are closed passed.
+[13:58:50] Contine to next floor called 10 current floor
+[13:58:50] Checking upwards
+[13:58:50] Checking downward
+[13:58:50] Checking downward c floor is 10
+[13:58:50] Floor to be called is 9 (Set floorid =)
+[13:58:50] Moving to floor
+[13:58:52] Adding floor to quene 9
+[13:58:52] Added floor to quene 9
+[13:58:52] lINES 11
+[13:58:52] lINES 11
+[13:58:54] On Object Moved Elevator Reached next floor
+[13:58:54] On Object Moved Floor is in queue
+[13:58:54] On Object Moved Floor is in queue timer set pass
+[13:58:54] On Object Moved Floor doors 9
+[13:58:54] On Object Moved Floor doors 9 (-1178.93 | -1179.43)
+[13:58:59] Checking for next
+[13:58:59] Checking for next next floor found
+[13:59:00] On Object Moved Floor doors 9
+[13:59:00] On Object Moved Floor doors 9 (-1180.55 | -1179.43)
+[13:59:00] On Object Moved Floor doors are closed passed.
+[13:59:00] Contine to next floor called 9 current floor
+[13:59:00] Checking downward
+[13:59:00] Checking downward c floor is 9
+[13:59:00] Floor to be called is 8 (Set floorid =)
+[13:59:00] Moving to floor
+[13:59:04] On Object Moved Elevator Reached next floor
+[13:59:04] Contine to next floor called 8 current floor
+[13:59:04] Checking downward
+[13:59:04] Checking downward c floor is 8
+[13:59:04] Floor to be called is 7 (Set floorid =)
+[13:59:04] Moving to floor
+[13:59:07] On Object Moved Elevator Reached next floor
+[13:59:07] Contine to next floor called 7 current floor
+[13:59:07] Checking downward
+[13:59:07] Checking downward c floor is 7
+[13:59:07] Floor to be called is 6 (Set floorid =)
+[13:59:07] Moving to floor
+[13:59:11] On Object Moved Elevator Reached next floor
+[13:59:11] Contine to next floor called 6 current floor
+[13:59:11] Checking downward
+[13:59:11] Checking downward c floor is 6
+[13:59:11] Floor to be called is 5 (Set floorid =)
+[13:59:11] Moving to floor
+[13:59:15] On Object Moved Elevator Reached next floor
+[13:59:15] Contine to next floor called 5 current floor
+[13:59:15] Checking downward
+[13:59:15] Checking downward c floor is 5
+[13:59:15] Floor to be called is 4 (Set floorid =)
+[13:59:15] Moving to floor
+[13:59:19] On Object Moved Elevator Reached next floor
+[13:59:19] Contine to next floor called 4 current floor
+[13:59:19] Checking downward
+[13:59:19] Checking downward c floor is 4
+[13:59:19] Floor to be called is 3 (Set floorid =)
+[13:59:19] Moving to floor
+[13:59:23] On Object Moved Elevator Reached next floor
+[13:59:23] Contine to next floor called 3 current floor
+[13:59:23] Checking downward
+[13:59:23] Checking downward c floor is 3
+[13:59:23] Floor to be called is 2 (Set floorid =)
+[13:59:23] Moving to floor
+[13:59:26] On Object Moved Elevator Reached next floor
+[13:59:26] Contine to next floor called 2 current floor
+[13:59:26] Checking downward
+[13:59:26] Checking downward c floor is 2
+[13:59:26] Floor to be called is 1 (Set floorid =)
+[13:59:26] Moving to floor
+[13:59:30] On Object Moved Elevator Reached next floor
+[13:59:30] On Object Moved Floor is in queue
+[13:59:30] On Object Moved Floor is in queue timer set pass
+[13:59:31] On Object Moved Floor doors 1
+[13:59:31] On Object Moved Floor doors 1 (-1178.93 | -1179.43)
+[13:59:36] Checking for next
+[13:59:36] Checking for next eleavtor is on 1
+[13:59:36] Checking for next no other floors requested
+
+----------
+Loaded log file: "server_log.txt".
+----------
+
+SA-MP Dedicated Server
+----------------------
+v0.3.7-R2, (C)2005-2015 SA-MP Team
+
+[14:12:44] 
+[14:12:44] Server Plugins
+[14:12:44] --------------
+[14:12:44]  Loading plugin: crashdetect
+[14:12:44]   CrashDetect v4.17 is OK.
+[14:12:44]   Loaded.
+[14:12:44]  Loading plugin: log-plugin
+[14:12:44]  >> plugin.log: v0.3 successfully loaded.
+[14:12:44]   Loaded.
+[14:12:44]  Loading plugin: streamer
+[14:12:44] 
+
+*** Streamer Plugin v2.9.1 by Incognito loaded ***
+
+[14:12:44]   Loaded.
+[14:12:44]  Loading plugin: sscanf
+[14:12:44] 
+
+[14:12:44]  ===============================
+
+[14:12:44]       sscanf plugin loaded.     
+
+[14:12:44]          Version:  2.8.2        
+
+[14:12:44]    (c) 2012 Alex "Y_Less" Cole  
+
+[14:12:44]  ===============================
+
+[14:12:44]   Loaded.
+[14:12:44]  Loading plugin: irc
+[14:12:44] 
+
+*** IRC Plugin v1.4.8 by Incognito loaded ***
+
+[14:12:44]   Loaded.
+[14:12:44]  Loading plugin: mysql
+[14:12:44]  >> plugin.mysql: R41-2 successfully loaded.
+[14:12:44]   Loaded.
+[14:12:44]  Loading plugin: whirlpool
+[14:12:44]  
+[14:12:44]  ==================
+[14:12:44]  
+[14:12:44]   Whirlpool loaded
+[14:12:44]  
+[14:12:44]  ==================
+[14:12:44]  
+[14:12:44]   Loaded.
+[14:12:44]  Loading plugin: pawncmd
+[14:12:44] Pawn.CMD plugin v3.1.4 by urShadow loaded
+[14:12:44]   Loaded.
+[14:12:44]  Loading plugin: nativechecker
+[14:12:44]   Loaded.
+[14:12:44]  Loaded 9 plugins.
+
+[14:12:44] 
+[14:12:44] Filterscripts
+[14:12:44] ---------------
+[14:12:44]   Loading filterscript 'Bans.amx'...
+[14:12:44] --------------------------------------
+[14:12:44]  MM/MG Ban system loaded. 
+[14:12:44] --------------------------------------
+
+[14:12:46]   Loading filterscript 'vspawner.amx'...
+[14:12:46] 
+--Admin Vehicle Spawner Loaded
+
+[14:12:46]   Loading filterscript 'int.amx'...
+[14:12:47]   Loaded 3 filterscripts.
+
+[14:12:51] Contine to next floor called 0 current floor
+[14:12:51] Checking upwards
+[14:12:51] Floor to be called is 1
+[14:12:51] Moving to floor
+[14:12:51] 
+
+[14:12:51]   |---------------------------------------------------
+[14:12:51]   |--- Cops and Robbers
+[14:12:51]   |--  Script v0.01
+[14:12:51]   |--  Sasuke_Uchiha
+[14:12:51]   |---------------------------------------------------
+[14:12:51] Number of vehicle models: 92
+[14:12:57] On Object Moved Elevator Reached next floor
+[14:12:57] On Object Moved Floor is in queue
+[14:12:57] On Object Moved Floor is in queue timer set pass
+[14:12:57] On Object Moved Floor doors 1
+[14:12:57] On Object Moved Floor doors 1 (-1178.93 | -1179.43)
+[14:13:02] Checking for next
+[14:13:02] Checking for next eleavtor is on 1
+[14:13:02] Checking for next no other floors requested
+[14:13:34] [connection] incoming connection: 127.0.0.1:50625 id: 0
+[14:13:34] [join] Sasuke_Uchiha has joined the server (0:127.0.0.1)
+[14:13:39] Cleared
+
+----------
+Loaded log file: "server_log.txt".
+----------
+
+SA-MP Dedicated Server
+----------------------
+v0.3.7-R2, (C)2005-2015 SA-MP Team
+
+[18:38:10] 
+[18:38:10] Server Plugins
+[18:38:10] --------------
+[18:38:10]  Loading plugin: crashdetect
+[18:38:10]   CrashDetect v4.17 is OK.
+[18:38:10]   Loaded.
+[18:38:10]  Loading plugin: log-plugin
+[18:38:10]  >> plugin.log: v0.3 successfully loaded.
+[18:38:10]   Loaded.
+[18:38:10]  Loading plugin: streamer
+[18:38:10] 
+
+*** Streamer Plugin v2.9.1 by Incognito loaded ***
+
+[18:38:10]   Loaded.
+[18:38:10]  Loading plugin: sscanf
+[18:38:10] 
+
+[18:38:10]  ===============================
+
+[18:38:10]       sscanf plugin loaded.     
+
+[18:38:10]          Version:  2.8.2        
+
+[18:38:10]    (c) 2012 Alex "Y_Less" Cole  
+
+[18:38:10]  ===============================
+
+[18:38:10]   Loaded.
+[18:38:10]  Loading plugin: irc
+[18:38:10] 
+
+*** IRC Plugin v1.4.8 by Incognito loaded ***
+
+[18:38:10]   Loaded.
+[18:38:10]  Loading plugin: mysql
+[18:38:10]  >> plugin.mysql: R41-2 successfully loaded.
+[18:38:10]   Loaded.
+[18:38:10]  Loading plugin: whirlpool
+[18:38:10]  
+[18:38:10]  ==================
+[18:38:10]  
+[18:38:10]   Whirlpool loaded
+[18:38:10]  
+[18:38:10]  ==================
+[18:38:10]  
+[18:38:10]   Loaded.
+[18:38:10]  Loading plugin: pawncmd
+[18:38:10] Pawn.CMD plugin v3.1.4 by urShadow loaded
+[18:38:10]   Loaded.
+[18:38:10]  Loading plugin: nativechecker
+[18:38:10]   Loaded.
+[18:38:10]  Loaded 9 plugins.
+
+[18:38:11] 
+[18:38:11] Filterscripts
+[18:38:11] ---------------
+[18:38:11]   Loading filterscript 'Bans.amx'...
+[18:38:11] --------------------------------------
+[18:38:11]  MM/MG Ban system loaded. 
+[18:38:11] --------------------------------------
+
+[18:38:13]   Loading filterscript 'vspawner.amx'...
+[18:38:13] 
+--Admin Vehicle Spawner Loaded
+
+[18:38:13]   Loading filterscript 'int.amx'...
+[18:38:13]   Loaded 3 filterscripts.
+
+[18:38:17] 
+
+[18:38:17]   |---------------------------------------------------
+[18:38:17]   |--- Cops and Robbers
+[18:38:17]   |--  Script v0.01
+[18:38:17]   |--  Sasuke_Uchiha
+[18:38:17]   |---------------------------------------------------
+[18:38:17] Number of vehicle models: 93
+[18:39:14] [connection] incoming connection: 127.0.0.1:62627 id: 0
+[18:39:14] [join] Sasuke_Uchiha has joined the server (0:127.0.0.1)
+[18:39:19] Cleared
+[18:39:49] [part] Sasuke_Uchiha has left the server (0:1)
+Console input: exit
+[18:41:46] --- Server Shutting Down.
+[18:41:46] --------------------------------------
+[18:41:46]  MM/MG Ban system unloaded. 
+[18:41:46] --------------------------------------
+
+[18:41:46] plugin.log: Plugin unloaded.
+[18:41:46] 
+
+*** Streamer Plugin v2.9.1 by Incognito unloaded ***
+
+[18:41:46] 
+
+[18:41:46]  ===============================
+
+[18:41:46]      sscanf plugin unloaded.    
+
+[18:41:46]  ===============================
+
+[18:41:46] 
+
+*** IRC Plugin v1.4.8 by Incognito unloaded ***
+
+[18:41:46] plugin.mysql: Unloading plugin...
+[18:41:46] plugin.mysql: Plugin unloaded.
+[18:41:46]  
+[18:41:46]  ====================
+[18:41:46]  
+[18:41:46]   Whirlpool unloaded
+[18:41:46]  
+[18:41:46]  ====================
+[18:41:46]  
+[18:41:46] Pawn.CMD plugin v3.1.4 by urShadow unloaded
+
+----------
+Loaded log file: "server_log.txt".
+----------
+
+SA-MP Dedicated Server
+----------------------
+v0.3.7-R2, (C)2005-2015 SA-MP Team
+
+[18:47:32] 
+[18:47:32] Server Plugins
+[18:47:32] --------------
+[18:47:32]  Loading plugin: crashdetect
+[18:47:32]   CrashDetect v4.17 is OK.
+[18:47:32]   Loaded.
+[18:47:32]  Loading plugin: log-plugin
+[18:47:32]  >> plugin.log: v0.3 successfully loaded.
+[18:47:32]   Loaded.
+[18:47:32]  Loading plugin: streamer
+[18:47:32] 
+
+*** Streamer Plugin v2.9.1 by Incognito loaded ***
+
+[18:47:32]   Loaded.
+[18:47:32]  Loading plugin: sscanf
+[18:47:32] 
+
+[18:47:32]  ===============================
+
+[18:47:32]       sscanf plugin loaded.     
+
+[18:47:32]          Version:  2.8.2        
+
+[18:47:32]    (c) 2012 Alex "Y_Less" Cole  
+
+[18:47:32]  ===============================
+
+[18:47:32]   Loaded.
+[18:47:32]  Loading plugin: irc
+[18:47:32] 
+
+*** IRC Plugin v1.4.8 by Incognito loaded ***
+
+[18:47:32]   Loaded.
+[18:47:32]  Loading plugin: mysql
+[18:47:32]  >> plugin.mysql: R41-2 successfully loaded.
+[18:47:32]   Loaded.
+[18:47:32]  Loading plugin: whirlpool
+[18:47:32]  
+[18:47:32]  ==================
+[18:47:32]  
+[18:47:32]   Whirlpool loaded
+[18:47:32]  
+[18:47:32]  ==================
+[18:47:32]  
+[18:47:32]   Loaded.
+[18:47:32]  Loading plugin: pawncmd
+[18:47:32] Pawn.CMD plugin v3.1.4 by urShadow loaded
+[18:47:32]   Loaded.
+[18:47:32]  Loading plugin: nativechecker
+[18:47:32]   Loaded.
+[18:47:32]  Loaded 9 plugins.
+
+[18:47:32] 
+[18:47:32] Filterscripts
+[18:47:32] ---------------
+[18:47:32]   Loading filterscript 'Bans.amx'...
+[18:47:32] --------------------------------------
+[18:47:32]  MM/MG Ban system loaded. 
+[18:47:32] --------------------------------------
+
+[18:47:35]   Loading filterscript 'vspawner.amx'...
+[18:47:35] 
+--Admin Vehicle Spawner Loaded
+
+[18:47:35]   Loading filterscript 'int.amx'...
+[18:47:35]   Loaded 3 filterscripts.
+
+[18:47:39] 
+
+[18:47:39]   |---------------------------------------------------
+[18:47:39]   |--- Cops and Robbers
+[18:47:39]   |--  Script v0.01
+[18:47:39]   |--  Sasuke_Uchiha
+[18:47:39]   |---------------------------------------------------
+[18:47:39] Number of vehicle models: 92
+Console input: exit
+[18:48:27] --- Server Shutting Down.
+[18:48:27] --------------------------------------
+[18:48:27]  MM/MG Ban system unloaded. 
+[18:48:27] --------------------------------------
+
+[18:48:27] plugin.log: Plugin unloaded.
+[18:48:27] 
+
+*** Streamer Plugin v2.9.1 by Incognito unloaded ***
+
+[18:48:27] 
+
+[18:48:27]  ===============================
+
+[18:48:27]      sscanf plugin unloaded.    
+
+[18:48:27]  ===============================
+
+[18:48:27] 
+
+*** IRC Plugin v1.4.8 by Incognito unloaded ***
+
+[18:48:27] plugin.mysql: Unloading plugin...
+[18:48:27] plugin.mysql: Plugin unloaded.
+[18:48:27]  
+[18:48:27]  ====================
+[18:48:27]  
+[18:48:27]   Whirlpool unloaded
+[18:48:27]  
+[18:48:27]  ====================
+[18:48:27]  
+[18:48:27] Pawn.CMD plugin v3.1.4 by urShadow unloaded
+
+----------
+Loaded log file: "server_log.txt".
+----------
+
+SA-MP Dedicated Server
+----------------------
+v0.3.7-R2, (C)2005-2015 SA-MP Team
+
+[18:50:14] 
+[18:50:14] Server Plugins
+[18:50:14] --------------
+[18:50:14]  Loading plugin: crashdetect
+[18:50:14]   CrashDetect v4.17 is OK.
+[18:50:14]   Loaded.
+[18:50:14]  Loading plugin: log-plugin
+[18:50:14]  >> plugin.log: v0.3 successfully loaded.
+[18:50:14]   Loaded.
+[18:50:14]  Loading plugin: streamer
+[18:50:14] 
+
+*** Streamer Plugin v2.9.1 by Incognito loaded ***
+
+[18:50:14]   Loaded.
+[18:50:14]  Loading plugin: sscanf
+[18:50:14] 
+
+[18:50:14]  ===============================
+
+[18:50:14]       sscanf plugin loaded.     
+
+[18:50:14]          Version:  2.8.2        
+
+[18:50:14]    (c) 2012 Alex "Y_Less" Cole  
+
+[18:50:14]  ===============================
+
+[18:50:14]   Loaded.
+[18:50:14]  Loading plugin: irc
+[18:50:14] 
+
+*** IRC Plugin v1.4.8 by Incognito loaded ***
+
+[18:50:14]   Loaded.
+[18:50:14]  Loading plugin: mysql
+[18:50:14]  >> plugin.mysql: R41-2 successfully loaded.
+[18:50:14]   Loaded.
+[18:50:14]  Loading plugin: whirlpool
+[18:50:14]  
+[18:50:14]  ==================
+[18:50:14]  
+[18:50:14]   Whirlpool loaded
+[18:50:14]  
+[18:50:14]  ==================
+[18:50:14]  
+[18:50:14]   Loaded.
+[18:50:14]  Loading plugin: pawncmd
+[18:50:14] Pawn.CMD plugin v3.1.4 by urShadow loaded
+[18:50:14]   Loaded.
+[18:50:14]  Loading plugin: nativechecker
+[18:50:14]   Loaded.
+[18:50:14]  Loaded 9 plugins.
+
+[18:50:14] 
+[18:50:14] Filterscripts
+[18:50:14] ---------------
+[18:50:14]   Loading filterscript 'Bans.amx'...
+[18:50:14] --------------------------------------
+[18:50:14]  MM/MG Ban system loaded. 
+[18:50:14] --------------------------------------
+
+[18:50:17]   Loading filterscript 'vspawner.amx'...
+[18:50:17] 
+--Admin Vehicle Spawner Loaded
+
+[18:50:17]   Loading filterscript 'int.amx'...
+[18:50:17]   Loaded 3 filterscripts.
+
+[18:50:21] 
+
+[18:50:21]   |---------------------------------------------------
+[18:50:21]   |--- Cops and Robbers
+[18:50:21]   |--  Script v0.01
+[18:50:21]   |--  Sasuke_Uchiha
+[18:50:21]   |---------------------------------------------------
+[18:50:21] Number of vehicle models: 94
+[18:50:40] [connection] incoming connection: 127.0.0.1:60690 id: 0
+[18:50:40] [join] Sasuke_Uchiha has joined the server (0:127.0.0.1)
+[18:50:44] Cleared
+Console input: exit
+[18:54:08] --- Server Shutting Down.
+[18:54:08] --------------------------------------
+[18:54:08]  MM/MG Ban system unloaded. 
+[18:54:08] --------------------------------------
+
+[18:54:08] [part] Sasuke_Uchiha has left the server (0:0)
+[18:54:08] plugin.log: Plugin unloaded.
+[18:54:08] 
+
+*** Streamer Plugin v2.9.1 by Incognito unloaded ***
+
+[18:54:08] 
+
+[18:54:08]  ===============================
+
+[18:54:08]      sscanf plugin unloaded.    
+
+[18:54:08]  ===============================
+
+[18:54:08] 
+
+*** IRC Plugin v1.4.8 by Incognito unloaded ***
+
+[18:54:08] plugin.mysql: Unloading plugin...
+[18:54:08] plugin.mysql: Plugin unloaded.
+[18:54:08]  
+[18:54:08]  ====================
+[18:54:08]  
+[18:54:08]   Whirlpool unloaded
+[18:54:08]  
+[18:54:08]  ====================
+[18:54:08]  
+[18:54:08] Pawn.CMD plugin v3.1.4 by urShadow unloaded
+
+----------
+Loaded log file: "server_log.txt".
+----------
+
+SA-MP Dedicated Server
+----------------------
+v0.3.7-R2, (C)2005-2015 SA-MP Team
+
+[18:54:50] 
+[18:54:50] Server Plugins
+[18:54:50] --------------
+[18:54:50]  Loading plugin: crashdetect
+[18:54:50]   CrashDetect v4.17 is OK.
+[18:54:50]   Loaded.
+[18:54:50]  Loading plugin: log-plugin
+[18:54:50]  >> plugin.log: v0.3 successfully loaded.
+[18:54:50]   Loaded.
+[18:54:50]  Loading plugin: streamer
+[18:54:50] 
+
+*** Streamer Plugin v2.9.1 by Incognito loaded ***
+
+[18:54:50]   Loaded.
+[18:54:50]  Loading plugin: sscanf
+[18:54:50] 
+
+[18:54:50]  ===============================
+
+[18:54:50]       sscanf plugin loaded.     
+
+[18:54:50]          Version:  2.8.2        
+
+[18:54:50]    (c) 2012 Alex "Y_Less" Cole  
+
+[18:54:50]  ===============================
+
+[18:54:50]   Loaded.
+[18:54:50]  Loading plugin: irc
+[18:54:50] 
+
+*** IRC Plugin v1.4.8 by Incognito loaded ***
+
+[18:54:50]   Loaded.
+[18:54:50]  Loading plugin: mysql
+[18:54:50]  >> plugin.mysql: R41-2 successfully loaded.
+[18:54:50]   Loaded.
+[18:54:50]  Loading plugin: whirlpool
+[18:54:50]  
+[18:54:50]  ==================
+[18:54:50]  
+[18:54:50]   Whirlpool loaded
+[18:54:50]  
+[18:54:50]  ==================
+[18:54:50]  
+[18:54:50]   Loaded.
+[18:54:50]  Loading plugin: pawncmd
+[18:54:50] Pawn.CMD plugin v3.1.4 by urShadow loaded
+[18:54:50]   Loaded.
+[18:54:50]  Loading plugin: nativechecker
+[18:54:50]   Loaded.
+[18:54:50]  Loaded 9 plugins.
+
+[18:54:50] 
+[18:54:50] Filterscripts
+[18:54:50] ---------------
+[18:54:50]   Loading filterscript 'Bans.amx'...
+[18:54:50] --------------------------------------
+[18:54:50]  MM/MG Ban system loaded. 
+[18:54:50] --------------------------------------
+
+[18:54:52]   Loading filterscript 'vspawner.amx'...
+[18:54:52] 
+--Admin Vehicle Spawner Loaded
+
+[18:54:52]   Loading filterscript 'int.amx'...
+[18:54:53]   Loaded 3 filterscripts.
+
+[18:54:56] 
+
+[18:54:56]   |---------------------------------------------------
+[18:54:56]   |--- Cops and Robbers
+[18:54:56]   |--  Script v0.01
+[18:54:56]   |--  Sasuke_Uchiha
+[18:54:56]   |---------------------------------------------------
+[18:54:56] Number of vehicle models: 90
+[18:55:26] [connection] incoming connection: 127.0.0.1:56382 id: 0
+[18:55:26] [join] Sasuke_Uchiha has joined the server (0:127.0.0.1)
+[18:55:31] Cleared
+[18:56:23] lINES 22
+[18:56:29] lINES 5
+
+----------
+Loaded log file: "server_log.txt".
+----------
+
+SA-MP Dedicated Server
+----------------------
+v0.3.7-R2, (C)2005-2015 SA-MP Team
+
+[18:58:18] 
+[18:58:18] Server Plugins
+[18:58:18] --------------
+[18:58:18]  Loading plugin: crashdetect
+[18:58:18]   CrashDetect v4.17 is OK.
+[18:58:18]   Loaded.
+[18:58:18]  Loading plugin: log-plugin
+[18:58:18]  >> plugin.log: v0.3 successfully loaded.
+[18:58:18]   Loaded.
+[18:58:18]  Loading plugin: streamer
+[18:58:18] 
+
+*** Streamer Plugin v2.9.1 by Incognito loaded ***
+
+[18:58:18]   Loaded.
+[18:58:18]  Loading plugin: sscanf
+[18:58:18] 
+
+[18:58:18]  ===============================
+
+[18:58:18]       sscanf plugin loaded.     
+
+[18:58:18]          Version:  2.8.2        
+
+[18:58:18]    (c) 2012 Alex "Y_Less" Cole  
+
+[18:58:18]  ===============================
+
+[18:58:18]   Loaded.
+[18:58:18]  Loading plugin: irc
+[18:58:18] 
+
+*** IRC Plugin v1.4.8 by Incognito loaded ***
+
+[18:58:18]   Loaded.
+[18:58:18]  Loading plugin: mysql
+[18:58:18]  >> plugin.mysql: R41-2 successfully loaded.
+[18:58:18]   Loaded.
+[18:58:18]  Loading plugin: whirlpool
+[18:58:18]  
+[18:58:18]  ==================
+[18:58:18]  
+[18:58:18]   Whirlpool loaded
+[18:58:18]  
+[18:58:18]  ==================
+[18:58:18]  
+[18:58:18]   Loaded.
+[18:58:18]  Loading plugin: pawncmd
+[18:58:18] Pawn.CMD plugin v3.1.4 by urShadow loaded
+[18:58:18]   Loaded.
+[18:58:18]  Loading plugin: nativechecker
+[18:58:18]   Loaded.
+[18:58:18]  Loaded 9 plugins.
+
+[18:58:18] 
+[18:58:18] Filterscripts
+[18:58:18] ---------------
+[18:58:18]   Loading filterscript 'Bans.amx'...
+[18:58:18] --------------------------------------
+[18:58:18]  MM/MG Ban system loaded. 
+[18:58:18] --------------------------------------
+
+[18:58:20]   Loading filterscript 'vspawner.amx'...
+[18:58:20] 
+--Admin Vehicle Spawner Loaded
+
+[18:58:20]   Loading filterscript 'int.amx'...
+[18:58:20]   Loaded 3 filterscripts.
+
+[18:58:25] 
+
+[18:58:25]   |---------------------------------------------------
+[18:58:25]   |--- Cops and Robbers
+[18:58:25]   |--  Script v0.01
+[18:58:25]   |--  Sasuke_Uchiha
+[18:58:25]   |---------------------------------------------------
+[18:58:25] Number of vehicle models: 90
+[19:00:40] [connection] incoming connection: 127.0.0.1:61942 id: 0
+[19:00:40] [join] Sasuke_Uchiha has joined the server (0:127.0.0.1)
+[19:00:45] Cleared
+[19:03:55] lINES 22
+[19:04:03] lINES 5
+
+----------
+Loaded log file: "server_log.txt".
+----------
+
+SA-MP Dedicated Server
+----------------------
+v0.3.7-R2, (C)2005-2015 SA-MP Team
+
+[19:09:38] 
+[19:09:38] Server Plugins
+[19:09:38] --------------
+[19:09:38]  Loading plugin: crashdetect
+[19:09:38]   CrashDetect v4.17 is OK.
+[19:09:38]   Loaded.
+[19:09:38]  Loading plugin: log-plugin
+[19:09:38]  >> plugin.log: v0.3 successfully loaded.
+[19:09:38]   Loaded.
+[19:09:38]  Loading plugin: streamer
+[19:09:38] 
+
+*** Streamer Plugin v2.9.1 by Incognito loaded ***
+
+[19:09:38]   Loaded.
+[19:09:38]  Loading plugin: sscanf
+[19:09:38] 
+
+[19:09:38]  ===============================
+
+[19:09:38]       sscanf plugin loaded.     
+
+[19:09:38]          Version:  2.8.2        
+
+[19:09:38]    (c) 2012 Alex "Y_Less" Cole  
+
+[19:09:38]  ===============================
+
+[19:09:38]   Loaded.
+[19:09:38]  Loading plugin: irc
+[19:09:38] 
+
+*** IRC Plugin v1.4.8 by Incognito loaded ***
+
+[19:09:38]   Loaded.
+[19:09:38]  Loading plugin: mysql
+[19:09:38]  >> plugin.mysql: R41-2 successfully loaded.
+[19:09:38]   Loaded.
+[19:09:38]  Loading plugin: whirlpool
+[19:09:38]  
+[19:09:38]  ==================
+[19:09:38]  
+[19:09:38]   Whirlpool loaded
+[19:09:38]  
+[19:09:38]  ==================
+[19:09:38]  
+[19:09:38]   Loaded.
+[19:09:38]  Loading plugin: pawncmd
+[19:09:38] Pawn.CMD plugin v3.1.4 by urShadow loaded
+[19:09:38]   Loaded.
+[19:09:38]  Loading plugin: nativechecker
+[19:09:38]   Loaded.
+[19:09:38]  Loaded 9 plugins.
+
+[19:09:38] 
+[19:09:38] Filterscripts
+[19:09:38] ---------------
+[19:09:38]   Loading filterscript 'Bans.amx'...
+[19:09:38] --------------------------------------
+[19:09:38]  MM/MG Ban system loaded. 
+[19:09:38] --------------------------------------
+
+[19:09:40]   Loading filterscript 'vspawner.amx'...
+[19:09:40] 
+--Admin Vehicle Spawner Loaded
+
+[19:09:40]   Loading filterscript 'int.amx'...
+[19:09:41]   Loaded 3 filterscripts.
+
+[19:09:45] 
+
+[19:09:45]   |---------------------------------------------------
+[19:09:45]   |--- Cops and Robbers
+[19:09:45]   |--  Script v0.01
+[19:09:45]   |--  Sasuke_Uchiha
+[19:09:45]   |---------------------------------------------------
+[19:09:45] Number of vehicle models: 95
+[19:09:45] [connection] incoming connection: 127.0.0.1:49695 id: 0
+[19:09:45] [join] Sasuke_Uchiha has joined the server (0:127.0.0.1)
+[19:09:49] Cleared
+
+----------
+Loaded log file: "server_log.txt".
+----------
+
+SA-MP Dedicated Server
+----------------------
+v0.3.7-R2, (C)2005-2015 SA-MP Team
+
+[19:14:01] 
+[19:14:01] Server Plugins
+[19:14:01] --------------
+[19:14:01]  Loading plugin: crashdetect
+[19:14:01]   CrashDetect v4.17 is OK.
+[19:14:01]   Loaded.
+[19:14:01]  Loading plugin: log-plugin
+[19:14:01]  >> plugin.log: v0.3 successfully loaded.
+[19:14:01]   Loaded.
+[19:14:01]  Loading plugin: streamer
+[19:14:01] 
+
+*** Streamer Plugin v2.9.1 by Incognito loaded ***
+
+[19:14:01]   Loaded.
+[19:14:01]  Loading plugin: sscanf
+[19:14:01] 
+
+[19:14:01]  ===============================
+
+[19:14:01]       sscanf plugin loaded.     
+
+[19:14:01]          Version:  2.8.2        
+
+[19:14:01]    (c) 2012 Alex "Y_Less" Cole  
+
+[19:14:01]  ===============================
+
+[19:14:01]   Loaded.
+[19:14:01]  Loading plugin: irc
+[19:14:01] 
+
+*** IRC Plugin v1.4.8 by Incognito loaded ***
+
+[19:14:01]   Loaded.
+[19:14:01]  Loading plugin: mysql
+[19:14:01]  >> plugin.mysql: R41-2 successfully loaded.
+[19:14:01]   Loaded.
+[19:14:01]  Loading plugin: whirlpool
+[19:14:01]  
+[19:14:01]  ==================
+[19:14:01]  
+[19:14:01]   Whirlpool loaded
+[19:14:01]  
+[19:14:01]  ==================
+[19:14:01]  
+[19:14:01]   Loaded.
+[19:14:01]  Loading plugin: pawncmd
+[19:14:01] Pawn.CMD plugin v3.1.4 by urShadow loaded
+[19:14:01]   Loaded.
+[19:14:01]  Loading plugin: nativechecker
+[19:14:01]   Loaded.
+[19:14:01]  Loaded 9 plugins.
+
+[19:14:01] 
+[19:14:01] Filterscripts
+[19:14:01] ---------------
+[19:14:01]   Loading filterscript 'Bans.amx'...
+[19:14:01] --------------------------------------
+[19:14:01]  MM/MG Ban system loaded. 
+[19:14:01] --------------------------------------
+
+[19:14:04]   Loading filterscript 'vspawner.amx'...
+[19:14:04] 
+--Admin Vehicle Spawner Loaded
+
+[19:14:04]   Loading filterscript 'int.amx'...
+[19:14:04]   Loaded 3 filterscripts.
+
+[19:14:08] 
+
+[19:14:08]   |---------------------------------------------------
+[19:14:08]   |--- Cops and Robbers
+[19:14:08]   |--  Script v0.01
+[19:14:08]   |--  Sasuke_Uchiha
+[19:14:08]   |---------------------------------------------------
+[19:14:08] Number of vehicle models: 92
+[19:14:23] [connection] incoming connection: 127.0.0.1:61451 id: 0
+[19:14:24] [join] Sasuke_Uchiha has joined the server (0:127.0.0.1)
+[19:14:28] Cleared
+[19:15:32] [part] Sasuke_Uchiha has left the server (0:1)
+
+----------
+Loaded log file: "server_log.txt".
+----------
+
+SA-MP Dedicated Server
+----------------------
+v0.3.7-R2, (C)2005-2015 SA-MP Team
+
+[21:01:22] 
+[21:01:22] Server Plugins
+[21:01:22] --------------
+[21:01:22]  Loading plugin: crashdetect
+[21:01:22]   CrashDetect v4.17 is OK.
+[21:01:22]   Loaded.
+[21:01:22]  Loading plugin: log-plugin
+[21:01:23]  >> plugin.log: v0.3 successfully loaded.
+[21:01:23]   Loaded.
+[21:01:23]  Loading plugin: streamer
+[21:01:23] 
+
+*** Streamer Plugin v2.9.1 by Incognito loaded ***
+
+[21:01:23]   Loaded.
+[21:01:23]  Loading plugin: sscanf
+[21:01:23] 
+
+[21:01:23]  ===============================
+
+[21:01:23]       sscanf plugin loaded.     
+
+[21:01:23]          Version:  2.8.2        
+
+[21:01:23]    (c) 2012 Alex "Y_Less" Cole  
+
+[21:01:23]  ===============================
+
+[21:01:23]   Loaded.
+[21:01:23]  Loading plugin: irc
+[21:01:23] 
+
+*** IRC Plugin v1.4.8 by Incognito loaded ***
+
+[21:01:23]   Loaded.
+[21:01:23]  Loading plugin: mysql
+[21:01:24]  >> plugin.mysql: R41-2 successfully loaded.
+[21:01:24]   Loaded.
+[21:01:24]  Loading plugin: whirlpool
+[21:01:24]  
+[21:01:24]  ==================
+[21:01:24]  
+[21:01:24]   Whirlpool loaded
+[21:01:24]  
+[21:01:24]  ==================
+[21:01:24]  
+[21:01:24]   Loaded.
+[21:01:24]  Loading plugin: pawncmd
+[21:01:24] Pawn.CMD plugin v3.1.4 by urShadow loaded
+[21:01:24]   Loaded.
+[21:01:24]  Loading plugin: nativechecker
+[21:01:24]   Loaded.
+[21:01:24]  Loaded 9 plugins.
+
+[21:01:24] 
+[21:01:24] Filterscripts
+[21:01:24] ---------------
+[21:01:24]   Loading filterscript 'Bans.amx'...
+[21:01:26] --------------------------------------
+[21:01:26]  MM/MG Ban system loaded. 
+[21:01:26] --------------------------------------
+
+[21:01:32]   Loading filterscript 'vspawner.amx'...
+[21:01:32] 
+--Admin Vehicle Spawner Loaded
+
+[21:01:32]   Loading filterscript 'int.amx'...
+[21:01:32]   Loaded 3 filterscripts.
+
+[21:01:32]    Error: Function not registered: 'NearestPlayerNode'
+[21:01:32]    Error: Function not registered: 'NearestNodeFromPoint'
+[21:01:32]    Error: Function not registered: 'CalculatePath'
+[21:01:32]    Error: Function not registered: 'gps_AddPlayer'
+[21:01:32]    Error: Function not registered: 'gps_RemovePlayer'
+[21:01:32] [debug] Run time error 19: "File or function is not found"
+[21:01:32] [debug]  NearestPlayerNode
+[21:01:32] [debug]  NearestNodeFromPoint
+[21:01:32] [debug]  CalculatePath
+[21:01:32] [debug]  gps_AddPlayer
+[21:01:32] [debug]  gps_RemovePlayer
+[21:01:32] [debug] Run time error 19: "File or function is not found"
+[21:01:32] [debug]  NearestPlayerNode
+[21:01:32] [debug]  NearestNodeFromPoint
+[21:01:32] [debug]  CalculatePath
+[21:01:32] [debug]  gps_AddPlayer
+[21:01:32] [debug]  gps_RemovePlayer
+[21:01:32] Script[gamemodes/CnR.amx]: Run time error 19: "File or function is not found"
+[21:01:32] Number of vehicle models: 0
+[21:01:32] [debug] Run time error 19: "File or function is not found"
+[21:01:32] [debug]  NearestPlayerNode
+[21:01:32] [debug]  NearestNodeFromPoint
+[21:01:32] [debug]  CalculatePath
+[21:01:32] [debug]  gps_AddPlayer
+[21:01:32] [debug]  gps_RemovePlayer
+
+----------
+Loaded log file: "server_log.txt".
+----------
+
+SA-MP Dedicated Server
+----------------------
+v0.3.7-R2, (C)2005-2015 SA-MP Team
+
+[21:06:46] 
+[21:06:46] Server Plugins
+[21:06:46] --------------
+[21:06:46]  Loading plugin: crashdetect
+[21:06:46]   CrashDetect v4.17 is OK.
+[21:06:46]   Loaded.
+[21:06:46]  Loading plugin: log-plugin
+[21:06:46]  >> plugin.log: v0.3 successfully loaded.
+[21:06:46]   Loaded.
+[21:06:46]  Loading plugin: streamer
+[21:06:46] 
+
+*** Streamer Plugin v2.9.1 by Incognito loaded ***
+
+[21:06:46]   Loaded.
+[21:06:46]  Loading plugin: sscanf
+[21:06:46] 
+
+[21:06:46]  ===============================
+
+[21:06:46]       sscanf plugin loaded.     
+
+[21:06:46]          Version:  2.8.2        
+
+[21:06:46]    (c) 2012 Alex "Y_Less" Cole  
+
+[21:06:46]  ===============================
+
+[21:06:46]   Loaded.
+[21:06:46]  Loading plugin: irc
+[21:06:46] 
+
+*** IRC Plugin v1.4.8 by Incognito loaded ***
+
+[21:06:46]   Loaded.
+[21:06:46]  Loading plugin: mysql
+[21:06:46]  >> plugin.mysql: R41-2 successfully loaded.
+[21:06:46]   Loaded.
+[21:06:46]  Loading plugin: whirlpool
+[21:06:46]  
+[21:06:46]  ==================
+[21:06:46]  
+[21:06:46]   Whirlpool loaded
+[21:06:46]  
+[21:06:46]  ==================
+[21:06:46]  
+[21:06:46]   Loaded.
+[21:06:46]  Loading plugin: pawncmd
+[21:06:46] Pawn.CMD plugin v3.1.4 by urShadow loaded
+[21:06:46]   Loaded.
+[21:06:46]  Loading plugin: RouteConnectorPlugin
+[21:06:47]   Loaded.
+[21:06:47]  Loading plugin: nativechecker
+[21:06:47]   Loaded.
+[21:06:47]  Loaded 10 plugins.
+
+[21:06:47] 
+[21:06:47] Filterscripts
+[21:06:47] ---------------
+[21:06:47]   Loading filterscript 'Bans.amx'...
+[21:06:47] --------------------------------------
+[21:06:47]  MM/MG Ban system loaded. 
+[21:06:47] --------------------------------------
+
+[21:06:52]   Loading filterscript 'vspawner.amx'...
+[21:06:52] 
+--Admin Vehicle Spawner Loaded
+
+[21:06:52]   Loading filterscript 'int.amx'...
+[21:06:52]   Loaded 3 filterscripts.
+
+[21:07:02] 
+
+[21:07:02]   |---------------------------------------------------
+[21:07:02]   |--- Cops and Robbers
+[21:07:02]   |--  Script v0.01
+[21:07:02]   |--  Sasuke_Uchiha
+[21:07:03]   |---------------------------------------------------
+[21:07:03] Number of vehicle models: 90
+[21:09:44] [connection] incoming connection: 127.0.0.1:56628 id: 0
+[21:09:44] [join] Sasuke_Uchiha has joined the server (0:127.0.0.1)
+[21:09:52] Cleared
+[21:10:13] lINES 3
+[21:10:18] lINES 3
+[21:10:19] lINES 22
+[21:10:41] lINES 3
+[21:10:42] lINES 22
+
+----------
+Loaded log file: "server_log.txt".
+----------
+
+SA-MP Dedicated Server
+----------------------
+v0.3.7-R2, (C)2005-2015 SA-MP Team
+
+[21:36:25] 
+[21:36:25] Server Plugins
+[21:36:25] --------------
+[21:36:25]  Loading plugin: crashdetect
+[21:36:25]   CrashDetect v4.17 is OK.
+[21:36:25]   Loaded.
+[21:36:25]  Loading plugin: log-plugin
+[21:36:25]  >> plugin.log: v0.3 successfully loaded.
+[21:36:25]   Loaded.
+[21:36:25]  Loading plugin: streamer
+[21:36:25] 
+
+*** Streamer Plugin v2.9.1 by Incognito loaded ***
+
+[21:36:25]   Loaded.
+[21:36:25]  Loading plugin: sscanf
+[21:36:25] 
+
+[21:36:25]  ===============================
+
+[21:36:25]       sscanf plugin loaded.     
+
+[21:36:25]          Version:  2.8.2        
+
+[21:36:25]    (c) 2012 Alex "Y_Less" Cole  
+
+[21:36:25]  ===============================
+
+[21:36:25]   Loaded.
+[21:36:25]  Loading plugin: irc
+[21:36:25] 
+
+*** IRC Plugin v1.4.8 by Incognito loaded ***
+
+[21:36:25]   Loaded.
+[21:36:25]  Loading plugin: mysql
+[21:36:25]  >> plugin.mysql: R41-2 successfully loaded.
+[21:36:25]   Loaded.
+[21:36:25]  Loading plugin: whirlpool
+[21:36:25]  
+[21:36:25]  ==================
+[21:36:25]  
+[21:36:25]   Whirlpool loaded
+[21:36:25]  
+[21:36:25]  ==================
+[21:36:25]  
+[21:36:25]   Loaded.
+[21:36:25]  Loading plugin: pawncmd
+[21:36:25] Pawn.CMD plugin v3.1.4 by urShadow loaded
+[21:36:25]   Loaded.
+[21:36:25]  Loading plugin: RouteConnectorPlugin
+[21:36:26]   Loaded.
+[21:36:26]  Loading plugin: nativechecker
+[21:36:26]   Loaded.
+[21:36:26]  Loaded 10 plugins.
+
+[21:36:26] 
+[21:36:26] Filterscripts
+[21:36:26] ---------------
+[21:36:26]   Loading filterscript 'Bans.amx'...
+[21:36:26] --------------------------------------
+[21:36:26]  MM/MG Ban system loaded. 
+[21:36:26] --------------------------------------
+
+[21:36:30]   Loading filterscript 'vspawner.amx'...
+[21:36:30] 
+--Admin Vehicle Spawner Loaded
+
+[21:36:30]   Loading filterscript 'int.amx'...
+[21:36:30]   Loaded 3 filterscripts.
+
+[21:36:41] 
+
+[21:36:41]   |---------------------------------------------------
+[21:36:41]   |--- Cops and Robbers
+[21:36:41]   |--  Script v0.01
+[21:36:41]   |--  Sasuke_Uchiha
+[21:36:41]   |---------------------------------------------------
+[21:36:41] Number of vehicle models: 92
+[21:37:51] [connection] incoming connection: 127.0.0.1:54147 id: 0
+[21:37:52] [join] Sasuke_Uchiha has joined the server (0:127.0.0.1)
+[21:37:57] Cleared
+[21:38:13] lINES 22
+
+----------
+Loaded log file: "server_log.txt".
+----------
+
+SA-MP Dedicated Server
+----------------------
+v0.3.7-R2, (C)2005-2015 SA-MP Team
+
+[21:57:26] 
+[21:57:26] Server Plugins
+[21:57:26] --------------
+[21:57:26]  Loading plugin: crashdetect
+[21:57:26]   CrashDetect v4.17 is OK.
+[21:57:26]   Loaded.
+[21:57:26]  Loading plugin: log-plugin
+[21:57:26]  >> plugin.log: v0.3 successfully loaded.
+[21:57:26]   Loaded.
+[21:57:26]  Loading plugin: streamer
+[21:57:26] 
+
+*** Streamer Plugin v2.9.1 by Incognito loaded ***
+
+[21:57:26]   Loaded.
+[21:57:26]  Loading plugin: sscanf
+[21:57:26] 
+
+[21:57:26]  ===============================
+
+[21:57:26]       sscanf plugin loaded.     
+
+[21:57:26]          Version:  2.8.2        
+
+[21:57:26]    (c) 2012 Alex "Y_Less" Cole  
+
+[21:57:26]  ===============================
+
+[21:57:26]   Loaded.
+[21:57:26]  Loading plugin: irc
+[21:57:26] 
+
+*** IRC Plugin v1.4.8 by Incognito loaded ***
+
+[21:57:26]   Loaded.
+[21:57:26]  Loading plugin: mysql
+[21:57:26]  >> plugin.mysql: R41-2 successfully loaded.
+[21:57:26]   Loaded.
+[21:57:26]  Loading plugin: whirlpool
+[21:57:26]  
+[21:57:26]  ==================
+[21:57:26]  
+[21:57:26]   Whirlpool loaded
+[21:57:26]  
+[21:57:26]  ==================
+[21:57:26]  
+[21:57:26]   Loaded.
+[21:57:26]  Loading plugin: pawncmd
+[21:57:26] Pawn.CMD plugin v3.1.4 by urShadow loaded
+[21:57:26]   Loaded.
+[21:57:26]  Loading plugin: RouteConnectorPlugin
+[21:57:26]   Loaded.
+[21:57:26]  Loading plugin: nativechecker
+[21:57:26]   Loaded.
+[21:57:26]  Loaded 10 plugins.
+
+[21:57:26] 
+[21:57:26] Filterscripts
+[21:57:26] ---------------
+[21:57:26]   Loading filterscript 'Bans.amx'...
+[21:57:27] --------------------------------------
+[21:57:27]  MM/MG Ban system loaded. 
+[21:57:27] --------------------------------------
+
+[21:57:31]   Loading filterscript 'vspawner.amx'...
+[21:57:31] 
+--Admin Vehicle Spawner Loaded
+
+[21:57:31]   Loading filterscript 'int.amx'...
+[21:57:31]   Loaded 3 filterscripts.
+
+[21:57:37] 
+
+[21:57:37]   |---------------------------------------------------
+[21:57:37]   |--- Cops and Robbers
+[21:57:37]   |--  Script v0.01
+[21:57:37]   |--  Sasuke_Uchiha
+[21:57:37]   |---------------------------------------------------
+[21:57:37] Number of vehicle models: 92
+[21:57:42] [connection] incoming connection: 127.0.0.1:61271 id: 0
+[21:57:43] [join] Sasuke_Uchiha has joined the server (0:127.0.0.1)
+[21:57:48] Cleared
+[21:58:04] lINES 3
+[21:58:05] lINES 22
+
+----------
+Loaded log file: "server_log.txt".
+----------
+
+SA-MP Dedicated Server
+----------------------
+v0.3.7-R2, (C)2005-2015 SA-MP Team
+
+[22:01:57] 
+[22:01:57] Server Plugins
+[22:01:57] --------------
+[22:01:57]  Loading plugin: crashdetect
+[22:01:57]   CrashDetect v4.17 is OK.
+[22:01:57]   Loaded.
+[22:01:57]  Loading plugin: log-plugin
+[22:01:57]  >> plugin.log: v0.3 successfully loaded.
+[22:01:57]   Loaded.
+[22:01:57]  Loading plugin: streamer
+[22:01:57] 
+
+*** Streamer Plugin v2.9.1 by Incognito loaded ***
+
+[22:01:57]   Loaded.
+[22:01:57]  Loading plugin: sscanf
+[22:01:57] 
+
+[22:01:57]  ===============================
+
+[22:01:57]       sscanf plugin loaded.     
+
+[22:01:57]          Version:  2.8.2        
+
+[22:01:57]    (c) 2012 Alex "Y_Less" Cole  
+
+[22:01:57]  ===============================
+
+[22:01:57]   Loaded.
+[22:01:57]  Loading plugin: irc
+[22:01:57] 
+
+*** IRC Plugin v1.4.8 by Incognito loaded ***
+
+[22:01:57]   Loaded.
+[22:01:57]  Loading plugin: mysql
+[22:01:57]  >> plugin.mysql: R41-2 successfully loaded.
+[22:01:57]   Loaded.
+[22:01:57]  Loading plugin: whirlpool
+[22:01:57]  
+[22:01:57]  ==================
+[22:01:57]  
+[22:01:57]   Whirlpool loaded
+[22:01:57]  
+[22:01:57]  ==================
+[22:01:57]  
+[22:01:57]   Loaded.
+[22:01:57]  Loading plugin: pawncmd
+[22:01:57] Pawn.CMD plugin v3.1.4 by urShadow loaded
+[22:01:57]   Loaded.
+[22:01:57]  Loading plugin: RouteConnectorPlugin
+[22:01:58]   Loaded.
+[22:01:58]  Loading plugin: nativechecker
+[22:01:58]   Loaded.
+[22:01:58]  Loaded 10 plugins.
+
+[22:01:58] 
+[22:01:58] Filterscripts
+[22:01:58] ---------------
+[22:01:58]   Loading filterscript 'Bans.amx'...
+[22:01:58] --------------------------------------
+[22:01:58]  MM/MG Ban system loaded. 
+[22:01:58] --------------------------------------
+
+[22:02:02]   Loading filterscript 'vspawner.amx'...
+[22:02:02] 
+--Admin Vehicle Spawner Loaded
+
+[22:02:02]   Loading filterscript 'int.amx'...
+[22:02:03]   Loaded 3 filterscripts.
+
+[22:02:10] 
+
+[22:02:10]   |---------------------------------------------------
+[22:02:10]   |--- Cops and Robbers
+[22:02:10]   |--  Script v0.01
+[22:02:10]   |--  Sasuke_Uchiha
+[22:02:10]   |---------------------------------------------------
+[22:02:10] Number of vehicle models: 94
+[22:02:10] [connection] incoming connection: 127.0.0.1:61057 id: 0
+[22:02:10] [join] Sasuke_Uchiha has joined the server (0:127.0.0.1)
+[22:02:14] Cleared
+[22:02:41] lINES 3
+[22:02:42] lINES 22
+[22:03:21] lINES 3
+[22:03:22] lINES 22
+
+----------
+Loaded log file: "server_log.txt".
+----------
+
+SA-MP Dedicated Server
+----------------------
+v0.3.7-R2, (C)2005-2015 SA-MP Team
+
+[22:07:51] 
+[22:07:51] Server Plugins
+[22:07:51] --------------
+[22:07:51]  Loading plugin: crashdetect
+[22:07:51]   CrashDetect v4.17 is OK.
+[22:07:51]   Loaded.
+[22:07:51]  Loading plugin: log-plugin
+[22:07:51]  >> plugin.log: v0.3 successfully loaded.
+[22:07:51]   Loaded.
+[22:07:51]  Loading plugin: streamer
+[22:07:51] 
+
+*** Streamer Plugin v2.9.1 by Incognito loaded ***
+
+[22:07:51]   Loaded.
+[22:07:51]  Loading plugin: sscanf
+[22:07:51] 
+
+[22:07:51]  ===============================
+
+[22:07:51]       sscanf plugin loaded.     
+
+[22:07:51]          Version:  2.8.2        
+
+[22:07:51]    (c) 2012 Alex "Y_Less" Cole  
+
+[22:07:51]  ===============================
+
+[22:07:51]   Loaded.
+[22:07:51]  Loading plugin: irc
+[22:07:51] 
+
+*** IRC Plugin v1.4.8 by Incognito loaded ***
+
+[22:07:51]   Loaded.
+[22:07:51]  Loading plugin: mysql
+[22:07:51]  >> plugin.mysql: R41-2 successfully loaded.
+[22:07:51]   Loaded.
+[22:07:51]  Loading plugin: whirlpool
+[22:07:51]  
+[22:07:51]  ==================
+[22:07:51]  
+[22:07:51]   Whirlpool loaded
+[22:07:51]  
+[22:07:51]  ==================
+[22:07:51]  
+[22:07:51]   Loaded.
+[22:07:51]  Loading plugin: pawncmd
+[22:07:51] Pawn.CMD plugin v3.1.4 by urShadow loaded
+[22:07:51]   Loaded.
+[22:07:51]  Loading plugin: RouteConnectorPlugin
+[22:07:52]   Loaded.
+[22:07:52]  Loading plugin: nativechecker
+[22:07:52]   Loaded.
+[22:07:52]  Loaded 10 plugins.
+
+[22:07:52] 
+[22:07:52] Filterscripts
+[22:07:52] ---------------
+[22:07:52]   Loading filterscript 'Bans.amx'...
+[22:07:52] --------------------------------------
+[22:07:52]  MM/MG Ban system loaded. 
+[22:07:52] --------------------------------------
+
+[22:07:56]   Loading filterscript 'vspawner.amx'...
+[22:07:56] 
+--Admin Vehicle Spawner Loaded
+
+[22:07:56]   Loading filterscript 'int.amx'...
+[22:07:56]   Loaded 3 filterscripts.
+
+[22:08:04] 
+
+[22:08:04]   |---------------------------------------------------
+[22:08:04]   |--- Cops and Robbers
+[22:08:04]   |--  Script v0.01
+[22:08:04]   |--  Sasuke_Uchiha
+[22:08:04]   |---------------------------------------------------
+[22:08:04] Number of vehicle models: 94
+[22:08:04] [connection] incoming connection: 127.0.0.1:56420 id: 0
+[22:08:04] [join] Sasuke_Uchiha has joined the server (0:127.0.0.1)
+[22:08:09] Cleared
+[22:08:13] lINES 3
+[22:08:15] lINES 22
+[22:08:35] lINES 3
+[22:08:36] lINES 22
+[22:08:38] Test Passed
+[22:10:09] Test Passed
+[22:10:14] Test Passed
+[22:10:31] Test Passed
+[22:10:32] Test Passed
+[22:10:32] Test Passed
+[22:10:40] Test Passed
+[22:10:40] Test Passed
+[22:10:42] Test Passed
+[22:10:46] Test Passed
+[22:10:48] Test Passed
+[22:10:51] Test Passed
+[22:10:51] Test Passed
+[22:10:54] Test Passed
+[22:11:16] lINES 3
+[22:11:17] lINES 22
+
+----------
+Loaded log file: "server_log.txt".
+----------
+
+SA-MP Dedicated Server
+----------------------
+v0.3.7-R2, (C)2005-2015 SA-MP Team
+
+[22:18:00] 
+[22:18:00] Server Plugins
+[22:18:00] --------------
+[22:18:00]  Loading plugin: crashdetect
+[22:18:00]   CrashDetect v4.17 is OK.
+[22:18:00]   Loaded.
+[22:18:00]  Loading plugin: log-plugin
+[22:18:00]  >> plugin.log: v0.3 successfully loaded.
+[22:18:00]   Loaded.
+[22:18:00]  Loading plugin: streamer
+[22:18:00] 
+
+*** Streamer Plugin v2.9.1 by Incognito loaded ***
+
+[22:18:00]   Loaded.
+[22:18:00]  Loading plugin: sscanf
+[22:18:00] 
+
+[22:18:00]  ===============================
+
+[22:18:00]       sscanf plugin loaded.     
+
+[22:18:00]          Version:  2.8.2        
+
+[22:18:00]    (c) 2012 Alex "Y_Less" Cole  
+
+[22:18:00]  ===============================
+
+[22:18:00]   Loaded.
+[22:18:00]  Loading plugin: irc
+[22:18:00] 
+
+*** IRC Plugin v1.4.8 by Incognito loaded ***
+
+[22:18:00]   Loaded.
+[22:18:00]  Loading plugin: mysql
+[22:18:00]  >> plugin.mysql: R41-2 successfully loaded.
+[22:18:00]   Loaded.
+[22:18:00]  Loading plugin: whirlpool
+[22:18:00]  
+[22:18:00]  ==================
+[22:18:00]  
+[22:18:00]   Whirlpool loaded
+[22:18:00]  
+[22:18:00]  ==================
+[22:18:00]  
+[22:18:00]   Loaded.
+[22:18:00]  Loading plugin: pawncmd
+[22:18:00] Pawn.CMD plugin v3.1.4 by urShadow loaded
+[22:18:00]   Loaded.
+[22:18:00]  Loading plugin: RouteConnectorPlugin
+[22:18:01]   Loaded.
+[22:18:01]  Loading plugin: nativechecker
+[22:18:01]   Loaded.
+[22:18:01]  Loaded 10 plugins.
+
+[22:18:01] 
+[22:18:01] Filterscripts
+[22:18:01] ---------------
+[22:18:01]   Loading filterscript 'Bans.amx'...
+[22:18:01] --------------------------------------
+[22:18:01]  MM/MG Ban system loaded. 
+[22:18:01] --------------------------------------
+
+[22:18:05]   Loading filterscript 'vspawner.amx'...
+[22:18:05] 
+--Admin Vehicle Spawner Loaded
+
+[22:18:05]   Loading filterscript 'int.amx'...
+[22:18:05]   Loaded 3 filterscripts.
+
+[22:18:12] 
+
+[22:18:12]   |---------------------------------------------------
+[22:18:12]   |--- Cops and Robbers
+[22:18:12]   |--  Script v0.01
+[22:18:12]   |--  Sasuke_Uchiha
+[22:18:12]   |---------------------------------------------------
+[22:18:12] Number of vehicle models: 91
+[22:18:12] [connection] incoming connection: 127.0.0.1:64673 id: 0
+[22:18:12] [join] Sasuke_Uchiha has joined the server (0:127.0.0.1)
+[22:18:17] Cleared
+[22:19:46] lINES 3
+[22:19:47] lINES 22
+[22:21:37] [part] Sasuke_Uchiha has left the server (0:1)
+
+----------
+Loaded log file: "server_log.txt".
+----------
+
+SA-MP Dedicated Server
+----------------------
+v0.3.7-R2, (C)2005-2015 SA-MP Team
+
+[14:11:23] 
+[14:11:23] Server Plugins
+[14:11:23] --------------
+[14:11:23]  Loading plugin: crashdetect
+[14:11:23]   CrashDetect v4.17 is OK.
+[14:11:23]   Loaded.
+[14:11:23]  Loading plugin: log-plugin
+[14:11:23]  >> plugin.log: v0.3 successfully loaded.
+[14:11:23]   Loaded.
+[14:11:23]  Loading plugin: streamer
+[14:11:23] 
+
+*** Streamer Plugin v2.9.1 by Incognito loaded ***
+
+[14:11:23]   Loaded.
+[14:11:23]  Loading plugin: sscanf
+[14:11:23] 
+
+[14:11:23]  ===============================
+
+[14:11:23]       sscanf plugin loaded.     
+
+[14:11:23]          Version:  2.8.2        
+
+[14:11:23]    (c) 2012 Alex "Y_Less" Cole  
+
+[14:11:23]  ===============================
+
+[14:11:23]   Loaded.
+[14:11:23]  Loading plugin: irc
+[14:11:23] 
+
+*** IRC Plugin v1.4.8 by Incognito loaded ***
+
+[14:11:23]   Loaded.
+[14:11:23]  Loading plugin: mysql
+[14:11:23]  >> plugin.mysql: R41-2 successfully loaded.
+[14:11:23]   Loaded.
+[14:11:23]  Loading plugin: whirlpool
+[14:11:24]  
+[14:11:24]  ==================
+[14:11:24]  
+[14:11:24]   Whirlpool loaded
+[14:11:24]  
+[14:11:24]  ==================
+[14:11:24]  
+[14:11:24]   Loaded.
+[14:11:24]  Loading plugin: pawncmd
+[14:11:24] Pawn.CMD plugin v3.1.4 by urShadow loaded
+[14:11:24]   Loaded.
+[14:11:24]  Loading plugin: RouteConnectorPlugin
+
+----------
+Loaded log file: "server_log.txt".
+----------
+
+SA-MP Dedicated Server
+----------------------
+v0.3.7-R2, (C)2005-2015 SA-MP Team
+
+[23:02:17] 
+[23:02:17] Server Plugins
+[23:02:17] --------------
+[23:02:17]  Loading plugin: crashdetect
+[23:02:17]   CrashDetect v4.17 is OK.
+[23:02:17]   Loaded.
+[23:02:17]  Loading plugin: log-plugin
+[23:02:19]  >> plugin.log: v0.3 successfully loaded.
+[23:02:19]   Loaded.
+[23:02:19]  Loading plugin: streamer
+[23:02:19] 
+
+*** Streamer Plugin v2.9.1 by Incognito loaded ***
+
+[23:02:19]   Loaded.
+[23:02:19]  Loading plugin: sscanf
+[23:02:19] 
+
+[23:02:19]  ===============================
+
+[23:02:19]       sscanf plugin loaded.     
+
+[23:02:19]          Version:  2.8.2        
+
+[23:02:19]    (c) 2012 Alex "Y_Less" Cole  
+
+[23:02:19]  ===============================
+
+[23:02:19]   Loaded.
+[23:02:19]  Loading plugin: irc
+[23:02:19] 
+
+*** IRC Plugin v1.4.8 by Incognito loaded ***
+
+[23:02:19]   Loaded.
+[23:02:19]  Loading plugin: mysql
+[23:02:19]  >> plugin.mysql: R41-2 successfully loaded.
+[23:02:19]   Loaded.
+[23:02:19]  Loading plugin: whirlpool
+[23:02:20]  
+[23:02:20]  ==================
+[23:02:20]  
+[23:02:20]   Whirlpool loaded
+[23:02:20]  
+[23:02:20]  ==================
+[23:02:20]  
+[23:02:20]   Loaded.
+[23:02:20]  Loading plugin: pawncmd
+[23:02:20] Pawn.CMD plugin v3.1.4 by urShadow loaded
+[23:02:20]   Loaded.
+[23:02:20]  Loading plugin: RouteConnectorPlugin
+[23:02:20]   Loaded.
+[23:02:20]  Loading plugin: nativechecker
+[23:02:20]   Loaded.
+[23:02:20]  Loaded 10 plugins.
+
+[23:02:20] 
+[23:02:20] Filterscripts
+[23:02:20] ---------------
+[23:02:20]   Loading filterscript 'Bans.amx'...
+[23:02:22] --------------------------------------
+[23:02:22]  MM/MG Ban system loaded. 
+[23:02:22] --------------------------------------
+
+[23:02:25]   Loading filterscript 'vspawner.amx'...
+[23:02:25] 
+--Admin Vehicle Spawner Loaded
+
+[23:02:25]   Loading filterscript 'int.amx'...
+[23:02:25]   Loaded 3 filterscripts.
+
+[23:02:32] 
+
+[23:02:32]   |---------------------------------------------------
+[23:02:32]   |--- Cops and Robbers
+[23:02:32]   |--  Script v0.01
+[23:02:32]   |--  Sasuke_Uchiha
+[23:02:32]   |---------------------------------------------------
+[23:02:32] Number of vehicle models: 90

@@ -1,0 +1,462 @@
+:irc.exp-gaming.net NOTICE * :*** Looking up your hostname...
+:irc.exp-gaming.net NOTICE * :*** Couldn't resolve your hostname; using your IP address instead
+:irc.exp-gaming.net 433 * CnR1 :Nickname is already in use.
+PING :B572A729
+:irc.exp-gaming.net 001 [BOT]CnR1 :Welcome to the EXP Gaming IRC Network IRC Network [BOT]CnR1!Exp@39.34.201.246
+:irc.exp-gaming.net 002 [BOT]CnR1 :Your host is irc.exp-gaming.net, running version UnrealIRCd-4.0.5
+:irc.exp-gaming.net 003 [BOT]CnR1 :This server was created Thu Aug 11 2016 at 16:43:20 CEST
+:irc.exp-gaming.net 004 [BOT]CnR1 irc.exp-gaming.net UnrealIRCd-4.0.5 iowrsxzdHtIRqpWGTSB lvhopsmntikraqbeIzMQNRTOVKDdGLPZSCcf
+:irc.exp-gaming.net 005 [BOT]CnR1 CMDS=USERIP,STARTTLS,KNOCK,DCCALLOW,MAP UHNAMES NAMESX SAFELIST HCN MAXCHANNELS=30 CHANLIMIT=#:30 MAXLIST=b:60,e:60,I:60 MAXNICKLEN=30 NICKLEN=30 CHANNELLEN=32 TOPICLEN=307 KICKLEN=307 :are supported by this server
+:irc.exp-gaming.net 005 [BOT]CnR1 AWAYLEN=307 MAXTARGETS=20 WALLCHOPS WATCH=128 WATCHOPTS=A SILENCE=15 MODES=12 CHANTYPES=# PREFIX=(qaohv)~&@%+ CHANMODES=beI,kLf,l,psmntirzMQNRTOVKDdGPZSCc NETWORK=EXP-Gaming-IRC-Network CASEMAPPING=ascii EXTBAN=~,SOcaRrnqj :are supported by this server
+:irc.exp-gaming.net 005 [BOT]CnR1 ELIST=MNUCT STATUSMSG=~&@%+ EXCEPTS INVEX :are supported by this server
+:irc.exp-gaming.net 396 [BOT]CnR1 8B35D6CE.B3736B93.4E9DC371.IP :is now your displayed host
+:irc.exp-gaming.net 251 [BOT]CnR1 :There are 19 users and 61 invisible on 2 servers
+:irc.exp-gaming.net 252 [BOT]CnR1 11 :operator(s) online
+:irc.exp-gaming.net 254 [BOT]CnR1 52 :channels formed
+:irc.exp-gaming.net 255 [BOT]CnR1 :I have 60 clients and 1 servers
+:irc.exp-gaming.net 265 [BOT]CnR1 60 62 :Current local users 60, max 62
+:irc.exp-gaming.net 266 [BOT]CnR1 80 344 :Current global users 80, max 344
+:irc.exp-gaming.net 375 [BOT]CnR1 :- irc.exp-gaming.net Message of the Day - 
+:irc.exp-gaming.net 372 [BOT]CnR1 :- 11/8/2016 17:10
+:irc.exp-gaming.net 372 [BOT]CnR1 :-           _____                                            _____          
+:irc.exp-gaming.net 372 [BOT]CnR1 :-          /\    \                 ______                   /\    \         
+:irc.exp-gaming.net 372 [BOT]CnR1 :-         /::\    \               |::|   |                 /::\    \        
+:irc.exp-gaming.net 372 [BOT]CnR1 :-        /::::\    \              |::|   |                /::::\    \       
+:irc.exp-gaming.net 372 [BOT]CnR1 :-       /::::::\    \             |::|   |               /::::::\    \      
+:irc.exp-gaming.net 372 [BOT]CnR1 :-      /:::/\:::\    \            |::|   |              /:::/\:::\    \     
+:irc.exp-gaming.net 372 [BOT]CnR1 :-     /:::/__\:::\    \           |::|   |             /:::/__\:::\    \    
+:irc.exp-gaming.net 372 [BOT]CnR1 :-    /::::\   \:::\    \          |::|   |            /::::\   \:::\    \   
+:irc.exp-gaming.net 372 [BOT]CnR1 :-   /::::::\   \:::\    \         |::|   |           /::::::\   \:::\    \  
+:irc.exp-gaming.net 372 [BOT]CnR1 :-  /:::/\:::\   \:::\    \  ______|::|___|___ ____  /:::/\:::\   \:::\____\ 
+:irc.exp-gaming.net 372 [BOT]CnR1 :- /:::/__\:::\   \:::\____\|:::::::::::::::::|    |/:::/  \:::\   \:::|    |
+:irc.exp-gaming.net 372 [BOT]CnR1 :- \:::\   \:::\   \::/    /|:::::::::::::::::|____|\::/    \:::\  /:::|____|
+:irc.exp-gaming.net 372 [BOT]CnR1 :-  \:::\   \:::\   \/____/  ~~~~~~|::|~~~|~~~       \/_____/\:::\/:::/    / 
+:irc.exp-gaming.net 372 [BOT]CnR1 :-   \:::\   \:::\    \            |::|   |                   \::::::/    /  
+:irc.exp-gaming.net 372 [BOT]CnR1 :-    \:::\   \:::\____\           |::|   |                    \::::/    /   
+:irc.exp-gaming.net 372 [BOT]CnR1 :-     \:::\   \::/    /           |::|   |                     \::/____/    
+:irc.exp-gaming.net 372 [BOT]CnR1 :-      \:::\   \/____/            |::|   |                      ~~          
+:irc.exp-gaming.net 372 [BOT]CnR1 :-       \:::\    \                |::|   |                                  
+:irc.exp-gaming.net 372 [BOT]CnR1 :-        \:::\____\               |::|   |                                  
+:irc.exp-gaming.net 372 [BOT]CnR1 :-         \::/    /               |::|___|                                  
+:irc.exp-gaming.net 372 [BOT]CnR1 :-          \/____/                 ~~                                       
+:irc.exp-gaming.net 372 [BOT]CnR1 :-                                                                           :
+irc.exp-gaming.net 372 [BOT]CnR1 :- Welcome to Exp Gaming IRC Network
+:irc.exp-gaming.net 372 [BOT]CnR1 :- You are connected on our München, Germany server, irc.exp-gaming.net.
+:irc.exp-gaming.net 372 [BOT]CnR1 :- :irc.exp-gaming.net 372 [BOT]CnR1 :- Avail
+able Ports: 6665-6669 and 8067 - Port 6697 For SSL!
+:irc.exp-gaming.net 372 [BOT]CnR1 :- 
+:irc.exp-gaming.net 372 [BOT]CnR1 :- Visit us online at http://exp-gaming.net
+:irc.exp-gaming.net 372 [BOT]CnR1 :- 
+:irc.exp-gaming.net 372 [BOT]CnR1 :- By connecting to this network, you give us permission
+:irc.exp-gaming.net 372 [BOT]CnR1 :- to scan your machine for open proxies.
+:irc.exp-gaming.net 372 [BOT]CnR1 :- 
+:irc.exp-gaming.net 372 [BOT]CnR1 :-     _    _                _   
+:irc.exp-gaming.net 372 [BOT]CnR1 :-    /_\  | |__  ___  _  _ | |_ 
+:irc.exp-gaming.net 372 [BOT]CnR1 :-   / _ \ | '_ \/ _ \| || ||  _|
+:irc.exp-gaming.net 372 [BOT]CnR1 :-  /_/ \_\|_.__/\___/ \_,_| \__|
+:irc.exp-gaming.net 372 [BOT]CnR1 :-                               
+:irc.exp-gaming.net 372 [BOT]CnR1 :- IRC created for exp-gaming: 18 february 2013
+:irc.exp-gaming.net 372 [BOT]CnR1 :- MOTD Last Updated On: 5 august 2014
+:irc.exp-gaming.net 372 [BOT]CnR1 :- MOTD Updated By: MichaelBelgium
+:irc.exp-gaming.net 372 [BOT]CnR1 :- Reason For Update: Rules update !
+:irc.exp-gaming.net 372 [BOT]CnR1 :- 
+:irc.exp-gaming.net 372 [BOT]CnR1 :- Exp Gaming IRC Network.
+:irc.exp-gaming.net 372 [BOT]CnR1 :- 
+:irc.exp-gaming.net 372 [BOT]CnR1 :-   ___  _           __   __ 
+:irc.exp-gaming.net 372 [BOT]CnR1 :-  / __|| |_  __ _  / _| / _|
+:irc.exp-gaming.net 372 [BOT]CnR1 :-  \__ \|  _|/ _` ||  _||  _|
+:irc.exp-gaming.net 372 [BOT]CnR1 :-  |___/ \__|\__,_||_|  |_|  
+:irc.exp-gaming.net 372 [BOT]CnR1 :-                            
+:irc.exp-gaming.net 372 [BOT]CnR1 :- 
+:irc.exp-gaming.net 372 [BOT]CnR1 :- IRC Administrators:
+:irc.exp-gaming.net 372 [BOT]CnR1 :- * Michael@Belgium
+:irc.exp-gaming.net 372 [BOT]CnR1 :- * Beremix
+:irc.exp-gaming.net 372 [BOT]CnR1 :- 
+:irc.exp-gaming.net 372 [BOT]CnR1 :- IRC Operators:
+:irc.exp-gaming.net 372 [BOT]CnR1 :- * robin_be
+:irc.exp-gaming.net 372 [BOT]CnR1 :- * Tokkor
+:irc.exp-gaming.net 372 [BOT]CnR1 :- 
+:irc.exp-gaming.net 372 [BOT]CnR1 :- A full list of our staff can be seen on our website at http://exp-gaming.net
+:irc.exp-gaming.net 372 [BOT]CnR1 :- 
+:irc.exp-gaming.net 372 [BOT]CnR1 :-    ___  _                            _     
+:irc.exp-gaming.net 372 [BOT]CnR1 :-   / __|| |_   __ _  _ _   _ _   ___ | | ___
+:irc.exp-gaming.net 372 [BOT]CnR1 :-  | (__ | ' \ / _` || ' \ | ' \ / -_)| |(_-<
+:irc.exp-gaming.net 372 [BOT]CnR1 :-   \___||_||_|\__,_||_||_||_||_|\___||_|/__/
+:irc.exp-gaming.net 372 [BOT]CnR1 :-                                            
+:irc.exp-gaming.net 372 [BOT]CnR1 :- #exp-gaming - General community channel.
+:irc.exp-gaming.net 372 [BOT]CnR1 :- #help - General Help channel.
+:irc.exp-gaming.net 372 [BOT]CnR1 :- 
+:irc.exp-gaming.net 372 [BOT]CnR1 :- #mg - Minigames Server channel.
+:irc.exp-gaming.net 372 [BOT]CnR1 :- #eg - eXtra Games Server channel.
+:irc.exp-gaming.net 372 [BOT]CnR1 :- #pat - Police And Terrorists channel.
+:irc.exp-gaming.net 372 [BOT]CnR1 :- 
+:irc.exp-gaming.net 372 [BOT]CnR1 :-   _____                              
+:irc.exp-gaming.net 372 [BOT]CnR1 :-  /  ___|                             
+:irc.exp-gaming.net 372 [BOT]CnR1 :-  \ `--.  ___ _ ____   _____ _ __ ___ 
+:irc.exp-gaming.net 372 [BOT]CnR1 :-   `--. \/ _ \ '__\ \ / / _ \ '__/ __|
+:irc.exp-gaming.net 372 [BOT]CnR1 :-  /\__/ /  __/ |   \ V /  __/ |  \__ \
+:irc.exp-gaming.net 372 [BOT]CnR1 :-  \____/ \___|_|    \_/ \___|_|  |___/
+:irc.exp-gaming.net 372 [BOT]CnR1 :- 
+:irc.exp-gaming.net 372 [BOT]CnR1 :- * irc.exp-gaming.net
+:irc.exp-gaming.net 372 [BOT]CnR1 :- * irc.mg-s.us
+:irc.exp-gaming.net 372 [BOT]CnR1 :- 
+:irc.exp-gaming.net 372 [BOT]CnR1 :- Exp-gaming unlinked with bw-gaming on 2 february 2014.
+:irc.exp-gaming.net 372 [BOT]CnR1 :- 
+:irc.exp-gaming.net 372 [BOT]CnR1 :-   ___        _          
+:irc.exp-gaming.net 372 [BOT]CnR1 :-  | _ \ _  _ | | ___  ___
+:irc.exp-gaming.net 372 [BOT]CnR1 :-  |   /| || || |/ -_)(_-<
+:irc.exp-gaming.net 372 [BOT]CnR1 :-  |_|_\ \_,_||_|\___|/__/
+:irc.exp-gaming.net 372 [BOT]CnR1 :-                         :irc.exp-gaming.net 372 [BOT]CnR1 :- 
+:irc.exp-gaming.net 372 [BOT]CnR1 :- The following is prohibited on our network:
+:irc.exp-gaming.net 372 [BOT]CnR1 :- 
+:irc.exp-gaming.net 372 [BOT]CnR1 :- - Verbally assaulting or insulting network staff, network clients.:irc.exp-gaming.net 372 [BOT]CnR
+1 :- -- Do not disrespect any client of staff on this network with threats, insults, racism or other look-a-likes. We are here to have fun and not to have fights. 
+:irc.exp-gaming.net 372 [BOT]CnR1 :- --- Profanity is allowed but be respectful.
+:irc.exp-gaming.net 372 [BOT]CnR1 :- --- Trolling is allowed but when you're not sure the person who you're gonna troll with would take it serious or not - We prefer to not doing it. 
+:irc.exp-gaming.net 372 [BOT]CnR1 :- --- Staff members may deny your access to this network for any reason.
+:irc.exp-gaming.net 372 [BOT]CnR1 :- 
+:irc.exp-gaming.net 372 [BOT]CnR1 :- - Spreading of pornographic material
+:irc.exp-gaming.net 372 [BOT]CnR1 :- -- Discussing about it is allowed. However we prefer not to.
+:irc.exp-gaming.net 372 [BOT]CnR1 :- 
+:irc.exp-gaming.net 372 [BOT]CnR1 :- - Spamming and advertising
+:irc.exp-gaming.net 372 [BOT]CnR1 :- -- Spamming or flooding any channel with useless sentences, symbols or any kind - is strictly forbidden. You may get banned on the channel, if you continue to breach this rule you may get banned on the network.
+:irc.exp-gaming.net 372 [BOT]CnR1 :- -- Advertising, In general: in terms of other things who don't have to do anything with us (exp-gaming) and/or the gameservers inside of exp-gaming, is allowed. IRC networks are made to talk about everything and nothing. However do note, it depends on which channel you are.
+:irc.exp-gaming.net 372 [BOT]CnR1 :- 
+:irc.exp-gaming.net 372 [BOT]CnR1 :- - Illegal activities
+:irc.exp-gaming.net 372 [BOT]CnR1 :- -- Activities such as botnets who flood channels, ddos threats or material suchs as warez and torrents are simply strictly forbidden !
+:irc.exp-gaming.net 372 [BOT]CnR1 :- 
+:irc.exp-gaming.net 372 [BOT]CnR1 :- - Various
+:irc.exp-gaming.net 372 [BOT]CnR1 :- -- Ban evading is obviously also not allowed
+:irc.exp-gaming.net 372 [BOT]CnR1 :- -- Multi-connections
+:irc.exp-gaming.net 372 [BOT]CnR1 :- --- We only allow 3 connections per IP. If you have more connections coming from your IP we'll keep an eye on you and the IRC server will automaticly kill your connection.
+:irc.exp-gaming.net 372 [BOT]CnR1 :- --- If you have a valid reason to put an exception on your IP you can ask the staff in #help
+:irc.exp-gaming.net 372 [BOT]CnR1 :- -- Proxy's
+:irc.exp-gaming.net 372 [BOT]CnR1 :- --- Using proxy's to connect to this network is allowed, however do note: proxy's are suspicious.
+:irc.exp-gaming.net 372 [BOT]CnR1 :- 
+:irc.exp-gaming.net 372 [BOT]CnR1 :- Users of this network must follow international law, or laws of their country.
+:irc.exp-gaming.net 372 [BOT]CnR1 :- 
+:irc.exp-gaming.net 372 [BOT]CnR1 :- The use of this network is a privilige, we hold the right to deny access to any user from this network.
+:irc.exp-gaming.net 372 [BOT]CnR1 :- All users connecting this network, agree to these rules as stated above.
+:irc.exp-gaming.net 376 [BOT]CnR1 :End of /MOTD command.
+:[BOT]CnR1 MODE [BOT]CnR1 :+iwx
+:NickServ!services@exp-gaming.net NOTICE [BOT]CnR1 :Your nick isn't registered.
+:[BOT]CnR1!Exp@8B35D6CE.B3736B93.4E9DC371.IP JOIN :#cnr.echo
+:irc.exp-gaming.net 332 [BOT]CnR1 #cnr.echo :1Exp Gaming 12Cops 1N 12Robbers 1Echo Channel || 4Server IP:1N/A
+:irc.exp-gaming.net 333 [BOT]CnR1 #cnr.echo DowDaw 1508790625
+:irc.exp-gaming.net 353 [BOT]CnR1 * #cnr.echo :[BOT]CnR1 +SaK ~Sasuke_Uchiha +FreAkeD ~ThecnoPrisoner ~Beremix` &CnR5 &CnR4 &CnR3 &CnR2 &CnR1 ~DowDaw` ~LuciferGRE &Stefy 
+:irc.exp-gaming.net 366 [BOT]CnR1 #cnr.echo :End of /NAMES list.
+:irc.exp-gaming.net 473 [BOT]CnR1 #cnr.admins :Cannot join channel (+i)
+:irc.exp-gaming.net 473 [BOT]CnR1 #cnr.management :Cannot join channel (+i)
+:irc.exp-gaming.net 473 [BOT]CnR1 #mg.radio :Cannot join channel (+i)
+:[BOT]CnR1!Exp@8B35D6CE.B3736B93.4E9DC371.IP JOIN :#RadioHeadDJs
+:irc.exp-gaming.net 332 [BOT]CnR1 #RadioHeadDJs :
+:irc.exp-gaming.net 333 [BOT]CnR1 #RadioHeadDJs ChanServ 1500641373
+:irc.exp-gaming.net 353 [BOT]CnR1 = #RadioHeadDJs :[BOT]CnR1 &Sasuke_Uchiha ~GrueroGRE &MM4 &MM5 &MM3 &MM2 &MM1 &CnR5 &CnR4 &CnR3 &CnR2 &CnR1 ~LuciferGRE &DowDaw` ~SaK @Berebot ~Beremix` 
+:irc.exp-gaming.net 366 [BOT]CnR1 #RadioHeadDJs :End of /NAMES list.
+:irc.exp-gaming.net 477 [BOT]CnR1 #bans :You need a registered nick to join that channel.
+:ChanServ!services@exp-gaming.net MODE #cnr.echo +v [BOT]CnR1
+:irc.exp-gaming.net 353 [BOT]CnR1 * #cnr.echo :+[BOT]CnR1 +SaK ~Sasuke_Uchiha +FreAkeD ~ThecnoPrisoner ~Beremix` &CnR5 &CnR4 &CnR3 &CnR2 &CnR1 ~DowDaw` ~LuciferGRE &Stefy 
+:irc.exp-gaming.net 366 [BOT]CnR1 #cnr.echo :End of /NAMES list.
+:NickServ!services@exp-gaming.net NOTICE [BOT]CnR1 :Your nick isn't registered.
+:irc.exp-gaming.net 473 [BOT]CnR1 #cnr.admins :Cannot join channel (+i)
+:irc.exp-gaming.net 473 [BOT]CnR1 #cnr.management :Cannot join channel (+i)
+:irc.exp-gaming.net 473 [BOT]CnR1 #mg.radio :Cannot join channel (+i)
+:irc.exp-gaming.net NOTICE * :*** Looking up your hostname...
+:irc.exp-gaming.net NOTICE * :*** Couldn't resolve your hostname; using your IP address instead
+:irc.exp-gaming.net 433 * CnR2 :Nickname is already in use.
+PING :7AEACE32
+:irc.exp-gaming.net 477 [BOT]CnR1 #bans :You need a registered nick to join that channel.
+:irc.exp-gaming.net 001 [BOT]CnR2 :Welcome to the EXP Gaming IRC Network IRC Network [BOT]CnR2!Exp@39.34.201.246
+:irc.exp-gaming.net 002 [BOT]CnR2 :Your host is irc.exp-gaming.net, running version UnrealIRCd-4.0.5
+:irc.exp-gaming.net 003 [BOT]CnR2 :This server was created Thu Aug 11 2016 at 16:43:20 CEST
+:irc.exp-gaming.net 004 [BOT]CnR2 irc.exp-gaming.net UnrealIRCd-4.0.5 iowrsxzdHtIRqpWGTSB lvhopsmntikraqbeIzMQNRTOVKDdGLPZSCcf
+:irc.exp-gaming.net 005 [BOT]CnR2 CMDS=USERIP,STARTTLS,KNOCK,DCCALLOW,MAP UHNAMES NAMESX SAFELIST HCN MAXCHANNELS=30 CHANLIMIT=#:30 MAXLIST=b:60,e:60,I:60 MAXNICKLEN=30 NICKLEN=30 CHANNELLEN=32 TOPICLEN=307 KICKLEN=307 :are supported by this server
+:irc.exp-gaming.net 005 [BOT]CnR2 AWAYLEN=307 MAXTARGETS=20 WALLCHOPS WATCH=128 WATCHOPTS=A SILENCE=15 MODES=12 CHANTYPES=# PREFIX=(qaohv)~&@%+ CHANMODES=beI,kLf,l,psmntirzMQNRTOVKDdGPZSCc NETWORK=EXP-Gaming-IRC-Network CASEMAPPING=ascii EXTBAN=~,SOcaRrnqj :are supported by this server
+:irc.exp-gaming.net 005 [BOT]CnR2 ELIST=MNUCT STATUSMSG=~&@%+ EXCEPTS INVEX :are supported by this server
+:irc.exp-gaming.net 396 [BOT]CnR2 8B35D6CE.B3736B93.4E9DC371.IP :is now your displayed host
+:irc.exp-gaming.net 251 [BOT]CnR2 :There are 19 users and 62 invisible on 2 servers
+:irc.exp-gaming.net 252 [BOT]CnR2 11 :operator(s) online
+:irc.exp-gaming.net 254 [BOT]CnR2 52 :channels formed
+:irc.exp-gaming.net 255 [BOT]CnR2 :I have 61 clients and 1 servers
+:irc.exp-gaming.net 265 [BOT]CnR2 61 62 :Current local users 61, max 62
+:irc.exp-gaming.net 266 [BOT]CnR2 81 344 :Current global users 81, max 344
+:irc.exp-gaming.net 375 [BOT]CnR2 :- irc.exp-gaming.net Message of the Day - 
+:irc.exp-gaming.net 372 [BOT]CnR2 :- 11/8/2016 17:10
+:irc.exp-gaming.net 372 [BOT]CnR2 :-           _____                                            _____          
+:irc.exp-gaming.net 372 [BOT]CnR2 :-          /\    \                 ______                   /\    \         
+:irc.exp-gaming.net 372 [BOT]CnR2 :-         /::\    \               |::|   |                 /::\    \        
+:irc.exp-gaming.net 372 [BOT]CnR2 :-        /::::\    \              |::|   |                /::::\    \       
+:irc.exp-gaming.net 372 [BOT]CnR2 :-       /::::::\    \             |::|   |               /::::::\    \      
+:irc.exp-gaming.net 372 [BOT]CnR2 :-      /:::/\:::\    \            |::|   |              /:::/\:::\    \     
+:irc.exp-gaming.net 372 [BOT]CnR2 :-     /:::/__\:::\    \           |::|   |             /:::/__\:::\    \    
+:irc.exp-gaming.net 372 [BOT]CnR2 :-    /::::\   \:::\    \          |::|   |            /::::\   \:::\    \   
+:irc.exp-gaming.net 372 [BOT]CnR2 :-   /::::::\   \:::\    \         |::|   |           /::::::\   \:::\    \  
+:irc.exp-gaming.net 372 [BOT]CnR2 :-  /:::/\:::\   \:::\    \  ______|::|___|___ ____  /:::/\:::\   \:::\____\ 
+:irc.exp-gaming.net 372 [BOT]CnR2 :- /:::/__\:::\   \:::\____\|:::::::::::::::::|    |/:::/  \:::\   \:::|    |
+:irc.exp-gaming.net 372 [BOT]CnR2 :- \:::\   \:::\   \::/    /|:::::::::::::::::|____|\::/    \:::\  /:::|____|
+:irc.exp-gaming.net 372 [BOT]CnR2 :-  \:::\   \:::\   \/____/  ~~~~~~|::|~~~|~~~       \/_____/\:::\/:::/    / 
+:irc.exp-gaming.net 372 [BOT]CnR2 :-   \:::\   \:::\    \            |::|   |                   \::::::/    /  
+:irc.exp-gaming.net 372 [BOT]CnR2 :-    \:::\   \:::\____\           |::|   |                    \::::/    /   
+:irc.exp-gaming.net 372 [BOT]CnR2 :-     \:::\   \::/    /           |::|   |                     \::/____/    
+:irc.exp-gaming.net 372 [BOT]CnR2 :-      \:::\   \/____/            |::|   |                      ~~          
+:irc.exp-gaming.net 372 [BOT]CnR2 :-       \:::\    \                |::|   |                                  
+:irc.exp-gaming.net 372 [BOT]CnR2 :-        \:::\____\               |::|   |                                  
+:irc.exp-gaming.net 372 [BOT]CnR2 :-         \::/    /               |::|___|                                  
+:irc.exp-gaming.net 372 [BOT]CnR2 :-          \/____/                 ~~                                       
+:irc.exp-gaming.net 372 [BOT]CnR2 :-                                                                           :
+irc.exp-gaming.net 372 [BOT]CnR2 :- Welcome to Exp Gaming IRC Network
+:irc.exp-gaming.net 372 [BOT]CnR2 :- You are connected on our München, Germany server, irc.exp-gaming.net.
+:irc.exp-gaming.net 372 [BOT]CnR2 :- :irc.exp-gaming.net 372 [BOT]CnR2 :- Avail
+able Ports: 6665-6669 and 8067 - Port 6697 For SSL!
+:irc.exp-gaming.net 372 [BOT]CnR2 :- 
+:irc.exp-gaming.net 372 [BOT]CnR2 :- Visit us online at http://exp-gaming.net
+:irc.exp-gaming.net 372 [BOT]CnR2 :- 
+:irc.exp-gaming.net 372 [BOT]CnR2 :- By connecting to this network, you give us permission
+:irc.exp-gaming.net 372 [BOT]CnR2 :- to scan your machine for open proxies.
+:irc.exp-gaming.net 372 [BOT]CnR2 :- 
+:irc.exp-gaming.net 372 [BOT]CnR2 :-     _    _                _   
+:irc.exp-gaming.net 372 [BOT]CnR2 :-    /_\  | |__  ___  _  _ | |_ 
+:irc.exp-gaming.net 372 [BOT]CnR2 :-   / _ \ | '_ \/ _ \| || ||  _|
+:irc.exp-gaming.net 372 [BOT]CnR2 :-  /_/ \_\|_.__/\___/ \_,_| \__|
+:irc.exp-gaming.net 372 [BOT]CnR2 :-                               
+:irc.exp-gaming.net 372 [BOT]CnR2 :- IRC created for exp-gaming: 18 february 2013
+:irc.exp-gaming.net 372 [BOT]CnR2 :- MOTD Last Updated On: 5 august 2014
+:irc.exp-gaming.net 372 [BOT]CnR2 :- MOTD Updated By: MichaelBelgium
+:irc.exp-gaming.net 372 [BOT]CnR2 :- Reason For Update: Rules update !
+:irc.exp-gaming.net 372 [BOT]CnR2 :- 
+:irc.exp-gaming.net 372 [BOT]CnR2 :- Exp Gaming IRC Network.
+:irc.exp-gaming.net 372 [BOT]CnR2 :- 
+:irc.exp-gaming.net 372 [BOT]CnR2 :-   ___  _           __   __ 
+:irc.exp-gaming.net 372 [BOT]CnR2 :-  / __|| |_  __ _  / _| / _|
+:irc.exp-gaming.net 372 [BOT]CnR2 :-  \__ \|  _|/ _` ||  _||  _|
+:irc.exp-gaming.net 372 [BOT]CnR2 :-  |___/ \__|\__,_||_|  |_|  
+:irc.exp-gaming.net 372 [BOT]CnR2 :-                            
+:irc.exp-gaming.net 372 [BOT]CnR2 :- 
+:irc.exp-gaming.net 372 [BOT]CnR2 :- IRC Administrators:
+:irc.exp-gaming.net 372 [BOT]CnR2 :- * Michael@Belgium
+:irc.exp-gaming.net 372 [BOT]CnR2 :- * Beremix
+:irc.exp-gaming.net 372 [BOT]CnR2 :- 
+:irc.exp-gaming.net 372 [BOT]CnR2 :- IRC Operators:
+:irc.exp-gaming.net 372 [BOT]CnR2 :- * robin_be
+:irc.exp-gaming.net 372 [BOT]CnR2 :- * Tokkor
+:irc.exp-gaming.net 372 [BOT]CnR2 :- 
+:irc.exp-gaming.net 372 [BOT]CnR2 :- A full list of our staff can be seen on our website at http://exp-gaming.net
+:irc.exp-gaming.net 372 [BOT]CnR2 :- 
+:irc.exp-gaming.net 372 [BOT]CnR2 :-    ___  _                            _     
+:irc.exp-gaming.net 372 [BOT]CnR2 :-   / __|| |_   __ _  _ _   _ _   ___ | | ___
+:irc.exp-gaming.net 372 [BOT]CnR2 :-  | (__ | ' \ / _` || ' \ | ' \ / -_)| |(_-<
+:irc.exp-gaming.net 372 [BOT]CnR2 :-   \___||_||_|\__,_||_||_||_||_|\___||_|/__/
+:irc.exp-gaming.net 372 [BOT]CnR2 :-                                            
+:irc.exp-gaming.net 372 [BOT]CnR2 :- #exp-gaming - General community channel.
+:irc.exp-gaming.net 372 [BOT]CnR2 :- #help - General Help channel.
+:irc.exp-gaming.net 372 [BOT]CnR2 :- 
+:irc.exp-gaming.net 372 [BOT]CnR2 :- #mg - Minigames Server channel.
+:irc.exp-gaming.net 372 [BOT]CnR2 :- #eg - eXtra Games Server channel.
+:irc.exp-gaming.net 372 [BOT]CnR2 :- #pat - Police And Terrorists channel.
+:irc.exp-gaming.net 372 [BOT]CnR2 :- 
+:irc.exp-gaming.net 372 [BOT]CnR2 :-   _____                              
+:irc.exp-gaming.net 372 [BOT]CnR2 :-  /  ___|                             
+:irc.exp-gaming.net 372 [BOT]CnR2 :-  \ `--.  ___ _ ____   _____ _ __ ___ 
+:irc.exp-gaming.net 372 [BOT]CnR2 :-   `--. \/ _ \ '__\ \ / / _ \ '__/ __|
+:irc.exp-gaming.net 372 [BOT]CnR2 :-  /\__/ /  __/ |   \ V /  __/ |  \__ \
+:irc.exp-gaming.net 372 [BOT]CnR2 :-  \____/ \___|_|    \_/ \___|_|  |___/
+:irc.exp-gaming.net 372 [BOT]CnR2 :- 
+:irc.exp-gaming.net 372 [BOT]CnR2 :- * irc.exp-gaming.net
+:irc.exp-gaming.net 372 [BOT]CnR2 :- * irc.mg-s.us
+:irc.exp-gaming.net 372 [BOT]CnR2 :- 
+:irc.exp-gaming.net 372 [BOT]CnR2 :- Exp-gaming unlinked with bw-gaming on 2 february 2014.
+:irc.exp-gaming.net 372 [BOT]CnR2 :- 
+:irc.exp-gaming.net 372 [BOT]CnR2 :-   ___        _          
+:irc.exp-gaming.net 372 [BOT]CnR2 :-  | _ \ _  _ | | ___  ___
+:irc.exp-gaming.net 372 [BOT]CnR2 :-  |   /| || || |/ -_)(_-<
+:irc.exp-gaming.net 372 [BOT]CnR2 :-  |_|_\ \_,_||_|\___|/__/
+:irc.exp-gaming.net 372 [BOT]CnR2 :-                         :irc.exp-gaming.net 372 [BOT]CnR2 :- 
+:irc.exp-gaming.net 372 [BOT]CnR2 :- The following is prohibited on our network:
+:irc.exp-gaming.net 372 [BOT]CnR2 :- 
+:irc.exp-gaming.net 372 [BOT]CnR2 :- - Verbally assaulting or insulting network staff, network clients.
+:irc.exp-gaming.net 372 [BOT]CnR2 :- -- Do not disrespect any client of staff on this network with threats, insults, racism or other look-a-likes. We are here to have fun and not to have fights. 
+:irc.exp-gaming.net 372 [BOT]CnR2 :- --- Profanity is allowed but be respectful.
+:irc.exp-gaming.net 372 [BOT]CnR2 :- --- Trolling is allowed but when you're not sure the person who you're gonna troll with would take it serious or not - We prefer to not doing it. 
+:irc.exp-gaming.net 372 [BOT]CnR2 :- --- Staff members may deny your access to this network for any reason.
+:irc.exp-gaming.net 372 [BOT]CnR2 :- 
+:irc.exp-gaming.net 372 [BOT]CnR2 :- - Spreading of pornographic material
+:irc.exp-gaming.net 372 [BOT]CnR2 :- -- Discussing about it is allowed. However we prefer not to.
+:irc.exp-gaming.net 372 [BOT]CnR2 :- 
+:irc.exp-gaming.net 372 [BOT]CnR2 :- - Spamming and advertising
+:irc.exp-gaming.net 372 [BOT]CnR2 :- -- Spamming or flooding any channel with useless sentences, symbols or any kind - is strictly forbidden. You may get banned on the channel, if you continue to breach this rule you may get banned on the network.
+:irc.exp-gaming.net 372 [BOT]CnR2 :- -- Advertising, In general: in terms of other things who don't have to do anything with us (exp-gaming) and/or the gameservers inside of exp-gaming, is allowed. IRC networks are made to talk about everything and nothing. However do note, it depends on which channel you are.
+:irc.exp-gaming.net 372 [BOT]CnR2 :- 
+:irc.exp-gaming.net 372 [BOT]CnR2 :- - Illegal activities
+:irc.exp-gaming.net 372 [BOT]CnR2 :- -- Activities such as botnets who flood channels, ddos threats or material suchs as warez and torrents are simply strictly forbidden !
+:irc.exp-gaming.net 372 [BOT]CnR2 :- 
+:irc.exp-gaming.net 372 [BOT]CnR2 :- - Various
+:irc.exp-gaming.net 372 [BOT]CnR2 :- -- Ban evading is obviously also not allowed
+:irc.exp-gaming.net 372 [BOT]CnR2 :- -- Multi-connections
+:irc.exp-gaming.net 372 [BOT]CnR2 :- --- We only allow 3 connections per IP. If you have more connections coming from your IP we'll keep an eye on you and the IRC server will automaticly kill your connection.
+:irc.exp-gaming.net 372 [BOT]CnR2 :- --- If you have a valid reason to put an exception on your IP you can ask the staff in #help
+:irc.exp-gaming.net 372 [BOT]CnR2 :- -- Proxy's
+:irc.exp-gaming.net 372 [BOT]CnR2 :- --- Using proxy's to connect to this network is allowed, however do note: proxy's are suspicious.
+:irc.exp-gaming.net 372 [BOT]CnR2 :- 
+:irc.exp-gaming.net 372 [BOT]CnR2 :- Users of this network must follow international law, or laws of their country.
+:irc.exp-gaming.net 372 [BOT]CnR2 :- 
+:irc.exp-gaming.net 372 [BOT]CnR2 :- The use of this network is a privilige, we hold the right to deny access to any user from this network.
+:irc.exp-gaming.net 372 [BOT]CnR2 :- All users connecting this network, agree to these rules as stated above.:irc.exp-g
+aming.net 376 [BOT]CnR2 :End of /MOTD command.
+:[BOT]CnR2 MODE [BOT]CnR2 :+iwx
+:[BOT]CnR2!Exp@8B35D6CE.B3736B93.4E9DC371.IP JOIN :#cnr.echo
+:NickServ!services@exp-gaming.net NOTICE [BOT]CnR2 :Your nick isn't registered.
+:[BOT]CnR2!Exp@8B35D6CE.B3736B93.4E9DC371.IP JOIN :#RadioHeadDJs
+:ChanServ!services@exp-gaming.net MODE #cnr.echo +v [BOT]CnR2
+:[BOT]CnR2!Exp@8B35D6CE.B3736B93.4E9DC371.IP JOIN :#cnr.echo
+:irc.exp-gaming.net 332 [BOT]CnR2 #cnr.echo :1Exp Gaming 12Cops 1N 12Robbers 1Echo Channel || 4Server IP:1N/A
+:irc.exp-gaming.net 333 [BOT]CnR2 #cnr.echo DowDaw 1508790625
+:irc.exp-gaming.net 353 [BOT]CnR2 * #cnr.echo :[BOT]CnR2 +[BOT]CnR1 +SaK ~Sasuke_Uchiha +FreAkeD ~ThecnoPrisoner ~Beremix` &CnR5 &CnR4 &CnR3 &CnR2 &CnR1 ~DowDaw` ~LuciferGRE &Stefy 
+:irc.exp-gaming.net 366 [BOT]CnR2 #cnr.echo :End of /NAMES list.
+:irc.exp-gaming.net 473 [BOT]CnR2 #cnr.admins :Cannot join channel (+i)
+:irc.exp-gaming.net 473 [BOT]CnR2 #cnr.management :Cannot join channel (+i)
+:irc.exp-gaming.net 473 [BOT]CnR2 #mg.radio :Cannot join channel (+i)
+:[BOT]CnR2!Exp@8B35D6CE.B3736B93.4E9DC371.IP JOIN :#RadioHeadDJs
+:irc.exp-gaming.net 332 [BOT]CnR2 #RadioHeadDJs :
+:irc.exp-gaming.net 333 [BOT]CnR2 #RadioHeadDJs ChanServ 1500641373
+:irc.exp-gaming.net 353 [BOT]CnR2 = #RadioHeadDJs :[BOT]CnR2 [BOT]CnR1 &Sasuke_Uchiha ~GrueroGRE &MM4 &MM5 &MM3 &MM2 &MM1 &CnR5 &CnR4 &CnR3 &CnR2 &CnR1 ~LuciferGRE &DowDaw` ~SaK @Berebot ~Beremix` 
+:irc.exp-gaming.net 366 [BOT]CnR2 #RadioHeadDJs :End of /NAMES list.
+:irc.exp-gaming.net 477 [BOT]CnR2 #bans :You need a registered nick to join that channel.
+:ChanServ!services@exp-gaming.net MODE #cnr.echo +v [BOT]CnR2
+:irc.exp-gaming.net 353 [BOT]CnR1 * #cnr.echo :+[BOT]CnR2 +[BOT]CnR1 +SaK ~Sasuke_Uchiha +FreAkeD ~ThecnoPrisoner ~Beremix` &CnR5 &CnR4 &CnR3 &CnR2 &CnR1 ~DowDaw` ~LuciferGRE &Stefy 
+:irc.exp-gaming.net 353 [BOT]CnR2 * #cnr.echo :+[BOT]CnR2 +[BOT]CnR1 +SaK ~Sasuke_Uchiha +FreAkeD ~ThecnoPrisoner ~Beremix` &CnR5 &CnR4 &CnR3 &CnR2 &CnR1 ~DowDaw` ~LuciferGRE &Stefy 
+:irc.exp-gaming.net 366 [BOT]CnR2 #cnr.echo :End of /NAMES list.
+:irc.exp-gaming.net 366 [BOT]CnR1 #cnr.echo :End of /NAMES list.
+:irc.exp-gaming.net NOTICE * :*** Looking up your hostname...
+:irc.exp-gaming.net NOTICE * :*** Couldn't resolve your hostname; using your IP address instead
+:irc.exp-gaming.net 433 * CnR3 :Nickname is already in use.
+PING :4CB36F6E
+:irc.exp-gaming.net 001 [BOT]CnR3 :Welcome to the EXP Gaming IRC Network IRC Network [BOT]CnR3!Exp@39.34.201.246
+:irc.exp-gaming.net 002 [BOT]CnR3 :Your host is irc.exp-gaming.net, running version UnrealIRCd-4.0.5
+:irc.exp-gaming.net 003 [BOT]CnR3 :This server was created Thu Aug 11 2016 at 16:43:20 CEST
+:irc.exp-gaming.net 004 [BOT]CnR3 irc.exp-gaming.net UnrealIRCd-4.0.5 iowrsxzdHtIRqpWGTSB lvhopsmntikraqbeIzMQNRTOVKDdGLPZSCcf
+:irc.exp-gaming.net 005 [BOT]CnR3 CMDS=USERIP,STARTTLS,KNOCK,DCCALLOW,MAP UHNAMES NAMESX SAFELIST HCN MAXCHANNELS=30 CHANLIMIT=#:30 MAXLIST=b:60,e:60,I:60 MAXNICKLEN=30 NICKLEN=30 CHANNELLEN=32 TOPICLEN=307 KICKLEN=307 :are supported by this server
+:irc.exp-gaming.net 005 [BOT]CnR3 AWAYLEN=307 MAXTARGETS=20 WALLCHOPS WATCH=128 WATCHOPTS=A SILENCE=15 MODES=12 CHANTYPES=# PREFIX=(qaohv)~&@%+ CHANMODES=beI,kLf,l,psmntirzMQNRTOVKDdGPZSCc NETWORK=EXP-Gaming-IRC-Network CASEMAPPING=ascii EXTBAN=~,SOcaRrnqj :are supported by this server
+:irc.exp-gaming.net 005 [BOT]CnR3 ELIST=MNUCT STATUSMSG=~&@%+ EXCEPTS INVEX :are supported by this server
+:irc.exp-gaming.net 396 [BOT]CnR3 8B35D6CE.B3736B93.4E9DC371.IP :is now your displayed host
+:irc.exp-gaming.net 251 [BOT]CnR3 :There are 19 users and 63 invisible on 2 servers
+:irc.exp-gaming.net 252 [BOT]CnR3 11 :operator(s) online
+:irc.exp-gaming.net 254 [BOT]CnR3 52 :channels formed
+:irc.exp-gaming.net 255 [BOT]CnR3 :I have 62 clients and 1 servers
+:irc.exp-gaming.net 265 [BOT]CnR3 62 62 :Current local users 62, max 62
+:irc.exp-gaming.net 266 [BOT]CnR3 82 344 :Current global users 82, max 344
+:irc.exp-gaming.net 375 [BOT]CnR3 :- irc.exp-gaming.net Message of the Day - 
+:irc.exp-gaming.net 372 [BOT]CnR3 :- 11/8/2016 17:10
+:irc.exp-gaming.net 372 [BOT]CnR3 :-           _____                                            _____          
+:irc.exp-gaming.net 372 [BOT]CnR3 :-          /\    \                 ______                   /\    \         
+:irc.exp-gaming.net 372 [BOT]CnR3 :-         /::\    \               |::|   |                 /::\    \        
+:irc.exp-gaming.net 372 [BOT]CnR3 :-        /::::\    \              |::|   |                /::::\    \       
+:irc.exp-gaming.net 372 [BOT]CnR3 :-       /::::::\    \             |::|   |               /::::::\    \      
+:irc.exp-gaming.net 372 [BOT]CnR3 :-      /:::/\:::\    \            |::|   |              /:::/\:::\    \     
+:irc.exp-gaming.net 372 [BOT]CnR3 :-     /:::/__\:::\    \           |::|   |             /:::/__\:::\    \    
+:irc.exp-gaming.net 372 [BOT]CnR3 :-    /::::\   \:::\    \          |::|   |            /::::\   \:::\    \   
+:irc.exp-gaming.net 372 [BOT]CnR3 :-   /::::::\   \:::\    \         |::|   |           /::::::\   \:::\    \  
+:irc.exp-gaming.net 372 [BOT]CnR3 :-  /:::/\:::\   \:::\    \  ______|::|___|___ ____  /:::/\:::\   \:::\____\ 
+:irc.exp-gaming.net 372 [BOT]CnR3 :- /:::/__\:::\   \:::\____\|:::::::::::::::::|    |/:::/  \:::\   \:::|    |
+:irc.exp-gaming.net 372 [BOT]CnR3 :- \:::\   \:::\   \::/    /|:::::::::::::::::|____|\::/    \:::\  /:::|____|
+:irc.exp-gaming.net 372 [BOT]CnR3 :-  \:::\   \:::\   \/____/  ~~~~~~|::|~~~|~~~       \/_____/\:::\/:::/    / 
+:irc.exp-gaming.net 372 [BOT]CnR3 :-   \:::\   \:::\    \            |::|   |                   \::::::/    /  
+:irc.exp-gaming.net 372 [BOT]CnR3 :-    \:::\   \:::\____\           |::|   |                    \::::/    /   
+:irc.exp-gaming.net 372 [BOT]CnR3 :-     \:::\   \::/    /           |::|   |                     \::/____/    
+:irc.exp-gaming.net 372 [BOT]CnR3 :-      \:::\   \/____/            |::|   |                      ~~          
+:irc.exp-gaming.net 372 [BOT]CnR3 :-       \:::\    \                |::|   |                                  
+:irc.exp-gaming.net 372 [BOT]CnR3 :-        \:::\____\               |::|   |                                  
+:irc.exp-gaming.net 372 [BOT]CnR3 :-         \::/    /               |::|___|                                  
+:irc.exp-gaming.net 372 [BOT]CnR3 :-          \/____/                 ~~                                       
+:irc.exp-gaming.net 372 [BOT]CnR3 :-                                                                           :
+irc.exp-gaming.net 372 [BOT]CnR3 :- Welcome to Exp Gaming IRC Network
+:irc.exp-gaming.net 372 [BOT]CnR3 :- You are connected on our München, Germany server, irc.exp-gaming.net.
+:irc.exp-gaming.net 372 [BOT]CnR3 :- :irc.exp-gaming.net 372 [BOT]CnR3 :- Avail
+able Ports: 6665-6669 and 8067 - Port 6697 For SSL!
+:irc.exp-gaming.net 372 [BOT]CnR3 :- 
+:irc.exp-gaming.net 372 [BOT]CnR3 :- Visit us online at http://exp-gaming.net
+:irc.exp-gaming.net 372 [BOT]CnR3 :- 
+:irc.exp-gaming.net 372 [BOT]CnR3 :- By connecting to this network, you give us permission
+:irc.exp-gaming.net 372 [BOT]CnR3 :- to scan your machine for open proxies.
+:irc.exp-gaming.net 372 [BOT]CnR3 :- 
+:irc.exp-gaming.net 372 [BOT]CnR3 :-     _    _                _   
+:irc.exp-gaming.net 372 [BOT]CnR3 :-    /_\  | |__  ___  _  _ | |_ 
+:irc.exp-gaming.net 372 [BOT]CnR3 :-   / _ \ | '_ \/ _ \| || ||  _|
+:irc.exp-gaming.net 372 [BOT]CnR3 :-  /_/ \_\|_.__/\___/ \_,_| \__|
+:irc.exp-gaming.net 372 [BOT]CnR3 :-                               
+:irc.exp-gaming.net 372 [BOT]CnR3 :- IRC created for exp-gaming: 18 february 2013
+:irc.exp-gaming.net 372 [BOT]CnR3 :- MOTD Last Updated On: 5 august 2014
+:irc.exp-gaming.net 372 [BOT]CnR3 :- MOTD Updated By: MichaelBelgium
+:irc.exp-gaming.net 372 [BOT]CnR3 :- Reason For Update: Rules update !
+:irc.exp-gaming.net 372 [BOT]CnR3 :- 
+:irc.exp-gaming.net 372 [BOT]CnR3 :- Exp Gaming IRC Network.
+:irc.exp-gaming.net 372 [BOT]CnR3 :- 
+:irc.exp-gaming.net 372 [BOT]CnR3 :-   ___  _           __   __ 
+:irc.exp-gaming.net 372 [BOT]CnR3 :-  / __|| |_  __ _  / _| / _|
+:irc.exp-gaming.net 372 [BOT]CnR3 :-  \__ \|  _|/ _` ||  _||  _|
+:irc.exp-gaming.net 372 [BOT]CnR3 :-  |___/ \__|\__,_||_|  |_|  
+:irc.exp-gaming.net 372 [BOT]CnR3 :-                            
+:irc.exp-gaming.net 372 [BOT]CnR3 :- 
+:irc.exp-gaming.net 372 [BOT]CnR3 :- IRC Administrators:
+:irc.exp-gaming.net 372 [BOT]CnR3 :- * Michael@Belgium
+:irc.exp-gaming.net 372 [BOT]CnR3 :- * Beremix
+:irc.exp-gaming.net 372 [BOT]CnR3 :- 
+:irc.exp-gaming.net 372 [BOT]CnR3 :- IRC Operators:
+:irc.exp-gaming.net 372 [BOT]CnR3 :- * robin_be
+:irc.exp-gaming.net 372 [BOT]CnR3 :- * Tokkor
+:irc.exp-gaming.net 372 [BOT]CnR3 :- 
+:irc.exp-gaming.net 372 [BOT]CnR3 :- A full list of our staff can be seen on our website at http://exp-gaming.net
+:irc.exp-gaming.net 372 [BOT]CnR3 :- 
+:irc.exp-gaming.net 372 [BOT]CnR3 :-    ___  _                            _     
+:irc.exp-gaming.net 372 [BOT]CnR3 :-   / __|| |_   __ _  _ _   _ _   ___ | | ___
+:irc.exp-gaming.net 372 [BOT]CnR3 :-  | (__ | ' \ / _` || ' \ | ' \ / -_)| |(_-<
+:irc.exp-gaming.net 372 [BOT]CnR3 :-   \___||_||_|\__,_||_||_||_||_|\___||_|/__/
+:irc.exp-gaming.net 372 [BOT]CnR3 :-                                            
+:irc.exp-gaming.net 372 [BOT]CnR3 :- #exp-gaming - General community channel.
+:irc.exp-gaming.net 372 [BOT]CnR3 :- #help - General Help channel.
+:irc.exp-gaming.net 372 [BOT]CnR3 :- 
+:irc.exp-gaming.net 372 [BOT]CnR3 :- #mg - Minigames Server channel.
+:irc.exp-gaming.net 372 [BOT]CnR3 :- #eg - eXtra Games Server channel.
+:irc.exp-gaming.net 372 [BOT]CnR3 :- #pat - Police And Terrorists channel.
+:irc.exp-gaming.net 372 [BOT]CnR3 :- 
+:irc.exp-gaming.net 372 [BOT]CnR3 :-   _____                              
+:irc.exp-gaming.net 372 [BOT]CnR3 :-  /  ___|                             
+:irc.exp-gaming.net 372 [BOT]CnR3 :-  \ `--.  ___ _ ____   _____ _ __ ___ 
+:irc.exp-gaming.net 372 [BOT]CnR3 :-   `--. \/ _ \ '__\ \ / / _ \ '__/ __|
+:irc.exp-gaming.net 372 [BOT]CnR3 :-  /\__/ /  __/ |   \ V /  __/ |  \__ \
+:irc.exp-gaming.net 372 [BOT]CnR3 :-  \____/ \___|_|    \_/ \___|_|  |___/
+:irc.exp-gaming.net 372 [BOT]CnR3 :- 
+:irc.exp-gaming.net 372 [BOT]CnR3 :- * irc.exp-gaming.net
+:irc.exp-gaming.net 372 [BOT]CnR3 :- * irc.mg-s.us
+:irc.exp-gaming.net 372 [BOT]CnR3 :- 
+:irc.exp-gaming.net 372 [BOT]CnR3 :- Exp-gaming unlinked with bw-gaming on 2 february 2014.
+:irc.exp-gaming.net 372 [BOT]CnR3 :- 
+:irc.exp-gaming.net 372 [BOT]CnR3 :-   ___        _          
+:irc.exp-gaming.net 372 [BOT]CnR3 :-  | _ \ _  _ | | ___  ___
+:irc.exp-gaming.net 372 [BOT]CnR3 :-  |   /| || || |/ -_)(_-<
+:irc.exp-gaming.net 372 [BOT]CnR3 :-  |_|_\ \_,_||_|\___|/__/
+:irc.exp-gaming.net 372 [BOT]CnR3 :-                         :irc.exp-gaming.net 372 [BOT]CnR3 :- 
+:irc.exp-gaming.net 372 [BOT]CnR3 :- The following is prohibited on our network:
+:irc.exp-gaming.net 372 [BOT]CnR3 :- 
+:irc.exp-gaming.net 372 [BOT]CnR3 :- - Verbally assaulting or insulting network staff, network clients.
+:irc.exp-gaming.net 372 [BOT]CnR3 :- -- Do not disrespect any client of staff on this network with threats, insults, racism or other look-a-likes. We are here to have fun and not to have fights. 
+:irc.exp-gaming.net 372 [BOT]CnR3 :- --- Profanity is allowed but be respectful.
+:irc.exp-gaming.net 372 [BOT]CnR3 :- --- Trolling is allowed but when you're not sure the person who you're gonna troll with would take it serious or not - We prefer to not doing it. 
+:irc.exp-gaming.net 372 [BOT]CnR3 :- --- Staff members may deny your access to this network for any reason.
+:irc.exp-gaming.net 372 [BOT]CnR3 :- 
+:irc.exp-gaming.net 372 [BOT]CnR3 :- - Spreading of pornographic material
+:irc.exp-gaming.net 372 [BOT]CnR3 :- -- Discussing about it is allowed. However we prefer not to.
+:irc.exp-gaming.net 372 [BOT]CnR3 :- 
+:irc.exp-gaming.net 372 [BOT]CnR3 :- - Spamming and advertising
+:irc.exp-gaming.net 372 [BOT]CnR3 :- -- Spamming or flooding any channel with useless sentences, symbols or any kind - is strictly forbidden. You may get banned on the channel, if you continue to breach this rule you may get banned on the network.
+:irc.exp-gaming.net 372 [BOT]CnR3 :- -- Advertising, In general: in terms of other things who don't have to do anything with us (exp-gaming) and/or the gameservers inside of exp-gaming, is allowed. IRC networks are made to talk about everything and nothing. However do note, it depends on which channel you are.:irc.exp-gaming.net 372 [BOT]CnR
+ERROR :Closing Link: [39.34.201.246] (Throttled: Reconnecting too fast) -Email team@exp-gaming.net for more information.
+:[BOT]CnR1!Exp@8B35D6CE.B3736B93.4E9DC371.IP PRIVMSG #cnr.echo :7,1[CONNECT] Sasuke_Uchiha (0).
+:irc.exp-gaming.net 404 [BOT]CnR2 #cnr.admins :No external channel messages (#cnr.admins)
+:irc.exp-gaming.net 404 [BOT]CnR1 #cnr.management :No external channel messages (#cnr.management)
+ERROR :Closing Link: [39.34.201.246] (Throttled: Reconnecting too fast) -Email team@exp-gaming.net for more information.
+ERROR :Closing Link: [39.34.201.246] (Throttled: Reconnecting too fast) -Email team@exp-gaming.net for more information.
+ERROR :Closing Link: [39.34.201.246] (Throttled: Reconnecting too fast) -Email team@exp-gaming.net for more information.
+ERROR :Closing Link: [39.34.201.246] (Throttled: Reconnecting too fast) -Email team@exp-gaming.net for more information.
+ERROR :Closing Link: [39.34.201.246] (Throttled: Reconnecting too fast) -Email team@exp-gaming.net for more information.
+ERROR :Closing Link: [39.34.201.246] (Throttled: Reconnecting too fast) -Email team@exp-gaming.net for more information.
+ERROR :Closing Link: [39.34.201.246] (Throttled: Reconnecting too fast) -Email team@exp-gaming.net for more information.
