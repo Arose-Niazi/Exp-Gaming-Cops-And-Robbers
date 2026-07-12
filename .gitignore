@@ -1,0 +1,9 @@
+# Local Claude Code tooling
+.claude/
+
+# Runtime logs
+server_log.txt
+logs/*.log
+
+# Local environment
+.env
