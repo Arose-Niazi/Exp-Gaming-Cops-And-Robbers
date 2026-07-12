@@ -607,7 +607,7 @@ FUNCTION ZoneCreateTD(playerid)
 	PlayerTextDrawSetOutline(playerid,ZoneNameTD, 1);
 	PlayerTextDrawBackgroundColor(playerid,ZoneNameTD, 255);
 	PlayerTextDrawFont(playerid,ZoneNameTD, 3);
-	PlayerTextDrawSetProportional(playerid,ZoneNameTD, 1);
+	PlayerTextDrawSetProportional(playerid,ZoneNameTD, true);
 	PlayerTextDrawSetShadow(playerid,ZoneNameTD, 0);
     return 1;
 }

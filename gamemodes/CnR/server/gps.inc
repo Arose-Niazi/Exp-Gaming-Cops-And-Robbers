@@ -13,6 +13,10 @@
 	Functions Being Called:
 */
 
+forward Float:arw_GetYRotation(Float:x,Float:y,Float:z, Float:ax, Float:ay, Float:az);
+forward Float:arw_PointToPoint(Float:x2, Float:y2, Float:X, Float:Y);
+forward Float:GetDistanceBetweenPoints3D(Float:x1,Float:y1,Float:z1,Float:x2,Float:y2,Float:z2);
+forward OnPlayerClosestNodeIDChange(playerid,old_NodeID,new_NodeID);
 
 new PlayerText:GPS_Textdraw[3];
 
@@ -78,10 +82,11 @@ CMD:gpsoff(playerid) {
 	return 1;
 }
 
-alias:gpsoff("cleargps");
+alias:gpsoff("cleargps")
 
 OnGPSMenu(playerid,option1,option2,option3)
 {
+	#pragma unused option3
 	switch(option1)
 	{
 		case 1:
@@ -153,7 +158,6 @@ OnGPSMenu(playerid,option1,option2,option3)
 					if(PlayerInfo[playerid][pCustomMapMarker][0] == 0.0 && PlayerInfo[playerid][pCustomMapMarker][1] == 0.0 && PlayerInfo[playerid][pCustomMapMarker][2] == 0.0) format(string,sizeof(string),"~b~~h~%d ~r~- Map Markers",options+1);
 					else format(string,sizeof(string),"~b~~h~%d ~p~- Map Markers",options+1);
 					ShowTextDrawMenuItems(playerid, options+2, " ", string, "",GPS_MAP_MARKER);
-					options++;
 				}
 				/*case GPS_ROBBERY:
 				case GPS_MISSION:
@@ -193,7 +197,7 @@ OnGPSMenu(playerid,option1,option2,option3)
 	return 1;
 }
 
-SetGPS(playerid,Float:X,Float:Y,Float:Z,Dest[])
+SetGPS(playerid,Float:X,Float:Y,Float:Z,const Dest[])
 {
 	if(PlayerInfo[playerid][GPS_Calculating]) return SendClientMessage(playerid,COLOR_ERROR,"Please wait, the gps route is already being loacted.");
 	if(PlayerInfo[playerid][GPS_Destination] != -1) DisableGPS(playerid);
@@ -354,7 +358,7 @@ CreateGPStd(playerid)
 	PlayerTextDrawSetOutline(playerid, GPS_Textdraw[0], 1);
 	PlayerTextDrawBackgroundColor(playerid, GPS_Textdraw[0], 255);
 	PlayerTextDrawFont(playerid, GPS_Textdraw[0], 1);
-	PlayerTextDrawSetProportional(playerid, GPS_Textdraw[0], 1);
+	PlayerTextDrawSetProportional(playerid, GPS_Textdraw[0], true);
 	PlayerTextDrawSetShadow(playerid, GPS_Textdraw[0], 0);
 
 	GPS_Textdraw[1] = CreatePlayerTextDraw(playerid, 543.001586, 378.609344, "Distance_5.3KM");
@@ -365,7 +369,7 @@ CreateGPStd(playerid)
 	PlayerTextDrawSetOutline(playerid, GPS_Textdraw[1], 1);
 	PlayerTextDrawBackgroundColor(playerid, GPS_Textdraw[1], 255);
 	PlayerTextDrawFont(playerid, GPS_Textdraw[1], 1);
-	PlayerTextDrawSetProportional(playerid, GPS_Textdraw[1], 1);
+	PlayerTextDrawSetProportional(playerid, GPS_Textdraw[1], true);
 	PlayerTextDrawSetShadow(playerid, GPS_Textdraw[1], 0);
 	return 1;
 }

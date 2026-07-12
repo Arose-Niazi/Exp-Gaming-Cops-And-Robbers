@@ -371,7 +371,7 @@ FUNCTION CreateClassTD(playerid)
 	PlayerTextDrawSetOutline(playerid, PlayerClassSelection, 1);
 	PlayerTextDrawBackgroundColor(playerid, PlayerClassSelection, 255);
 	PlayerTextDrawFont(playerid, PlayerClassSelection, 3);
-	PlayerTextDrawSetProportional(playerid, PlayerClassSelection, 1);
+	PlayerTextDrawSetProportional(playerid, PlayerClassSelection, true);
 	PlayerTextDrawSetShadow(playerid, PlayerClassSelection, 0);
 	return 1;
 }

@@ -1,0 +1,30 @@
+# Development Docker Compose
+# For production, use: docker-compose -f docker-compose.prod.yml up
+
+services:
+  samp:
+    container_name: cnr
+    build: .
+    tty: true
+    depends_on:
+      - db
+    volumes:
+      - ./:/samp
+    ports:
+      - "7777:7777/udp"
+    # Note: the gamemode's LOCAL_DB credentials point at 127.0.0.1, which is
+    # correct for running omp-server directly on the host. To use this db
+    # service from inside the container, set SQL_HOST to "db" in
+    # gamemodes/CnR/server/db_config.inc and recompile.
+
+  db:
+    container_name: cnr_db
+    image: mariadb:11
+    tty: true
+    ports:
+      - 3306:3306
+    environment:
+      MARIADB_ROOT_PASSWORD: change_me_local_only
+      MARIADB_DATABASE: cnr
+    volumes:
+      - ./scriptfiles/cnr.sql:/docker-entrypoint-initdb.d/cnr.sql:ro

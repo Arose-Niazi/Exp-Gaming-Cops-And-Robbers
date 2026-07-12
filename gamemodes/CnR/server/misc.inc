@@ -34,7 +34,7 @@ InsertTimeStamp()
 	return StrSmall;
 }
 
-FUNCTION KickPlayer(playerid,KickerName[],Reason[])
+FUNCTION KickPlayer(playerid,const KickerName[],const Reason[])
 {
 	static bool:Kicked[MAX_PLAYERS];
 	if(Kicked[playerid]) return 0;
@@ -45,7 +45,7 @@ FUNCTION KickPlayer(playerid,KickerName[],Reason[])
 	SetTimerEx("DelayedKick", 1000, false, "d", playerid);
 	return 1;
 }
-FUNCTION KickPlayerHidden(playerid,kickerid,Reason[])
+FUNCTION KickPlayerHidden(playerid,kickerid,const Reason[])
 {
 	static bool:Kicked[MAX_PLAYERS];
 	if(Kicked[playerid]) return 0;
@@ -82,11 +82,11 @@ GetXYInFrontOfPlayer(playerid, &Float:x, &Float:y, Float:distance)
     x += (distance * floatsin(-a, degrees));
     y += (distance * floatcos(-a, degrees));
 }
-StringReplace(string[],replace[],const size)
+StringReplace(string[],const replace[],const size)
 {
 	strdel(string,0,size);
 	strins(string,replace,0,size);
-	return string;
+	return 1;
 }
 isNumeric(const string[])
 {

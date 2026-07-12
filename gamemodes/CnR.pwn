@@ -1,21 +1,22 @@
 /*
 
-	Cops and Robebrs Script.
+	Cops and Robbers Script — open.mp edition (SA-MP 0.3.7 clients).
 	Scripted by Arose Niazi.
 	Scripting started on 11th October 2017
-	Last Updated: ---
-	
+	Ported to open.mp: July 2026 (legacy SA-MP tree preserved under legacy/
+	and tagged v0.3.7-legacy). The IRC bridge was retired in the port.
+
 	Credits:
-		SA-MP team
+		SA-MP team / open.mp team
 		Zeex for crashdetect
-		Incognito for streamer and irc
+		Incognito for streamer
 		maddinat0r for mysql, sscanf2 and discord connector
 		Whitetiger for geolocation
 		Y_Less for whirlpool, sscanf2
 		emmet_ for sscanf2
 		YourShadow for Pawn.CMD
 		Gammer_Z for RouteConnector
-	
+
 	Functions:
 		
 		
@@ -57,11 +58,14 @@
 // Includes
 //==============================================================================
 
-#include <a_samp>
+// Toggle the MySQL credential set in CnR/server/db_config.inc
+// (comment out to use the remote / production credentials instead).
+#define LOCAL_DB
+
+#include <open.mp>
 #include <crashdetect>
 #include <streamer>
 #include <sscanf2>
-#include <irc>
 #include <a_mysql>
 #include <geolocation>
 #include <Pawn.CMD>
@@ -71,18 +75,15 @@
 //	Internal definitions and natives
 //==============================================================================
 
-#include "CnR\server\defines"
+#if defined WINDOWS_COMPILER
+	#include "CnR\server\defines"
+	#include "CnR\server\db_config"
+#else
+	#include "CnR/server/defines"
+	#include "CnR/server/db_config"
+#endif
 
 native WP_Hash(buffer[],len,const str[]);
-native IsValidVehicle(vehicleid);
-native gpci(playerid, serial[], len);
-
-
-//MySQL configuration
-#define SQL_HOST 					"127.0.0.1"
-#define SQL_DB 						"cnr"
-#define SQL_USER 					"admin"
-#define SQL_PASS 					""
 
 #define VERSION 					"0.01"
 #define STATS_VERSION 				0
@@ -122,6 +123,7 @@ main()
 	#define TABLE_PLAYERS_C "LVplayers"
 	#define TABLE_VEHICLES "LVvehicles"
 #endif
+#pragma unused CITY
 
 new Text:DaysOfWeek;
 new GameDay = 0;
@@ -139,29 +141,53 @@ new g_MysqlRaceCheck[MAX_PLAYERS];
 
 new Text:ConnectTD[2];
 
-#include "CnR\server\server_vars"
-#include "CnR\players\player_vars"
-#include "CnR\server\misc"
-#include "CnR\players\login_register"
-#include "CnR\players\bans"
-#include "CnR\server\zones"
+#if defined WINDOWS_COMPILER
+	#include "CnR\server\server_vars"
+	#include "CnR\players\player_vars"
+	#include "CnR\server\misc"
+	#include "CnR\players\login_register"
+	#include "CnR\players\bans"
+	#include "CnR\server\zones"
 
-#include "CnR\players\peds"
-#include "CnR\players\objects"
+	#include "CnR\players\peds"
+	#include "CnR\players\objects"
 
-#include "CnR\players\messages"
-#include "CnR\players\loading_data"
-#include "CnR\players\spawns"
-#include "CnR\players\menu"
-#include "CnR\server\int_tele_pickups"
-#include "CnR\players\vehicles"
-#include "CnR\players\elevator_samp"
-#include "CnR\players\elevator_golden"
-#include "CnR\server\irc_"
+	#include "CnR\players\messages"
+	#include "CnR\players\loading_data"
+	#include "CnR\players\spawns"
+	#include "CnR\players\menu"
+	#include "CnR\server\int_tele_pickups"
+	#include "CnR\players\vehicles"
+	#include "CnR\players\elevator_samp"
+	#include "CnR\players\elevator_golden"
 
-#include "CnR\players\cmds"
-#include "CnR\server\actors"
-#include "CnR\server\gps"
+	#include "CnR\players\cmds"
+	#include "CnR\server\actors"
+	#include "CnR\server\gps"
+#else
+	#include "CnR/server/server_vars"
+	#include "CnR/players/player_vars"
+	#include "CnR/server/misc"
+	#include "CnR/players/login_register"
+	#include "CnR/players/bans"
+	#include "CnR/server/zones"
+
+	#include "CnR/players/peds"
+	#include "CnR/players/objects"
+
+	#include "CnR/players/messages"
+	#include "CnR/players/loading_data"
+	#include "CnR/players/spawns"
+	#include "CnR/players/menu"
+	#include "CnR/server/int_tele_pickups"
+	#include "CnR/players/vehicles"
+	#include "CnR/players/elevator_samp"
+	#include "CnR/players/elevator_golden"
+
+	#include "CnR/players/cmds"
+	#include "CnR/server/actors"
+	#include "CnR/server/gps"
+#endif
 
 new WeekDays[7][] = {
 	{"Monday"},
@@ -189,7 +215,7 @@ public OnGameModeInit()
 	LoadInterior();
 	AddVehicles();
 	mysql_log(ERROR | WARNING);
-	EnableStuntBonusForAll(0); //Disabling stunt bonus.
+	EnableStuntBonusForAll(false); //Disabling stunt bonus.
 	DisableInteriorEnterExits();  // will disable all interior enter/exits in the game.
 	mysql_pquery(g_SQL, "UPDATE players SET Online=0 WHERE 1");
 	
@@ -199,7 +225,7 @@ public OnGameModeInit()
 	SetWorldTime(0);
 	SetWeather(random(21));
 	SendRconCommand("worldtime Sunday 00:00");
-	ServerInfo[sTimer] = SetTimerEx("GameModeClock", 1000, true, "d", "d");
+	ServerInfo[sTimer] = SetTimerEx("GameModeClock", 1000, true, "d", 0);
 	new string[75];
 	mysql_format(g_SQL,string,sizeof(string),"SELECT * FROM `server_data` WHERE Version=%d",STATS_VERSION);
 	mysql_pquery(g_SQL, string, "OnServerDataLoad","");
@@ -212,7 +238,7 @@ public OnGameModeInit()
 	TextDrawSetOutline(DaysOfWeek, 0);
 	TextDrawBackgroundColor(DaysOfWeek, 255);
 	TextDrawFont(DaysOfWeek, 3);
-	TextDrawSetProportional(DaysOfWeek, 1);
+	TextDrawSetProportional(DaysOfWeek, true);
 	TextDrawSetShadow(DaysOfWeek, 1);
 	
 	ConnectTD[0] = TextDrawCreate(327.481842, 129.333328, "_~n~_~n~_~n~_");
@@ -220,13 +246,13 @@ public OnGameModeInit()
 	TextDrawTextSize(ConnectTD[0], 0.000000, 300.000000);
 	TextDrawAlignment(ConnectTD[0], 2);
 	TextDrawColor(ConnectTD[0], -1);
-	TextDrawUseBox(ConnectTD[0], 1);
+	TextDrawUseBox(ConnectTD[0], true);
 	TextDrawBoxColor(ConnectTD[0], 0x00000055);
 	TextDrawSetShadow(ConnectTD[0], 0);
 	TextDrawSetOutline(ConnectTD[0], 0);
 	TextDrawBackgroundColor(ConnectTD[0], 255);
 	TextDrawFont(ConnectTD[0], 1);
-	TextDrawSetProportional(ConnectTD[0], 1);
+	TextDrawSetProportional(ConnectTD[0], true);
 	TextDrawSetShadow(ConnectTD[0], 0);
 
 	ConnectTD[1] = TextDrawCreate(330.292572, 136.333343, "~w~Welcome_To~n~~p~"COMMUNITY_NAME"~n~~b~Cops_~w~And_~r~~h~Robbers~n~~b~~h~Version__~w~"VERSION"~n~~r~~h~THIS_IS_NOT_A_DM_SERVER");
@@ -237,12 +263,11 @@ public OnGameModeInit()
 	TextDrawSetOutline(ConnectTD[1], 1);
 	TextDrawBackgroundColor(ConnectTD[1], 255);
 	TextDrawFont(ConnectTD[1], 2);
-	TextDrawSetProportional(ConnectTD[1], 1);
+	TextDrawSetProportional(ConnectTD[1], true);
 	TextDrawSetShadow(ConnectTD[1], 0);
 	
 	SAMP_Elevator_Initialize();
 	GRIN_Elevator_Initialize();
-	InitilizeIRC(); //Local
 	LoadActors();
 	return 1;
 }
@@ -251,7 +276,6 @@ public OnGameModeExit()
 {
 	SAMP_Elevator_Destroy();
 	GRIN_Elevator_Destroy();
-	UnloadIRC();
 	DestroyZones();
 	KillTimer(ServerInfo[sTimer]);
 	DeleteInterior();
@@ -611,6 +635,7 @@ public OnPlayerPickUpDynamicPickup(playerid, pickupid)
 
 public OnPlayerClickPlayer(playerid, clickedplayerid, source)
 {
+	if(PlayerInfo[playerid][pRank] < SERVER_MODERATOR) return 1;
 	new Float:paa[3];
 	GetPlayerPos(clickedplayerid,paa[0],paa[1],paa[2]);
 	SetPlayerPos(playerid,paa[0]+2,paa[1]+2,paa[2]+2);
@@ -634,10 +659,12 @@ public OnPlayerClickMap(playerid,Float:fX,Float:fY,Float:fZ)
 	return 1;
 }
 
+// Admin/dev utility commands — rank-gated in the open.mp port.
 new Float:p[MAX_PLAYERS][3];
 new pa[MAX_PLAYERS][2];
 CMD:saveloc(playerid)
 {
+	if(PlayerInfo[playerid][pRank] < SERVER_ADMIN) return SendClientMessage(playerid,COLOR_ERROR,ERROR_NOT_ADMIN);
 	GetPlayerPos(playerid,p[playerid][0],p[playerid][1],p[playerid][2]);
 	pa[playerid][0] = GetPlayerInterior(playerid);
 	pa[playerid][1] = GetPlayerVirtualWorld(playerid);
@@ -647,6 +674,7 @@ CMD:saveloc(playerid)
 
 CMD:teleback(playerid)
 {
+	if(PlayerInfo[playerid][pRank] < SERVER_ADMIN) return SendClientMessage(playerid,COLOR_ERROR,ERROR_NOT_ADMIN);
 	SetPlayerPos(playerid,p[playerid][0],p[playerid][1],p[playerid][2]);
 	SetPlayerInterior(playerid,pa[playerid][0]);
 	SetPlayerVirtualWorld(playerid,pa[playerid][1]);
@@ -656,6 +684,7 @@ CMD:teleback(playerid)
 
 CMD:resetsamp(playerid)
 {
+	if(PlayerInfo[playerid][pRank] < SERVER_ADMIN) return SendClientMessage(playerid,COLOR_ERROR,ERROR_NOT_ADMIN);
 	ResetSAMPElevatorQueueSAMP();
 	SendClientMessage(playerid,-1,"Reset Pass!");
 	return 1;
@@ -663,6 +692,7 @@ CMD:resetsamp(playerid)
 
 CMD:resetgrin(playerid)
 {
+	if(PlayerInfo[playerid][pRank] < SERVER_ADMIN) return SendClientMessage(playerid,COLOR_ERROR,ERROR_NOT_ADMIN);
 	ResetGRINElevatorQueueGRIN();
 	SendClientMessage(playerid,-1,"Reset Pass!");
 	return 1;
@@ -670,10 +700,11 @@ CMD:resetgrin(playerid)
 
 CMD:skin(playerid,params[])
 {
-    new skinid=strval(params);
-    if (skinid < 0 || skinid > 311) return SendClientMessage(playerid, -1,"ERROR: Invalid skin");
-    SetPlayerSkin(playerid, skinid);
-    return 1;
+	if(PlayerInfo[playerid][pRank] < SERVER_ADMIN) return SendClientMessage(playerid,COLOR_ERROR,ERROR_NOT_ADMIN);
+	new skinid=strval(params);
+	if (skinid < 0 || skinid > 311) return SendClientMessage(playerid, -1,"ERROR: Invalid skin");
+	SetPlayerSkin(playerid, skinid);
+	return 1;
 }
 //==============================================================================
 //	Global Functions 
@@ -715,8 +746,9 @@ FUNCTION GameModeClock()
 		}
 	}
 
-	for(new playerid=0,j=GetPlayerPoolSize(); playerid <= j; playerid++)
+	for(new playerid=0; playerid < MAX_PLAYERS; playerid++)
 	{
+		if(!IsPlayerConnected(playerid)) continue;
 		SetPlayerTime(playerid, GameHour, GameMinute);
 	}
 

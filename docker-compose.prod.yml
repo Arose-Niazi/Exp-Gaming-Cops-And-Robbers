@@ -1,0 +1,33 @@
+services:
+  # open.mp Game Server
+  samp-server:
+    # Option 1: Build from local Dockerfile (for local development)
+    build:
+      context: .
+      dockerfile: Dockerfile
+    # Option 2: Use pre-built image from registry (for production)
+    # Uncomment and set your GitHub username/image name:
+    # image: ghcr.io/arose-niazi/exp-gaming-cnr:latest
+    container_name: cnr-server
+    restart: unless-stopped
+    # Use port mapping for Windows compatibility (host network mode doesn't work on Windows Docker)
+    ports:
+      - "7777:7777/udp"
+    volumes:
+      # Persist logs
+      - ./logs:/samp/logs
+      # Persist saves/backups
+      - ./saves:/samp/saves
+      # Mount .amx files so they can be updated without rebuilding image
+      - ./gamemodes:/samp/gamemodes:ro
+      - ./filterscripts:/samp/filterscripts:ro
+    healthcheck:
+      test: ["CMD", "pgrep", "omp-server"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+networks:
+  default:
+    name: cnr-net

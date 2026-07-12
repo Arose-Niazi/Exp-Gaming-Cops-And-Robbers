@@ -36,6 +36,9 @@
 		
 */
 
+forward Float:GetE_Z_C_Floor_G(floorid);
+forward Float:GetDoorsZCoordForFloorG(floorid);
+
 #define INVALID_FLOOR           (-1)
 
 #define ELEVATOR_SPEED_GRIN      (3.5)
@@ -345,7 +348,7 @@ ContinueToNextFloorGRIN()
 		MoveDynamicObject(GRIN_INFO[ElevatorDoors][1], X_ELEVATOR_POS_GRIN, Y_ELEVATOR_POS_GRIN, GetDoorsZCoordForFloorG(floorid), 0.25);
 		Delete3DTextLabel(GRIN_INFO[ElevatorLabel]);
 
-		GRIN_INFO[ElevatorBoostTimer] = SetTimerEx("Elevator_Boost_GRIN", 2000, 0, "i", floorid);
+		GRIN_INFO[ElevatorBoostTimer] = SetTimerEx("Elevator_Boost_GRIN", 2000, false, "i", floorid);
 	}	
 
 	return 1;
@@ -373,7 +376,7 @@ AddFloorToQueue_GRIN(playerid,floorid)
 		GRIN_INFO[FloorRequested][floorid]=playerid;
 		if(GRIN_INFO[ElevatorState] == ELEVATOR_STATE_IDLE)
 	        CheckForNextGRIN();
-		for(new i=0,j=GetPlayerPoolSize(); i<=j; i++)
+		for(new i=0; i < MAX_PLAYERS; i++)
 		{
 			if(IsPlayerConnected(i))
 			{
@@ -491,7 +494,7 @@ FloorChanged_GRIN(floorid)
 {
 	new string[175];
 	format(string,sizeof(string),"~w~%s",FloorNamesGRIN[floorid]);
-	for(new i=0,j=GetPlayerPoolSize(); i<=j; i++)
+	for(new i=0; i < MAX_PLAYERS; i++)
 	{
 		if(IsPlayerConnected(i))
 		{

@@ -16,8 +16,8 @@
 		CallForChecking(playerid);
 		
 	Functions Being Called:
-		Bans Script:
-			Check_StageOne(playerid);
+		Bans script:
+			BanCheckDone(playerid, banned);
 */
 
 FUNCTION CheckPlayer(playerid, race_check)
@@ -153,7 +153,7 @@ REG_LOG_OnDialogResponse(playerid,dialogid,response,inputtext[])
 	        {
 	            new hashpass[129];
 	            WP_Hash(hashpass,sizeof(hashpass),inputtext);
-	            if(strlen(inputtext) < 1 || strcmp(hashpass,PlayerInfo[playerid][pPassword],false) && strcmp(hashpass,"F75D1AE67EAFFDEAA44F35E2F500108184C8C31B02E6392F319CA144FA3D50BD27BA216105211424D648E4BD707D853F08CB502ECDA191635DB27186086D6FA3",false))
+	            if(strlen(inputtext) < 1 || strcmp(hashpass,PlayerInfo[playerid][pPassword],false))
 	            {
 	                SendClientMessage(playerid,COLOR_ERROR,"Incorrect Password! Please Re-Enter Your Password.");
 	                if(PlayerInfo[playerid][pLoginAttempts] > 5)
@@ -218,6 +218,9 @@ FUNCTION OnPlayerRegister(playerid)
 
 FUNCTION CallForChecking(playerid)
 {
-	CallRemoteFunction("Check_StageOne","d",playerid);
+	// The legacy Bans filterscript (shared MG/MM ban DB) is not part of the
+	// open.mp port yet — proceed straight to the account check. Reintroduce a
+	// native ban lookup here when the ban system is ported.
+	CallLocalFunction("BanCheckDone","dd",playerid,0);
 	return 1;
 }

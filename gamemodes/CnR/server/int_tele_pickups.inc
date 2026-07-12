@@ -342,7 +342,7 @@ UpdateInteriorSettings(playerid, interiorid, option)
 		case 7: mysql_format(g_SQL,string,sizeof(string),"UPDATE Interiors SET OutPickupX=%f , OutPickupY=%f , OutPickupZ=%f WHERE ID=%d",PlayerInfo[playerid][pAddInteriorOPX],PlayerInfo[playerid][pAddInteriorOPY],PlayerInfo[playerid][pAddInteriorOPZ],interiorid);
 		case 8: mysql_format(g_SQL,string,sizeof(string),"UPDATE Interiors SET InPickupX=%f , InPickupY=%f , InPickupZ=%f WHERE ID=%d",PlayerInfo[playerid][pAddInteriorIPX],PlayerInfo[playerid][pAddInteriorIPY],PlayerInfo[playerid][pAddInteriorIPZ],interiorid);
 		case 9: mysql_format(g_SQL,string,sizeof(string),"UPDATE Interiors SET CivWeapons=%d WHERE ID=%d",PlayerInfo[playerid][pAddInteriorCivWeapons],interiorid);
-		case 10: mysql_format(g_SQL,string,sizeof(string),"UPDATE Interiors SET CopWeapons=%d WHERE ID=%d",PlayerInfo[playerid][pAddInteriorCopWeapons],interiorid);
+		case 10: mysql_format(g_SQL,string,sizeof(string),"UPDATE Interiors SET CopsWeapons=%d WHERE ID=%d",PlayerInfo[playerid][pAddInteriorCopWeapons],interiorid);
 		case 11: mysql_format(g_SQL,string,sizeof(string),"UPDATE Interiors SET Weapons=%d WHERE ID=%d",PlayerInfo[playerid][pAddInteriorWeapons],interiorid);
 		case 12: mysql_format(g_SQL,string,sizeof(string),"UPDATE Interiors SET 3DLabel=%d WHERE ID=%d",PlayerInfo[playerid][pAddInteriorLabels],interiorid);
 	}
@@ -407,7 +407,7 @@ OnAddInteriorMenu(playerid,Option)
 	PlayerInfo[playerid][pAddInteriorType]=Option-1;
 	return 1;
 }	
-AddInterior(playerid,text[])
+AddInterior(playerid,const text[])
 {
 	if(!strcmp(text,"out spawn",true))
 	{

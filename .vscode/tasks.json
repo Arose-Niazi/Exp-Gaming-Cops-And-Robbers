@@ -1,0 +1,112 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Compile",
+            "type": "shell",
+            "command": "${workspaceFolder}/qawno/pawncc",
+            "args": [
+                "-;+ -(+ -\\ -Z-",
+                "\"-i${fileDirname}\"",
+                "\"-i${fileDirname}/${fileBasenameNoExtension}\"",
+                "\"-i${workspaceFolder}/qawno/include\"",
+                "-d3",
+                "-t4",
+                "\"-o${fileDirname}/${fileBasenameNoExtension}\"",
+                "\"${file}\""
+            ],
+            "windows": {
+                "command": "${workspaceFolder}/qawno/pawncc",
+                "args": [
+                    "-;+ -(+ -\\ -Z-",
+                    "\"-i${fileDirname}\"",
+                    "\"-i${fileDirname}/${fileBasenameNoExtension}\"",
+                    "\"-i${workspaceFolder}/qawno/include\"",
+                    "-d3",
+                    "-t4",
+                    "\"-o${fileDirname}/${fileBasenameNoExtension}\"",
+                    "\"${file}\"",
+                    "WINDOWS_COMPILER=1"
+                ]
+            },
+            "osx": {
+                "command": "${workspaceFolder}/qawno/mac/pawncc"
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "reveal": "always"
+            },
+            "problemMatcher": [
+                {
+                    "owner": "pawn",
+                    "fileLocation": ["absolute"],
+                    "pattern": {
+                        "regexp": "^(.*\\.(pwn|inc))\\((\\d+)\\) : (.*) (\\d+): (.*)$",
+                        "file": 1,
+                        "line": 3,
+                        "severity": 4,
+                        "code": 5,
+                        "message": 6
+                    }
+                },
+                {
+                    "owner": "pawn",
+                    "fileLocation": ["absolute"],
+                    "pattern": {
+                        "regexp": "^(.*\\.(pwn|inc))\\((\\d+)\\) : user (.*): (.*)$",
+                        "file": 1,
+                        "line": 3,
+                        "severity": 4,
+                        "message": 5
+                    }
+                }
+            ]
+        },
+        {
+            "label": "Compile All",
+            "type": "shell",
+            "command": "python",
+            "args": [
+                "${workspaceFolder}/compile.py",
+                "${workspaceFolder}"
+            ],
+            "group": "build",
+            "problemMatcher": [
+                {
+                    "owner": "pawn",
+                    "fileLocation": ["absolute"],
+                    "pattern": {
+                        "regexp": "^(.*\\.(pwn|inc))\\((\\d+)\\) : (.*) (\\d+): (.*)$",
+                        "file": 1,
+                        "line": 3,
+                        "severity": 4,
+                        "code": 5,
+                        "message": 6
+                    }
+                },
+                {
+                    "owner": "pawn",
+                    "fileLocation": ["absolute"],
+                    "pattern": {
+                        "regexp": "^(.*\\.(pwn|inc))\\((\\d+)\\) : user (.*): (.*)$",
+                        "file": 1,
+                        "line": 3,
+                        "severity": 4,
+                        "message": 5
+                    }
+                }
+            ],
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            }
+        }
+    ]
+}

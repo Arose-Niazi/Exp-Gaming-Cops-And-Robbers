@@ -1,0 +1,70 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# IDE
+.vscode
+*.code-workspace
+
+# Documentation
+*.md
+!README.md
+
+# Development files
+qawno/
+pawno/
+*.exe
+*.dll
+*.pdb
+!omp-server-pdb
+!components/*.pdb
+samp-npc.exe
+samp-server.exe
+samp.sh
+
+# Build artifacts (keep .amx files, exclude source)
+*.pwn
+!filterscripts/**/*.pwn
+!gamemodes/**/*.pwn
+
+# Logs and runtime files
+logs/
+*.log
+crashdetect.pdb
+
+# Docker
+docker-compose.yml
+Dockerfile.dev
+*.dockerfile
+
+# Scripts
+*.py
+*.ps1
+*.bat
+*.sh
+!samp.sh
+!docker-entrypoint.sh
+
+# DLL files (Windows only)
+DLL Files/
+*.dll
+*.so.windows
+
+# Temporary files
+*.tmp
+*.bak
+*~
+__pycache__/
+.pytest_cache/
+
+# Database backups (don't include in image)
+db/
+*.sql.backup
+
+# Models (if large, consider separate volume)
+# models/
+
+# Scriptfiles that shouldn't be in image
+# Uncomment if you want to exclude SQL init files
+# scriptfiles/*.sql

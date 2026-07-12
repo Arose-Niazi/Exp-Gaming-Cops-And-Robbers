@@ -16,7 +16,11 @@
 		
 */
 
-#include "CnR\server\colors"
+#if defined WINDOWS_COMPILER
+	#include "CnR\server\colors"
+#else
+	#include "CnR/server/colors"
+#endif
 
 #define FUNCTION%1(%2) 			forward public %1(%2); 	public %1(%2)
 

@@ -111,7 +111,7 @@ FUNCTION LoadActors()
 			cache_get_value_float(i, "SpawnZ",ActorInfo[i][ActorSpawnZ]);
 			cache_get_value_float(i, "SpawnA",ActorInfo[i][ActorSpawnA]);
 			cache_get_value_int(i, "Skin",ActorInfo[i][ActorSkin]);
-			cache_get_value_name(i, "Loaction",ActorInfo[i][ActorLocation],MAX_ZONE_NAME);
+			cache_get_value_name(i, "Location",ActorInfo[i][ActorLocation],MAX_ZONE_NAME);
 			cache_get_value_int(i, "AnimationType",ActorInfo[i][ActorAnimationType]);
 			cache_get_value_bool(i, "3DLabel",ActorInfo[i][ActorLabelEnable]);
 			SetupActor(i);
@@ -164,7 +164,7 @@ FUNCTION LoadActorsID(actorid)
 		cache_get_value_float(0, "SpawnZ",ActorInfo[actor_id][ActorSpawnZ]);
 		cache_get_value_float(0, "SpawnA",ActorInfo[actor_id][ActorSpawnA]);
 		cache_get_value_int(0, "Skin",ActorInfo[actor_id][ActorSkin]);
-		cache_get_value_name(0, "Loaction",ActorInfo[actor_id][ActorLocation],MAX_ZONE_NAME);
+		cache_get_value_name(0, "Location",ActorInfo[actor_id][ActorLocation],MAX_ZONE_NAME);
 		cache_get_value_int(0, "AnimationType",ActorInfo[actor_id][ActorAnimationType]);
 		cache_get_value_bool(0, "3DLabel",ActorInfo[actor_id][ActorLabelEnable]);
 		SetupActor(actor_id);
@@ -201,7 +201,7 @@ FUNCTION OnEditActorsList(playerid,Option,ID)
 				cache_get_value_float(0, "SpawnZ",PlayerInfo[playerid][pAddActorSpawnZ]);
 				cache_get_value_float(0, "SpawnA",PlayerInfo[playerid][pAddActorSpawnA]);
 				cache_get_value_int(0, "Skin",PlayerInfo[playerid][pAddActorSkin]);
-				cache_get_value_name(0, "Loaction",PlayerInfo[playerid][pAddActorLocation],MAX_ZONE_NAME);
+				cache_get_value_name(0, "Location",PlayerInfo[playerid][pAddActorLocation],MAX_ZONE_NAME);
 				cache_get_value_int(0, "AnimationType",PlayerInfo[playerid][pAddActorAnimationType]);
 				cache_get_value_bool(0, "3DLabel",PlayerInfo[playerid][pAddActorLabelEnable]);
 				PlayerInfo[playerid][pEditingActor]=true;
@@ -238,7 +238,7 @@ FUNCTION OnActorSettingChange(playerid,Option)
 		case 1:
 		{
 			format(PlayerInfo[playerid][pAddActorLocation],MAX_ZONE_NAME,"%s",PlayerInfo[playerid][pZoneName]);
-			SendClientMessage(playerid,COLOR_ADMIN_INFO,"Actor Loaction updated.");
+			SendClientMessage(playerid,COLOR_ADMIN_INFO,"Actor Location updated.");
 			UpdateActorSettings(playerid,PlayerInfo[playerid][pEditingActorID],Option);
 			format(string,sizeof(string),"%s (%d) updated location name to %s for actor id '%d'",PlayerInfo[playerid][pUserName],playerid,PlayerInfo[playerid][pAddActorLocation],PlayerInfo[playerid][pEditingActorID]);
 		}
@@ -292,7 +292,7 @@ UpdateActorSettings(playerid, actorid, option)
 	new string[256];
 	switch(option)
 	{	
-		case 1: mysql_format(g_SQL,string,sizeof(string),"UPDATE Actors SET Loaction='%e' WHERE ID=%d",PlayerInfo[playerid][pAddActorLocation],actorid);
+		case 1: mysql_format(g_SQL,string,sizeof(string),"UPDATE Actors SET Location='%e' WHERE ID=%d",PlayerInfo[playerid][pAddActorLocation],actorid);
 		case 2: mysql_format(g_SQL,string,sizeof(string),"UPDATE Actors SET Interior=%d WHERE ID=%d",PlayerInfo[playerid][pAddActorInt],actorid); 
 		case 3: mysql_format(g_SQL,string,sizeof(string),"UPDATE Actors SET VirtualWorld=%d WHERE ID=%d",PlayerInfo[playerid][pAddActorVW],actorid);
 		case 4: mysql_format(g_SQL,string,sizeof(string),"UPDATE Actors SET Skin=%d WHERE ID=%d",PlayerInfo[playerid][pAddActorSkin],actorid);
@@ -353,7 +353,7 @@ OnAddActorMenu(playerid,Option)
 	}	
 	return 1;
 }	
-AddNewActor(playerid,text[])
+AddNewActor(playerid,const text[])
 {
 	if(!strcmp(text,"spawn",true))
 	{
@@ -383,7 +383,7 @@ AddNewActor(playerid,text[])
 		format(string,sizeof(string),"%s (%d) added actor %s in %s",PlayerInfo[playerid][pUserName],playerid,ActorTypeName[PlayerInfo[playerid][pAddActorType]][TJobName],PlayerInfo[playerid][pAddActorLocation]);
 		SendMessageToManagers(COLOR_ADMIN_INFO,string);
 		IRC_SendManagementMessage(string,IRC_ADMIN_COLOR_INFO);
-		format(string,sizeof(string),"INSERT INTO Actors (Type,Loaction,VirtualWorld,Interior,SpawnX,SpawnY,SpawnZ,SpawnA,AnimationType,Skin)");
+		format(string,sizeof(string),"INSERT INTO Actors (Type,Location,VirtualWorld,Interior,SpawnX,SpawnY,SpawnZ,SpawnA,AnimationType,Skin)");
 		mysql_format(g_SQL, string, sizeof(string), "%s VALUES (%d,'%e',%d,%d,%f,%f,%f,%f,%d,%d)",string,
 		PlayerInfo[playerid][pAddActorType],PlayerInfo[playerid][pAddActorLocation],PlayerInfo[playerid][pAddActorVW],PlayerInfo[playerid][pAddActorInt],PlayerInfo[playerid][pAddActorSpawnX],PlayerInfo[playerid][pAddActorSpawnY],PlayerInfo[playerid][pAddActorSpawnZ],PlayerInfo[playerid][pAddActorSpawnA],PlayerInfo[playerid][pAddActorAnimationType],PlayerInfo[playerid][pAddActorSkin]);
 		mysql_pquery(g_SQL,string, "LoadActorsOnAdd", "");
@@ -427,7 +427,7 @@ DeleteActor(playerid,actor_id)
 
 DeleteAllActors()
 {
-	for(new i=0,j=GetActorPoolSize(); i<=j; i++)
+	for(new i=0; i < MAX_ACTORS_USED; i++)
 	{
 		if(ActorInfo[i][ActorAID] == INVALID_ACTOR_ID) continue;
 		DestroyActor(ActorInfo[i][ActorAID]);
@@ -512,7 +512,7 @@ CMD:editactors(playerid,params[])
 		if(sscanf(params,"d",var)) var=0;
 		new string[75];
 		new rows,Cache:result;
-		mysql_format(g_SQL, string, sizeof(string), "SELECT ID,Loaction,Type FROM Actors LIMIT %d , 20",var);
+		mysql_format(g_SQL, string, sizeof(string), "SELECT ID,Location,Type FROM Actors LIMIT %d , 20",var);
 		result = mysql_query(g_SQL,string);
 		cache_get_row_count(rows);
 		if(rows)
@@ -524,7 +524,7 @@ CMD:editactors(playerid,params[])
 			{
 				new type,in[MAX_ZONE_NAME];
 				cache_get_value_int(i,"Type",type);
-				cache_get_value_name(i,"Loaction",in);
+				cache_get_value_name(i,"Location",in);
 				cache_get_value_int(i,"ID",id);
 				format(string,sizeof(string),"~b~~h~%d ~w~- %s ~y~in ~p~%s",i+1,ActorTypeName[type][TJobName],in);
 				ShowTextDrawMenuItems(playerid, i+2, " ", string, " ",id);

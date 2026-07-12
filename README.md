@@ -1,119 +1,101 @@
-# 🚔 EXP Gaming — Cops And Robbers (SA-MP 0.3.7 Legacy Snapshot)
+# 🚔 EXP Gaming — Cops And Robbers (open.mp / SA-MP 0.3.7)
 
-> A preserved snapshot of the **EXP GAMING Cops And Robbers** gamemode for
-> **SA-MP 0.3.7** — scripted by **Arose Niazi**, started 11 October 2017 —
-> locked here before the rebuild on **[open.mp](https://open.mp/)**
-> (still targeting SA-MP **0.3.7** clients).
+> The revival of the **EXP GAMING Cops And Robbers** gamemode — ported from the
+> 2017 SA-MP 0.3.7 codebase to the modern **[open.mp](https://open.mp/)**
+> framework, still fully playable with standard **SA-MP 0.3.7** clients
+> (no 0.3.DL required).
 
-![Platform](https://img.shields.io/badge/platform-SA--MP%200.3.7--R2-lightgrey)
+![Platform](https://img.shields.io/badge/platform-open.mp%20%7C%20SA--MP%200.3.7-brightgreen)
 ![Language](https://img.shields.io/badge/language-Pawn-orange)
-![Compiler](https://img.shields.io/badge/compiler-pawno%20(Pawn%203.2)-blue)
-![Status](https://img.shields.io/badge/status-legacy%20snapshot%20(WIP%20v0.01)-red)
+![Compiler](https://img.shields.io/badge/compiler-QAWNO%203.10-blue)
+![Status](https://img.shields.io/badge/status-Milestone%201%20%E2%9C%94-yellow)
+
+> 🗃️ The original SA-MP 0.3.7 tree is preserved under [`legacy/`](./legacy)
+> and released as
+> [**v0.3.7-legacy**](https://github.com/Arose-Niazi/Exp-Gaming-Cops-And-Robbers/releases/tag/v0.3.7-legacy).
 
 ---
 
 ## 📖 About
 
-A cops-vs-robbers gamemode for Grand Theft Auto: San Andreas multiplayer,
-built around a single active city (**Los Santos**; San Fierro / Las Venturas are
-scaffolded via a `#define CITY_` switch but not populated). Persistence is
-**MySQL** (maddinat0r R41-2 plugin) with **Whirlpool**-hashed passwords, and the
-server is deeply integrated with a private **IRC** network for admin chat and
-echo bots.
-
-This snapshot is an **early work-in-progress (internal version 0.01)**: the
-infrastructure is largely in place and neatly modularised, but the actual
-cops-and-robbers gameplay loop (robberies, arrests, wanted levels, jail,
-economy) was never built. It is preserved as-is — bugs, dev backdoors and all —
-as the starting point for the open.mp rebuild.
+A cops-vs-robbers gamemode for Grand Theft Auto: San Andreas multiplayer set in
+**Los Santos** (San Fierro / Las Venturas scaffolded for later). MySQL-backed
+accounts, four law-enforcement teams plus civilians across ~240 skins, streamed
+interiors and shop NPCs, a road-following GPS, object elevators, and a
+textdraw-heavy UI. Scripted by **Arose Niazi** (started October 2017; ported to
+open.mp July 2026).
 
 ---
 
-## ✅ What's implemented
+## ✨ What's new vs. the legacy snapshot
 
-| System | Notes |
-|--------|-------|
-| **Accounts** | MySQL-backed register/login dialogs, Whirlpool password hashing, optional email, auto-login via stored IP + `gpci` serial match |
-| **Ban system** | `Bans` filterscript (shared MG/MM ban DB): nick / IP / serial / range bans checked on connect |
-| **Classes & teams** | ~240 selectable skins across CIVIL, POLICE, SHERIFF, FBI and UC_COP teams, with per-team class-selection cameras and textdraw UI |
-| **Spawns** | 28 civilian spawn points + police/sheriff/FBI stations (Los Santos) |
-| **Zone HUD** | 466 named map zones with enter/leave detection and a zone-name textdraw |
-| **Interiors & teleports** | Admin builder (`/addinterior`, `/editinteriors`): streamed enter/exit pickups, per-interior weapon flags and access types stored in MySQL |
-| **Actors (shop NPCs)** | Admin builder (`/addactor`, `/editactors`): 26 shop/service actor types (bank, 24-7, ammunation, …) with animations and 3D labels |
-| **GPS** | RouteConnector-based pathfinding with on-road arrow objects and a textdraw route HUD — map-marker routing works (`/gps`, `/gpsoff`) |
-| **Vehicles** | Admin spawner (`/addvehicle`, `/addvehicle2`, `/removevehicle`) persisting to MySQL; civilian/public/cop vehicle types |
-| **Elevators** | Two full object elevator systems (SA-MP office building + Golden Brown apartments) with call buttons and floor queues |
-| **Menu framework** | Reusable textdraw menu-box engine (chat-driven option selection) |
-| **Game clock** | Accelerated in-game week (day/hour/minute), weather cycle, weekly stats persisted to MySQL |
-| **IRC bridge** | 5 echo/admin bots, rank-scoped admin/management channels, `!s`/`!say` and `!players` IRC commands, connect/disconnect/action echoes |
-| **Moderation plumbing** | Rank hierarchy (Player → Owner), rank-scoped message helpers, kick with delayed-kick fix, chat lock, proxy/VPN detection on connect |
-
-### ⌨️ Command reference (all 17 — admin/builder/dev only)
-
-`/addvehicle` `/addvehicle2` `/removevehicle` `/addactor` `/stopaddingactor`
-`/editactors` `/addinterior` `/stopadding` `/editinteriors` `/gps` `/gpsoff`
-`/saveloc` `/teleback` `/resetsamp` `/resetgrin` `/skin` — plus IRC `!s`/`!say`,
-`!players`.
-
-There are **no player-facing gameplay commands yet** — that work was planned
-for after the infrastructure phase.
+| Area | Legacy (SA-MP 0.3.7) | open.mp port |
+|------|----------------------|--------------|
+| Server | `samp-server` 0.3.7-R2 | **open.mp** (`omp-server`) + components |
+| Compiler | pawno (Pawn 3.2) | **QAWNO** (Pawn 3.10), 0 errors / 0 warnings |
+| Config | `server.cfg` | `config.json` (+ `config.test.json`) |
+| Plugins | 10 legacy plugins | components + 5 legacy plugins (crashdetect, mysql, streamer, whirlpool, RouteConnector) |
+| IRC bridge | 5 bots on a private network | retired (no-op wrappers ready for a Discord bridge) |
+| Geolocation | plugin binary missing | include-only SQLite GeoIP (bundled `geoip.db`) |
+| Security | master-password backdoor, unguarded teleports/commands | **removed / rank-gated** |
+| Database | no schema shipped | `scriptfiles/cnr.sql` + `db_config.inc` credential toggle |
+| Known bugs | timer arg, settings-load, column typos | fixed at the port |
+| Deployment | manual | **Docker** (Ubuntu 24.04, healthcheck, compose files) |
 
 ---
 
-## ❌ What was planned but never built
+## 🧰 Requirements
 
-The code contains clear scaffolding for systems that don't exist yet:
+- **open.mp server** (`omp-server` / `omp-server.exe`) — bundled.
+- **QAWNO** Pawn compiler — bundled under `qawno/`.
+- **open.mp components** (`components/`) — bundled; auto-load.
+- **Legacy plugins** (bundled under `plugins/`): crashdetect, mysql R41-4
+  (+ `log-core*`, `libmariadb.dll` at the root), streamer, whirlpool,
+  RouteConnector (needs `scriptfiles/GPS.dat` — bundled).
+- **MySQL / MariaDB** server — schema in `scriptfiles/cnr.sql`.
+- A **SA-MP 0.3.7** client to play.
 
-- **Robbery / hideout system** — `ROBBERY` interior type and GPS "Robbery
-  Hideout" entries exist; nothing sets or uses them.
-- **Mission system** — GPS "Mission Destination" entry, never assigned.
-- **Cop gameplay** — no `/arrest`, `/cuff`, wanted levels, jail or bust logic
-  despite four law-enforcement teams being fully defined.
-- **Shop interactions** — actors advertise "Press Y for menu"; no handler or
-  shop menus exist.
-- **GPS destinations** — 20 GPS categories are listed in the menu; every
-  handler except *Map Marker* is commented out.
-- **Player settings** (`/settings` is referenced at registration but absent),
-  **warnings system** (loads commented out), **activity/GPS statistics**
-  (columns read, never written), **gender changes**, **vehicle ownership /
-  economy** (columns and flags defined, unused), **animations module**
-  (`anims.inc` is an empty header, not even included).
+Everything needed to build and run is committed to the repo (self-contained).
 
 ---
 
-## 🧰 Requirements & bundled software
+## 🚀 Build & Run
 
-- **SA-MP 0.3.7-R2 server** — bundled (`samp-server.exe`, Windows).
-- **Pawn compiler** — bundled (`pawno/`).
-- **MySQL / MariaDB server** — *not* bundled; two databases expected
-  (`cnr` for the gamemode, `mini_missions` for the Bans filterscript).
-- **Plugins** (bundled in `plugins/`, loaded via `server.cfg`): crashdetect,
-  log-plugin, streamer 2.9.1, sscanf 2.8.2, irc 1.4.8, mysql R41-2
-  (+ `libmariadb.dll`), whirlpool, Pawn.CMD 3.1.4, RouteConnector
-  (needs `scriptfiles/GPS.dat` — bundled), nativechecker.
-- **Filterscripts**: `Bans`, `vspawner`, `int`.
+```bash
+# 1. Clone
+git clone https://github.com/Arose-Niazi/Exp-Gaming-Cops-And-Robbers.git
+cd Exp-Gaming-Cops-And-Robbers
 
-> ⚠️ The gamemode `#include`s **geolocation** (Whitetiger) and calls
-> `GetPlayerCountry`/`GetPlayerProxy`, but the plugin binary is **not** in
-> `plugins/` and not in `server.cfg` — you must source it yourself (a
-> `scriptfiles/geoip.db` is bundled) or stub those calls.
+# 2. Compile the gamemode with QAWNO (Windows)
+qawno/pawncc.exe "-;+" "-(+" "-\\" "-Z-" "-igamemodes" "-iqawno/include" -d3 -t4 "-ogamemodes/CnR" "gamemodes/CnR.pwn" WINDOWS_COMPILER=1
+#    (Linux/CI: use ./qawno/pawncc and drop WINDOWS_COMPILER=1)
+#    In VS Code: press Ctrl+Shift+B.   Batch: python compile.py
 
----
+# 3. Database
+mysql -u root -p -e "CREATE DATABASE cnr CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci"
+mysql -u root -p cnr < scriptfiles/cnr.sql
+#    Credentials: gamemodes/CnR/server/db_config.inc (LOCAL_DB toggle in CnR.pwn)
 
-## 🚀 Quick start
+# 4. Run
+omp-server.exe                                   # Windows
+./omp-server                                     # Linux
+omp-server.exe --config-path config.test.json    # local test config (port 7778, LAN)
+```
 
-1. Compile: open `pawno/pawno.exe` → `gamemodes/CnR.pwn` → **F5**
-   (output `gamemodes/CnR.amx`).
-2. Create the MySQL databases. **No `.sql` schema ships with this snapshot** —
-   the tables (`players`, `LSplayers`, `LSvehicles`, `server_data`,
-   `Interiors`, `Actors`, and the Bans FS `player_bans`) must be
-   reverse-engineered from the queries. The open.mp rebuild ships a proper
-   schema.
-3. Edit credentials: `SQL_*` defines in `gamemodes/CnR.pwn` (defaults:
-   `127.0.0.1` / `admin` / empty password / db `cnr`) and the Bans
-   filterscript's own connection.
-4. Edit `server.cfg` (RCON password, hostname, port — default **3333**).
-5. Run `samp-server.exe` and connect with a SA-MP **0.3.7** client.
+Then connect with a **SA-MP 0.3.7** client on port **7777**.
+
+> ⚠️ **Before deploying:** change the placeholder RCON password in
+> `config.json` (`CHANGE_ME_cnr_rcon_2026`). Never commit real secrets.
+
+### 🐳 Docker
+
+```bash
+docker compose up                          # dev: server + MariaDB
+docker compose -f docker-compose.prod.yml up -d   # prod: build + ro .amx mounts
+```
+
+`.amx` files are volume-mounted read-only, so routine updates are
+`git pull` + container restart — no image rebuild.
 
 ---
 
@@ -122,75 +104,55 @@ The code contains clear scaffolding for systems that don't exist yet:
 ```
 Exp-Gaming-Cops-And-Robbers/
 ├── gamemodes/
-│   ├── CnR.pwn                 # entry point: includes, callbacks, game clock
-│   ├── CnR/players/            # player modules (auth, spawns, peds, menus,
-│   │                           #   vehicles, elevators, GPS state, messages…)
-│   ├── CnR/server/             # server modules (defines, colors, zones,
-│   │                           #   interiors, actors, GPS engine, IRC, misc)
-│   └── Backups/                # superseded zones.inc variant
-├── filterscripts/              # Bans, vspawner, int + stock SA-MP scripts
-├── pawno/                      # legacy Pawn 3.2 compiler + includes
-├── plugins/                    # prebuilt .dll/.so plugins (see list above)
-├── scriptfiles/                # GPS.dat, geoip.db, properties/, vehicles/
-├── npcmodes/                   # stock NPC recordings
-└── server.cfg                  # SA-MP server config
+│   ├── CnR.pwn              # entry point (compile → CnR.amx)
+│   └── CnR/
+│       ├── players/         # auth, loading, spawns, peds, menus, messages,
+│       │                    #   vehicles, elevators, commands
+│       └── server/          # defines, colors, db_config, zones, interiors,
+│                            #   actors, GPS engine, misc
+├── components/              # open.mp components (auto-load)
+├── plugins/                 # legacy plugins (crashdetect, mysql, streamer,
+│                            #   whirlpool, RouteConnector)
+├── qawno/                   # QAWNO compiler + modern includes
+├── scriptfiles/             # GPS.dat, geoip.db, cnr.sql, map data
+├── legacy/                  # preserved SA-MP 0.3.7 tree (see v0.3.7-legacy)
+├── config.json              # open.mp server config (0.3.7 clients allowed)
+├── config.test.json         # local test profile
+├── compile.py               # batch compiler (gamemode + filterscripts)
+└── Dockerfile / docker-compose*.yml
 ```
 
-Modules follow a `FUNCTION` macro convention (`forward public` + `public`) so
-every cross-module call works via `CallLocalFunction` — handy to know when
-reading the code.
-
 ---
 
-## ⚠️ Important caveats & known issues (read before deploying)
+## ✅ Systems in place (from the legacy build, now on open.mp)
 
-This is an honest snapshot of a **shelved work-in-progress** — do **not** run
-it publicly without addressing these:
+Accounts (MySQL + Whirlpool, auto-login), classes/teams (~240 skins; CIVIL,
+POLICE, SHERIFF, FBI, UC_COP), 466-zone name HUD, streamed interiors with
+teleport pickups (admin builder), shop/service NPC actors (admin builder),
+RouteConnector GPS with on-road arrows (`/gps`), persistent admin-spawned
+vehicles, two object-elevator systems, textdraw menu framework, accelerated
+game clock + weather, rank hierarchy with scoped messaging, proxy/VPN
+detection.
 
-**Security**
-- `login_register.inc:156` contains a **hardcoded master-password backdoor**:
-  a fixed Whirlpool hash is accepted as the password for *any* account.
-- `OnPlayerClickPlayer` teleports **any** player to any clicked player — no
-  rank check (`CnR.pwn:612`).
-- Debug commands (`/saveloc`, `/teleback`, `/skin`, `/resetsamp`,
-  `/resetgrin`) have **no permission guards**.
-- `filterscripts/Bans.pwn` contains **hardcoded remote MySQL credentials**
-  (including a public IP). Treat those credentials as burned; never reuse them.
-- The IRC module hardcodes a private network (`irc.mg-s.us`) and a NickServ
-  password; the bots will not connect anywhere useful today.
+## 🗺️ Roadmap
 
-**Bugs**
-- `loading_data.inc:32` loads the `ClassMusic` column into the *AutoLogin*
-  field (copy-paste bug) — `pClassMusic` is never actually loaded.
-- `CnR.pwn:202` passes the string `"d"` as an integer timer argument.
-- Interior saves write column `CopWeapons` while loads read `CopsWeapons`;
-  the `Actors` table has a `Loaction` (sic) column.
-- `DeleteVehicle` hardcodes the `LSvehicles` table, ignoring the city macro.
-- Class-selection/zone/menu textdraw handles are single globals rather than
-  per-player arrays (works by accident with player-textdraw ID reuse).
+The actual cops-and-robbers gameplay — robberies, arrests, wanted levels,
+jail, economy, shop interactions, missions — was planned but never built in
+the legacy code. It lands next, on this open.mp foundation:
 
-**Operational**
-- Only **Los Santos** is playable; SF/LV spawn/camera data is empty.
-- The geolocation plugin is missing (see Requirements).
-- `nativechecker` will flag unresolved natives if plugins are missing.
-
----
-
-## 🗺️ What's next
-
-The next major version moves to **[open.mp](https://open.mp/)** — modern
-server, QAWNO compiler, maintained plugin stack, Dockerised deployment — while
-continuing to target **SA-MP 0.3.7 clients** (no 0.3.DL required). The IRC
-bridge will be retired, the security issues above fixed, and the planned
-cops-and-robbers gameplay finally implemented.
+- Robbery / hideout system, missions, wanted levels & arrests, jail
+- Shop menus behind the 26 actor types (bank, 24-7, ammunation, …)
+- GPS destination categories (engine works; handlers were stubs)
+- Player `/settings`, warnings system, activity stats, gender changes
+- Vehicle ownership & economy
+- Native ban system (replacing the legacy Bans filterscript)
+- San Fierro & Las Venturas
 
 ---
 
 ## 🙏 Credits
 
-**Arose Niazi** (script) · the **SA-MP team** · **Zeex** (crashdetect) ·
-**Incognito** (streamer, irc) · **maddinat0r** (mysql) · **Whitetiger**
-(geolocation) · **Y_Less** (whirlpool, sscanf2) · **emmet_** (sscanf2) ·
-**YourShadow** (Pawn.CMD) · **Gammer_Z** (RouteConnector) · elevator systems
-adapted from SA-MP team filterscript examples. Server binaries are covered by
-`samp-license.txt` (SA-MP EULA).
+**Arose Niazi** (script) · the **SA-MP team** and **open.mp team** · **Zeex**
+(crashdetect) · **Incognito** (streamer) · **maddinat0r** (mysql) ·
+**Whitetiger** (geolocation) · **Y_Less** (whirlpool, sscanf2) · **emmet_**
+(sscanf2) · **YourShadow** (Pawn.CMD) · **Gammer_Z** (RouteConnector).

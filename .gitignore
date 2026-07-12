@@ -3,7 +3,15 @@
 
 # Runtime logs
 server_log.txt
-logs/*.log
+logs/
+log.txt
 
-# Local environment
+# Local environment / secrets
 .env
+
+# Debug symbols
+*.pdb
+
+# Runtime state
+saves/*
+!saves/.gitkeep

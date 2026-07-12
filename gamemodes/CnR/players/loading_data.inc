@@ -29,7 +29,7 @@ FUNCTION LoadPlayerData(playerid)
 	cache_get_value_bool(0, "AutoLogin",PlayerInfo[playerid][pAutoLogin]);
 	cache_get_value_bool(0, "HourlyTimeUpdate",PlayerInfo[playerid][pHourlyTimeUpdate]);
 	cache_get_value_bool(0, "ShowJoinMessages",PlayerInfo[playerid][pShowJoinMessages]);
-	cache_get_value_bool(0, "ClassMusic",PlayerInfo[playerid][pAutoLogin]);
+	cache_get_value_bool(0, "ClassMusic",PlayerInfo[playerid][pClassMusic]);
 	cache_get_value_int(0, "MenuTD_BG",PlayerInfo[playerid][pMenuTD_BG]);
 	CallLocalFunction("UpdateMenuBG","d",playerid);
 	new string[75];

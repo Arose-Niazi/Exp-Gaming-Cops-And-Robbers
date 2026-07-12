@@ -42,9 +42,9 @@ CreateMenuBox(playerid)
 	PlayerTextDrawLetterSize(playerid, Menu_Title, 0.509999, 1.400000);
 	PlayerTextDrawColor(playerid, Menu_Title, -1);
 	PlayerTextDrawSetOutline(playerid, Menu_Title, 1);
-	PlayerTextDrawSetProportional(playerid, Menu_Title, 1);
+	PlayerTextDrawSetProportional(playerid, Menu_Title, true);
 	PlayerTextDrawSetShadow(playerid, Menu_Title, 1);
-	PlayerTextDrawUseBox(playerid, Menu_Title, 1);
+	PlayerTextDrawUseBox(playerid, Menu_Title, true);
 	PlayerTextDrawBoxColor(playerid, Menu_Title, 110);
 	PlayerTextDrawTextSize(playerid, Menu_Title, 23.000000, 206.000000);
 
@@ -55,7 +55,7 @@ CreateMenuBox(playerid)
 	PlayerTextDrawLetterSize(playerid, Menu_Stats, 0.240000, 1.200000);
 	PlayerTextDrawColor(playerid, Menu_Stats, -1);
 	PlayerTextDrawSetOutline(playerid, Menu_Stats, 1);
-	PlayerTextDrawSetProportional(playerid, Menu_Stats, 1);
+	PlayerTextDrawSetProportional(playerid, Menu_Stats, true);
 	PlayerTextDrawSetShadow(playerid, Menu_Stats, 1);
 
 	Menu_StatsCont = CreatePlayerTextDraw(playerid, 115.000000, 162.000000, "_");
@@ -65,7 +65,7 @@ CreateMenuBox(playerid)
 	PlayerTextDrawLetterSize(playerid, Menu_StatsCont, 0.240000, 1.200000);
 	PlayerTextDrawColor(playerid, Menu_StatsCont, -1);
 	PlayerTextDrawSetOutline(playerid, Menu_StatsCont, 1);
-	PlayerTextDrawSetProportional(playerid, Menu_StatsCont, 1);
+	PlayerTextDrawSetProportional(playerid, Menu_StatsCont, true);
 	PlayerTextDrawSetShadow(playerid, Menu_StatsCont, 1);
 
 	Menu_End = CreatePlayerTextDraw(playerid, 115.000000, 200.800000, "_");
@@ -75,7 +75,7 @@ CreateMenuBox(playerid)
 	PlayerTextDrawLetterSize(playerid, Menu_End, 0.240000, 1.200000);
 	PlayerTextDrawColor(playerid, Menu_End, -1);
 	PlayerTextDrawSetOutline(playerid, Menu_End, 1);
-	PlayerTextDrawSetProportional(playerid, Menu_End, 1);
+	PlayerTextDrawSetProportional(playerid, Menu_End, true);
 	PlayerTextDrawSetShadow(playerid, Menu_End, 1);
 
 
@@ -91,7 +91,7 @@ CreateMenuBox(playerid)
 		PlayerTextDrawLetterSize(playerid, Menu_Column1[r], 0.240000, 1.200000);
 		PlayerTextDrawColor(playerid, Menu_Column1[r], -1);
 		PlayerTextDrawSetOutline(playerid, Menu_Column1[r], 1);
-		PlayerTextDrawSetProportional(playerid, Menu_Column1[r], 1);
+		PlayerTextDrawSetProportional(playerid, Menu_Column1[r], true);
 		PlayerTextDrawSetShadow(playerid, Menu_Column1[r], 1);
 
 		Menu_Column2[r] = CreatePlayerTextDraw(playerid, 162.000000, ChatBoxY, "~b~$100000000");
@@ -100,7 +100,7 @@ CreateMenuBox(playerid)
 		PlayerTextDrawLetterSize(playerid, Menu_Column2[r], 0.240000, 1.200000);
 		PlayerTextDrawColor(playerid, Menu_Column2[r], -1);
 		PlayerTextDrawSetOutline(playerid, Menu_Column2[r], 1);
-		PlayerTextDrawSetProportional(playerid, Menu_Column2[r], 1);
+		PlayerTextDrawSetProportional(playerid, Menu_Column2[r], true);
 		PlayerTextDrawSetShadow(playerid, Menu_Column2[r], 1);
 
 		ChatBoxY += 10.000000;
@@ -122,7 +122,7 @@ DestroyMenuBox(playerid)
 	return 1;
 }
 
-ShowTextDrawMenu(playerid, menuid, title[], lines, options)
+ShowTextDrawMenu(playerid, menuid, const title[], lines, options)
 {
 	new string[256];
 
@@ -153,7 +153,6 @@ ShowTextDrawMenu(playerid, menuid, title[], lines, options)
 		case 23: format(string, sizeof(string), " ~n~%s~n~ ~n~ ~n~ ~n~ ~n~ ~n~ ~n~ ~n~ ~n~ ~n~ ~n~ ~n~ ~n~ ~n~ ~n~ ~n~ ~n~ ~n~ ~n~ ~n~ ~n~ ~n~ ~n~ ~n~ ~n~ ~n~ ~n~ ~n~ ", title);
 		case 24: format(string, sizeof(string), " ~n~%s~n~ ~n~ ~n~ ~n~ ~n~ ~n~ ~n~ ~n~ ~n~ ~n~ ~n~ ~n~ ~n~ ~n~ ~n~ ~n~ ~n~ ~n~ ~n~ ~n~ ~n~ ~n~ ~n~ ~n~ ~n~ ~n~ ~n~ ~n~ ~n~", title);
 	}
-	printf("lINES %d",lines);
 
 	PlayerTextDrawSetString(playerid, Menu_Title, string);
 	PlayerTextDrawShow(playerid, Menu_Title);
@@ -215,7 +214,7 @@ ShowTextDrawMenu(playerid, menuid, title[], lines, options)
 	PlayerInfo[playerid][pMenu] = menuid;
 }
 
-ShowTextDrawMenuItems(playerid, row, stats[], column1[], column2[],item_price,item = 0)
+ShowTextDrawMenuItems(playerid, row, const stats[], const column1[], const column2[],item_price,item = 0)
 {
 	if (row == 0)
 	{
@@ -270,7 +269,7 @@ HideTextDrawMenu(playerid,show_msg = 0)
 	return 1;
 }
 
-OnPlayerEnterTextDrawMenuOption(playerid,text[])
+OnPlayerEnterTextDrawMenuOption(playerid,const text[])
 {
 	new /*string[500],*/Option,str[256];
 

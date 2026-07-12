@@ -36,6 +36,9 @@
 		
 */
 
+forward Float:GetE_Z_C_Floor_S(floorid);
+forward Float:GetDoorsZCoordForFloor(floorid);
+
 #define INVALID_FLOOR           (-1)
 
 #define ELEVATOR_SPEED_SAMP      (5.0)
@@ -365,7 +368,7 @@ ContinueToNextFloorSAMP()
 		MoveDynamicObject(SAMP_INFO[ElevatorDoors][1], X_DOOR_CLOSED_SAMP, -1303.459472, GetDoorsZCoordForFloor(floorid), 0.25);
 		Delete3DTextLabel(SAMP_INFO[ElevatorLabel]);
 
-		SAMP_INFO[ElevatorBoostTimer] = SetTimerEx("Elevator_Boost_SAMP", 2000, 0, "i", floorid);
+		SAMP_INFO[ElevatorBoostTimer] = SetTimerEx("Elevator_Boost_SAMP", 2000, false, "i", floorid);
 	}	
 
 	return 1;
@@ -393,7 +396,7 @@ AddFloorToQueue_SAMP(playerid,floorid)
 		SAMP_INFO[FloorRequested][floorid]=playerid;
 		if(SAMP_INFO[ElevatorState] == ELEVATOR_STATE_IDLE)
 	        CheckForNext();
-		for(new i=0,j=GetPlayerPoolSize(); i<=j; i++)
+		for(new i=0; i < MAX_PLAYERS; i++)
 		{
 			if(IsPlayerConnected(i))
 			{
@@ -495,7 +498,7 @@ FloorChanged_SAMP(floorid)
 {
 	new string[175];
 	format(string,sizeof(string),"~w~%s",FloorNamesSAMP[floorid]);
-	for(new i=0,j=GetPlayerPoolSize(); i<=j; i++)
+	for(new i=0; i < MAX_PLAYERS; i++)
 	{
 		if(IsPlayerConnected(i))
 		{

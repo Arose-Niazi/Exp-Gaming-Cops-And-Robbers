@@ -1,2 +1,28 @@
-# Auto detect text files and perform LF normalization
+# Normalize line endings for text; auto-detect the rest
 * text=auto
+
+# Pawn source is text
+*.pwn text
+*.inc text
+*.p   text
+
+# Binary assets — never line-ending normalize
+*.amx binary
+*.dff binary
+*.txd binary
+*.dll binary
+*.so  binary
+*.exe binary
+*.pdb binary
+*.db  binary
+*.png binary
+*.bmp binary
+
+# GitHub Linguist: classify Pawn correctly, hide vendored toolchains from stats
+*.inc              linguist-language=Pawn
+gamemodes/**/*.inc linguist-language=Pawn
+gamemodes/*.pwn    linguist-language=Pawn
+qawno/**        linguist-vendored
+components/**   linguist-vendored
+plugins/**      linguist-vendored
+legacy/**       linguist-vendored

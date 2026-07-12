@@ -235,7 +235,7 @@ CreateStaticVehicle(id,type,modelid,Float:X,Float:Y,Float:Z,Float:A,ColorOne,Col
 		return 1;
 	}
 
-	new siren;
+	new bool:siren;
 	if(type == VEHICLE_TYPE_COP) siren=true;
 	switch(modelid)
 	{
@@ -484,8 +484,7 @@ FUNCTION OnVehicleAdded()
 FUNCTION DeleteVehicle(vehicleid)
 {
 	new string[75];
-	mysql_format(g_SQL,string,sizeof(string),"DELETE FROM `LSvehicles` WHERE ID=%d",CarInfo[vehicleid][cID]);
-	printf(string);
+	mysql_format(g_SQL,string,sizeof(string),"DELETE FROM "TABLE_VEHICLES" WHERE ID=%d",CarInfo[vehicleid][cID]);
 	mysql_pquery(g_SQL,string);
 	DestroyVehicleEx(vehicleid);
 	return 1;

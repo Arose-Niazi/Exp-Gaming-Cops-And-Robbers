@@ -33,7 +33,7 @@
 
 FUNCTION TimeUpdateMessage(color,text[]) 
 {
-	for(new playerid=0,j=GetPlayerPoolSize(); playerid <= j; playerid++)
+	for(new playerid=0; playerid < MAX_PLAYERS; playerid++)
 		if(IsPlayerConnected(playerid))
 			if(PlayerInfo[playerid][pHourlyTimeUpdate])
 				SendClientMessage(playerid, color, text);
@@ -41,7 +41,7 @@ FUNCTION TimeUpdateMessage(color,text[])
 
 FUNCTION SendMessageToRetired(color, text[])
 {
-	for(new i=0,j=GetPlayerPoolSize(); i <= j; i++)
+	for(new i=0; i < MAX_PLAYERS; i++)
 	{
 	    if(IsPlayerConnected(i) && (PlayerInfo[i][pRank] == RETIRED_STAFF || PlayerInfo[i][pRank] >= SERVER_MODERATOR)  && PlayerInfo[i][pLoggedIn]) 
 		{
@@ -52,7 +52,7 @@ FUNCTION SendMessageToRetired(color, text[])
 
 FUNCTION SendMessageToModerators(color, text[])
 {
-	for(new i=0,j=GetPlayerPoolSize(); i <= j; i++)
+	for(new i=0; i < MAX_PLAYERS; i++)
 	{
 	    if(IsPlayerConnected(i) && PlayerInfo[i][pRank] >= SERVER_MODERATOR && PlayerInfo[i][pLoggedIn]) 
 		{
@@ -62,7 +62,7 @@ FUNCTION SendMessageToModerators(color, text[])
 }
 FUNCTION SendMessageToAdmins(color, text[])
 {
-	for(new i=0,j=GetPlayerPoolSize(); i <= j; i++)
+	for(new i=0; i < MAX_PLAYERS; i++)
 	{
 	    if(IsPlayerConnected(i) && PlayerInfo[i][pRank] >= SERVER_ADMIN && PlayerInfo[i][pLoggedIn]) 
 		{
@@ -72,7 +72,7 @@ FUNCTION SendMessageToAdmins(color, text[])
 }
 FUNCTION SendMessageToHeadAdmins(color, text[])
 {
-	for(new i=0,j=GetPlayerPoolSize(); i <= j; i++)
+	for(new i=0; i < MAX_PLAYERS; i++)
 	{
 	    if(IsPlayerConnected(i) && PlayerInfo[i][pRank] >= SERVER_HEAD_ADMIN && PlayerInfo[i][pLoggedIn]) 
 		{
@@ -82,14 +82,14 @@ FUNCTION SendMessageToHeadAdmins(color, text[])
 }
 FUNCTION SendMessageToManagers(color, text[])
 {
-	for(new i=0,j=GetPlayerPoolSize(); i <= j; i++)
+	for(new i=0; i < MAX_PLAYERS; i++)
 	{
 	    if(IsPlayerConnected(i) && PlayerInfo[i][pRank] >= SERVER_MANAGER && PlayerInfo[i][pLoggedIn]) SendClientMessage(i, color, text);
 	}
 }
 FUNCTION SendMessageToOwners(color, text[])
 {
-	for(new i=0,j=GetPlayerPoolSize(); i <= j; i++)
+	for(new i=0; i < MAX_PLAYERS; i++)
 	{
 	    if(IsPlayerConnected(i) && PlayerInfo[i][pRank] >= SERVER_OWNER && PlayerInfo[i][pLoggedIn]) SendClientMessage(i, color, text);
 	}
@@ -97,17 +97,17 @@ FUNCTION SendMessageToOwners(color, text[])
 
 FUNCTION SendMessageToDJ(color, text[])
 {
-	for(new i=0,j=GetPlayerPoolSize(); i <= j; i++)
+	for(new i=0; i < MAX_PLAYERS; i++)
 	{
 	    if(IsPlayerConnected(i) && PlayerInfo[i][pDj] && PlayerInfo[i][pLoggedIn]) SendClientMessage(i, color, text);
 	}
 }
 
 
-FUNCTION SendAdminAnonmityMessage(adminid,COLOR,text[],Irccol[])
+FUNCTION SendAdminAnonmityMessage(adminid,COLOR,const text[],const Irccol[])
 {
 	new string[128];
-	for(new i = 0, j = GetPlayerPoolSize(); i <= j; i++)
+	for(new i = 0; i < MAX_PLAYERS; i++)
    	{
    		if(IsPlayerConnected(i))
       	{
@@ -130,10 +130,10 @@ FUNCTION SendAdminAnonmityMessage(adminid,COLOR,text[],Irccol[])
 	IRC_SendMessage(string,Irccol);
 }
 
-FUNCTION SendAdminAnonmityMessageIRC(admin[],COLOR,text[],Irccol[])
+FUNCTION SendAdminAnonmityMessageIRC(const admin[],COLOR,const text[],const Irccol[])
 {
 	new string[128];
-	for(new i = 0, j = GetPlayerPoolSize(); i <= j; i++)
+	for(new i = 0; i < MAX_PLAYERS; i++)
    	{
    		if(IsPlayerConnected(i))
       	{
@@ -167,7 +167,7 @@ FUNCTION SendConnectMessage(playerid,text[],show)
 	if(rows || !show)
 	{
 		format(string,sizeof(string),"%s IP: %s / Country: %s.",text,PlayerInfo[playerid][pIP],PlayerInfo[playerid][pCurrent_country]);
-		for(new i = 0, j = GetPlayerPoolSize(); i <= j; i++)
+		for(new i = 0; i < MAX_PLAYERS; i++)
 		{
 			if(IsPlayerConnected(i))
 			{
@@ -181,7 +181,7 @@ FUNCTION SendConnectMessage(playerid,text[],show)
 	else
 	{
 		format(string,sizeof(string),"%s IP: %s / Country: %s.",text,PlayerInfo[playerid][pIP],PlayerInfo[playerid][pCurrent_country]);
-		for(new i = 0, j = GetPlayerPoolSize(); i <= j; i++)
+		for(new i = 0; i < MAX_PLAYERS; i++)
 		{
 			if(IsPlayerConnected(i))
 			{
@@ -199,65 +199,51 @@ FUNCTION SendConnectMessage(playerid,text[],show)
 	return 1;
 }
 
-FUNCTION IRC_SayColord(botid,channel[],message[],color[])
+/*
+	The legacy IRC bridge was retired in the open.mp port — the private IRC
+	network it relied on is gone. These wrappers are kept as no-ops so every
+	call site (connect echoes, admin actions, registrations, …) still works;
+	wire a Discord (or other) bridge through them later.
+*/
+FUNCTION IRC_SayColord(botid,const channel[],const message[],const color[])
 {
-	new string[256];
-	format(string,sizeof(string),"%s%s",color,message);
-	IRC_Say(botid, channel, string);
+	#pragma unused botid, channel, message, color
 	return 1;
 }
-FUNCTION IRC_Message(channel[],color[],message[])
+FUNCTION IRC_Message(const channel[],const color[],const message[])
 {
-	new string[256];
-	format(string,sizeof(string),"%s%s",color,message);
-	IRC_GroupSay(1, channel, string);
-	return 1;
-}
-
-FUNCTION IRC_MessageToAll(color[],message[])
-{
-	new string[256];
-	format(string,sizeof(string),"%s%s",color,message);
-	IRC_GroupSay(1, IRC_ECHANNEL, string);
-	IRC_GroupSay(1, IRC_ACHANNEL, string);
-	IRC_GroupSay(1, IRC_MCHANNEL, string);
+	#pragma unused channel, color, message
 	return 1;
 }
 
-FUNCTION IRC_SendAdminMessage(message[],color[])
+FUNCTION IRC_MessageToAll(const color[],const message[])
 {
-	new string[256];
-	format(string,sizeof(string),"%s%s",color,message);
-	IRC_GroupSay(1, IRC_ACHANNEL, string);
-	//IRC_GroupSay(1, ECHO_IRC_CHANNEL, string);
+	#pragma unused color, message
+	return 1;
+}
+
+FUNCTION IRC_SendAdminMessage(const message[],const color[])
+{
+	#pragma unused message, color
 	return 1;
 }
 
 
-FUNCTION IRC_SendManagementMessage(message[],color[])
+FUNCTION IRC_SendManagementMessage(const message[],const color[])
 {
-	new string[256];
-	format(string,sizeof(string),"%s%s",color,message);
-	IRC_GroupSay(1, IRC_MCHANNEL, string);
-	//IRC_GroupSay(1, ECHO_MANAGER_ADMIN, string);
-	//IRC_GroupSay(1, ECHO_MANAGER_NORMAL, string);
+	#pragma unused message, color
 	return 1;
 }
 
 
-FUNCTION IRC_SendMessage(message[],color[])
+FUNCTION IRC_SendMessage(const message[],const color[])
 {
-	new string[256];
-	format(string,sizeof(string),"%s%s",color,message);
-	IRC_GroupSay(1, IRC_ECHANNEL, string);
+	#pragma unused message, color
 	return 1;
 }
 
-FUNCTION SendRadioIRCMessage(message[], color[])
+FUNCTION SendRadioIRCMessage(const message[], const color[])
 {
-	new string[256];
-	format(string,sizeof(string),"%s%s",color,message);
-	IRC_GroupSay(1,IRC_RADIO,string);
-	IRC_GroupSay(1,IRC_RADIO_DJ,string);
+	#pragma unused message, color
 	return 1;
 }
