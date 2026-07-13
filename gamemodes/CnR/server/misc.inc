@@ -19,10 +19,16 @@
 		isNumeric(const string[]);
 		VehicleNames[model-400];
 		PlaySoundForPlayersInRange(soundid, Float:range, Float:x, Float:y, Float:z);
-		
+		IsStaff(playerid, rank);
+
 	Functions Being Called:
-		
+
 */
+
+// Permission helper (design §1.2) — every command gates identically through
+// this. IsCop / IsCivilian wait for the wanted/team system in M3.
+stock IsStaff(playerid, rank)
+	return (PlayerInfo[playerid][pRank] >= rank);
 
 InsertTimeStamp()
 {

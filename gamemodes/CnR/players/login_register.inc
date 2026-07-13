@@ -218,9 +218,14 @@ FUNCTION OnPlayerRegister(playerid)
 
 FUNCTION CallForChecking(playerid)
 {
-	// The legacy Bans filterscript (shared MG/MM ban DB) is not part of the
-	// open.mp port yet — proceed straight to the account check. Reintroduce a
-	// native ban lookup here when the ban system is ported.
-	CallLocalFunction("BanCheckDone","dd",playerid,0);
+	// Native ban lookup (systems/bans.inc) — matches an active, unexpired ban on
+	// this player's UserName / current IP / gpci serial. The async result lands
+	// in OnBanCheck, which shows the ban dialog and drives BanCheckDone.
+	new string[400], serial[MAX_SERIAL_SIZE];
+	gpci(playerid, serial, MAX_SERIAL_SIZE);
+	mysql_format(g_SQL, string, sizeof(string),
+		"SELECT Reason,AdminName,Expiry FROM bans WHERE Active=1 AND (Expiry IS NULL OR Expiry > NOW()) AND ((Type=0 AND Value='%e') OR (Type=1 AND Value='%e') OR (Type=2 AND Value='%e')) LIMIT 1",
+		PlayerInfo[playerid][pUserName], PlayerInfo[playerid][pIP], serial);
+	mysql_pquery(g_SQL, string, "OnBanCheck", "dd", playerid, g_MysqlRaceCheck[playerid]);
 	return 1;
 }

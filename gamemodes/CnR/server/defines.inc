@@ -84,23 +84,27 @@ enum
 	OTHER
 };
 
-enum 
+enum
 {
 	REGISTER_DIALOG_PASSWORD,
 	REGISTER_DIALOG_EMAIL,
 	LOGIN_DIALOG,
-	BAN_DIALOG
+	BAN_DIALOG,
+	COMMANDS_DIALOG,        // M2 — paginated command list (/showcommands for players)
+	ADMIN_INFO_DIALOG,      // M2 — generic read-only info dialog (aka/ips/osearch/ajailed/flag lists)
+	ADMIN_INFO_DIALOG2      // M2 — second generic info dialog (async result formatting)
 };
 
 enum
 {
-	SERVER_PLAYER,
-	RETIRED_STAFF,
-	SERVER_MODERATOR,
-	SERVER_ADMIN,
-	SERVER_HEAD_ADMIN,
-	SERVER_MANAGER,
-	SERVER_OWNER
+	SERVER_PLAYER,       // 0
+	RETIRED_STAFF,       // 1
+	SERVER_MODERATOR,    // 2
+	SERVER_ADMIN,        // 3
+	SERVER_HEAD_ADMIN,   // 4
+	SERVER_MANAGER,      // 5
+	SERVER_OWNER,        // 6
+	SERVER_SCRIPTER      // 7  <-- highest tier (appended, do not renumber)
 };
 
 enum 
@@ -167,6 +171,19 @@ enum
 #define ERROR_NOT_ADMIN "You don't match the rank to use this command."
 #define INVALID_COMMAND "This command is not valid, use /commands for the list."
 #define ERROR_WRONG_CHANNEL "This command is not available in this channel."
+
+// ---- M2 command / moderation infra ----
+#define PM_FLOOD_MS 			1500		// min gap between private messages (ms)
+#define MAX_ADMIN_JAIL_MINS		1440		// hard cap for /ajail duration
+#define PARACHUTE_WEAPON		46			// weapon id stripped inside DM zones
+
+// Admin-jail location (isolated: high virtual world + interior 0).
+#define ADMIN_JAIL_VW			90210
+#define ADMIN_JAIL_X			(197.6661)
+#define ADMIN_JAIL_Y			(173.8215)
+#define ADMIN_JAIL_Z			(1003.0234)
+#define ADMIN_JAIL_A			(0.0)
+#define ADMIN_JAIL_INT			3
 
 #define isNull(%1) \
                 ((!(%1[0])) || (((%1[0]) == '\1') && (!(%1[1]))))

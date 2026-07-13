@@ -52,10 +52,15 @@ CREATE TABLE IF NOT EXISTS `LSplayers` (
     `Spawns`          INT           NOT NULL DEFAULT 0,
     `MonthlyActivity` INT           NOT NULL DEFAULT 0,
     `Times_GPSUsed`   INT           NOT NULL DEFAULT 0,
+    `AdminJailUntil`  INT           NOT NULL DEFAULT 0,      -- M2: unix time admin-jail ends (0 = free)
     PRIMARY KEY (`aID`),
     CONSTRAINT `fk_LSplayers_aID` FOREIGN KEY (`aID`)
         REFERENCES `players` (`aID`) ON DELETE CASCADE
 ) ENGINE=InnoDB;
+
+-- Migration note (existing databases): the M2 column above is added by
+--   ALTER TABLE `LSplayers` ADD `AdminJailUntil` INT NOT NULL DEFAULT 0;
+-- (repeat for SFplayers/LVplayers when those cities go live).
 
 -- Per-city persistent vehicles (Los Santos)
 CREATE TABLE IF NOT EXISTS `LSvehicles` (
@@ -125,4 +130,23 @@ CREATE TABLE IF NOT EXISTS `Actors` (
     `Skin`          INT         NOT NULL DEFAULT 0,
     `3DLabel`       TINYINT(1)  NOT NULL DEFAULT 1,
     PRIMARY KEY (`ID`)
+) ENGINE=InnoDB;
+
+-- Native ban system (M2 — replaces the legacy Bans filterscript / shared MG-MM
+-- ban DB). One row per (Type, Value): a full ban writes three rows (name, IP,
+-- serial). CallForChecking (login_register.inc) SELECTs an active, unexpired
+-- match on connect; the admin commands live in systems/bans.inc.
+CREATE TABLE IF NOT EXISTS `bans` (
+    `BanID`      INT          NOT NULL AUTO_INCREMENT,
+    `Type`       INT          NOT NULL DEFAULT 0,            -- 0 name / 1 IP / 2 serial
+    `Value`      VARCHAR(256) NOT NULL DEFAULT '',           -- the banned name/IP/serial
+    `Nick`       VARCHAR(24)  NOT NULL DEFAULT '',           -- account nick this ban is logged under
+    `AdminName`  VARCHAR(24)  NOT NULL DEFAULT '',
+    `Reason`     VARCHAR(128) NOT NULL DEFAULT '',
+    `Date`       DATETIME     NULL,
+    `Expiry`     DATETIME     NULL,                          -- NULL = permanent
+    `Active`     TINYINT(1)   NOT NULL DEFAULT 1,
+    PRIMARY KEY (`BanID`),
+    KEY `idx_value` (`Value`),
+    KEY `idx_nick`  (`Nick`)
 ) ENGINE=InnoDB;

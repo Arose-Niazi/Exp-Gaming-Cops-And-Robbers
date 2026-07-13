@@ -164,6 +164,14 @@ new Text:ConnectTD[2];
 	#include "CnR\players\cmds"
 	#include "CnR\server\actors"
 	#include "CnR\server\gps"
+
+	// ---- M2 : command / moderation infra ----
+	#include "CnR\cmds\messages"
+	#include "CnR\cmds\admin"
+	#include "CnR\cmds\teleport"
+	#include "CnR\cmds\owner"
+	#include "CnR\cmds\scripter"
+	#include "CnR\systems\bans"
 #else
 	#include "CnR/server/server_vars"
 	#include "CnR/players/player_vars"
@@ -187,6 +195,14 @@ new Text:ConnectTD[2];
 	#include "CnR/players/cmds"
 	#include "CnR/server/actors"
 	#include "CnR/server/gps"
+
+	// ---- M2 : command / moderation infra ----
+	#include "CnR/cmds/messages"
+	#include "CnR/cmds/admin"
+	#include "CnR/cmds/teleport"
+	#include "CnR/cmds/owner"
+	#include "CnR/cmds/scripter"
+	#include "CnR/systems/bans"
 #endif
 
 new WeekDays[7][] = {
@@ -334,6 +350,11 @@ public OnPlayerDisconnect(playerid,reason)
 		TextDrawHideForPlayer(playerid,DaysOfWeek);
 		DestroyMenuBox(playerid);
 		GPS_OnPlayerDisconnect(playerid);
+		if(PlayerInfo[playerid][pAdminJailTimer] != -1)
+		{
+			KillTimer(PlayerInfo[playerid][pAdminJailTimer]);
+			PlayerInfo[playerid][pAdminJailTimer] = -1;
+		}
 		if(PlayerInfo[playerid][pLoggedIn])
 		{
 			mysql_format(g_SQL, string, sizeof(string), "UPDATE players SET LastOnline=NOW(),Online=0 WHERE aID=%d LIMIT 1",PlayerInfo[playerid][pID]);
@@ -467,19 +488,27 @@ public OnPlayerSpawn(playerid)
 		mysql_pquery(g_SQL, string);
 	}
 	PlayerInfo[playerid][pTeam] =PedsInfo[PlayerInfo[playerid][pClassID]][PedTeam];
-	
+
 	PlayerInfo[playerid][pSpawned]=true;
 	PlayerInfo[playerid][pSpawns]++;
+	// Leaving any DM zone on (re)spawn (anti-parachute flag clears).
+	PlayerInfo[playerid][pInDMZone]=false;
 	if(!IsPlayerNPC(playerid))
 	{
 		ZoneShowTD(playerid);
 		CreateClassTD(playerid);
-	}	
+	}
+	// Re-apply a still-running admin-jail across relog/respawn (M2 — §11.2).
+	if(PlayerInfo[playerid][pAdminJailUntil] > gettime())
+		ApplyAdminJail(playerid, 0, "Admin-jail resumed", SERVER_BOT);
+	else if(PlayerInfo[playerid][pAdminJailUntil] != 0)
+		PlayerInfo[playerid][pAdminJailUntil]=0;
 	return 1;
 }
 
 public OnPlayerDeath(playerid,killerid,reason)
 {
+	PlayerInfo[playerid][pInDMZone]=false;
 	if(!IsPlayerNPC(playerid))
 	{
 		ZoneHideTD(playerid);
@@ -611,19 +640,22 @@ public OnPlayerCommandReceived(playerid, cmd[], params[], flags)
 	}
 	return 1;
 }
-public OnPlayerCommandPerformed(playerid, cmd[], params[], result, flags) 
+public OnPlayerCommandPerformed(playerid, cmd[], params[], result, flags)
 {
-	//new string[256];
+	new string[256];
 	if(result == -1) return SendClientMessage(playerid,COLOR_ERROR,INVALID_COMMAND);
-	if(strcmp(cmd, "pm", true) == 0) return 1;
-	/*for(new i=0,j=GetPlayerPoolSize(); i <= j; i++)
+	if(strcmp(cmd, "pm", true) == 0 || strcmp(cmd, "msg", true) == 0 || strcmp(cmd, "m", true) == 0
+	   || strcmp(cmd, "reply", true) == 0 || strcmp(cmd, "r", true) == 0) return 1;
+	// Staff command-echo (/showcommands): mirror a command to any equal-or-higher
+	// ranked staff who have echo enabled (M2 — §11.2).
+	for(new i=0; i < MAX_PLAYERS; i++)
 	{
-	  	if(IsPlayerConnected(playerid) && PlayerInfo[i][pShowCommands] && PlayerInfo[i][pRank] >= PlayerInfo[playerid][pRank] && i != playerid)
+	  	if(IsPlayerConnected(i) && PlayerInfo[i][pShowCommands] && PlayerInfo[i][pRank] >= PlayerInfo[playerid][pRank] && i != playerid)
 	  	{
-	  	    format(string,sizeof(string),"%s (%d) Has Used Command \"%s\".",PlayerInfo[playerid][pUserName],playerid,cmd);
+	  	    format(string,sizeof(string),"%s (%d) Has Used Command \"/%s %s\".",PlayerInfo[playerid][pUserName],playerid,cmd,params);
 	  	    SendClientMessage(i,COLOR_ADMIN_INFO,string);
  		}
-	  }*/
+	}
 	return 1;
 }
 

@@ -127,9 +127,28 @@ enum pInfo
 	
 	pHideOutLocation,
 	pMissionLocation,
-	
-	Float:pCustomMapMarker[3]
+
+	Float:pCustomMapMarker[3],
+
+	// ---- M2 : command / moderation infra ----
+	pLastPMFrom,				// last PM sender id for /reply (-1 = none)
+	bool:pNoPM,					// /nopm toggle (session-only)
+	pPMFloodTime,				// GetTickCount() of last PM (flood throttle)
+	bool:pShowCommands,			// staff command-echo toggle
+	bool:pAdminDuty,			// /aduty on-duty flag
+	bool:pAdminJailed,			// currently admin-jailed
+	pAdminJailUntil,			// unix time the admin-jail ends (0 = free) [persisted]
+	pAdminJailTimer,			// per-player release timer handle (-1 = none)
+	bool:pInDMZone,				// inside a DM-flagged teleport zone (anti-parachute)
+	bool:pDebugMode,			// scripter /debug toggle
+	pVCFreezeUntil,				// cop /visualcontact hold expiry (set in M3; blocks teleport)
+	bool:pHealthHackFlags,		// anti-cheat HP-hack suspicion (detection lands M3)
+	bool:pAimbotFlags			// anti-cheat aimbot suspicion (detection lands M3)
 }
+
+// Session-only ignore matrix (bit-packed to save memory): does A ignore B?
+// pIgnored[a][b>>5] bit (b & 31). Reset per-connect in ClearPlayerVariables.
+new pIgnored[MAX_PLAYERS][(MAX_PLAYERS + 31) / 32];
 
 new PlayerInfo[MAX_PLAYERS][pInfo];
 
@@ -199,8 +218,18 @@ FUNCTION ClearPlayerVariables(playerid)
 	PlayerInfo[playerid][GPS_Calculating]=false;
 	PlayerInfo[playerid][GPS_Lenght]=PlayerInfo[playerid][GPS_LostCount]=PlayerInfo[playerid][pTimes_GPSUsed]=PlayerInfo[playerid][GPS_MakerLength]=0;
 	PlayerInfo[playerid][GPS_Distance]=0.0;
-	
-	
-	
+
+	// ---- M2 : command / moderation infra ----
+	PlayerInfo[playerid][pLastPMFrom]=-1;
+	PlayerInfo[playerid][pAdminJailUntil]=PlayerInfo[playerid][pPMFloodTime]=PlayerInfo[playerid][pVCFreezeUntil]=0;
+	if(PlayerInfo[playerid][pAdminJailTimer] != -1)
+	{
+		KillTimer(PlayerInfo[playerid][pAdminJailTimer]);
+	}
+	PlayerInfo[playerid][pAdminJailTimer]=-1;
+	PlayerInfo[playerid][pNoPM]=PlayerInfo[playerid][pShowCommands]=PlayerInfo[playerid][pAdminDuty]=PlayerInfo[playerid][pAdminJailed]=false;
+	PlayerInfo[playerid][pInDMZone]=PlayerInfo[playerid][pDebugMode]=PlayerInfo[playerid][pHealthHackFlags]=PlayerInfo[playerid][pAimbotFlags]=false;
+	for(new i=0; i<sizeof(pIgnored[]); i++) pIgnored[playerid][i]=0;
+
 	return 1;
-}	
+}

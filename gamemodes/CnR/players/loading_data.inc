@@ -71,6 +71,7 @@ FUNCTION LoadUserData(playerid)
 	cache_get_value_int(0, "Spawns",PlayerInfo[playerid][pSpawns]);
 	cache_get_value_int(0, "MonthlyActivity",PlayerInfo[playerid][pMonthlyActivity]);
 	cache_get_value_int(0, "Times_GPSUsed",PlayerInfo[playerid][pTimes_GPSUsed]);
+	cache_get_value_int(0, "AdminJailUntil",PlayerInfo[playerid][pAdminJailUntil]);
 	TogglePlayerSpectating(playerid,false);
 	return 1;
 }
