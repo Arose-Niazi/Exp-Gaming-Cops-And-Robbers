@@ -26,9 +26,18 @@
 */
 
 // Permission helper (design §1.2) — every command gates identically through
-// this. IsCop / IsCivilian wait for the wanted/team system in M3.
+// this.
 stock IsStaff(playerid, rank)
 	return (PlayerInfo[playerid][pRank] >= rank);
+
+// Team helpers (design §1.2) — landed with the wanted/team system in M3.
+// pTeam mirrors PedsInfo[...][PedTeam]: CIVIL/POLICE/SHERIFF/FBI/UC_COP.
+// An undercover cop (UC_COP) is law enforcement but *appears* civilian.
+stock IsCop(playerid)
+	return (PlayerInfo[playerid][pTeam] == POLICE || PlayerInfo[playerid][pTeam] == SHERIFF || PlayerInfo[playerid][pTeam] == FBI || PlayerInfo[playerid][pTeam] == UC_COP);
+
+stock IsCivilian(playerid)
+	return (PlayerInfo[playerid][pTeam] == CIVIL);
 
 InsertTimeStamp()
 {
@@ -71,8 +80,8 @@ FUNCTION DelayedKick(playerid)
 
 UpdateMoney(playerid)
 {
-	if(PlayerInfo[playerid][pMoney] > GetPlayerMoney(playerid)) GivePlayerMoney(playerid,PlayerInfo[playerid][pMoney]-GetPlayerMoney(playerid));
-	else if(PlayerInfo[playerid][pMoney] < GetPlayerMoney(playerid)) GivePlayerMoney(playerid,GetPlayerMoney(playerid)-PlayerInfo[playerid][pMoney]);
+	new delta = PlayerInfo[playerid][pMoney] - GetPlayerMoney(playerid);
+	if(delta != 0) GivePlayerMoney(playerid, delta);
 	return 1;
 }
 

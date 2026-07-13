@@ -53,13 +53,49 @@ CREATE TABLE IF NOT EXISTS `LSplayers` (
     `MonthlyActivity` INT           NOT NULL DEFAULT 0,
     `Times_GPSUsed`   INT           NOT NULL DEFAULT 0,
     `AdminJailUntil`  INT           NOT NULL DEFAULT 0,      -- M2: unix time admin-jail ends (0 = free)
+    `Wanted`          INT           NOT NULL DEFAULT 0,      -- M3: wanted level 0-10 (§2.1)
+    -- M3 (stage 2): cop rewards + jail persistence (design §3)
+    `Score`           INT           NOT NULL DEFAULT 0,      -- player score (cop arrests/tickets etc.)
+    `CopRank`         INT           NOT NULL DEFAULT 0,      -- cop rank ladder 0-10 Recruit->Commissioner
+    `RefillPoints`    INT           NOT NULL DEFAULT 0,      -- M3: cop /refill points (§3.1)
+    `SeriousCrimes`   INT           NOT NULL DEFAULT 0,      -- violent/murder charge count (blocks appeal)
+    `Jailed`          TINYINT(1)    NOT NULL DEFAULT 0,      -- currently cop-jailed
+    `JailUntil`       INT           NOT NULL DEFAULT 0,      -- unix time the cop-jail sentence ends (0 = free)
+    `Bail`            INT           NOT NULL DEFAULT 0,      -- bail cost to buy out of jail
+    `JailReason`      VARCHAR(64)   NOT NULL DEFAULT '',     -- charge text
+    `EscapeChained`   TINYINT(1)    NOT NULL DEFAULT 0,      -- re-caught escapee, cannot /escape again
+    -- M3 (stage 3): player crime commands (design §4)
+    `Skill`           INT           NOT NULL DEFAULT 0,      -- civ/cop skill (pickpocket/con-artist/rapist/…) set at City Hall (M6)
+    `Drugs`           INT           NOT NULL DEFAULT 0,      -- grams of drugs carried (§4.3)
+    `STDs`            INT           NOT NULL DEFAULT 0,      -- STD bitmask Chlamydia..Mary Lou (§4.2)
+    `Condoms`         INT           NOT NULL DEFAULT 0,      -- condoms carried (reduce infection chance)
+    `ChastityBelt`    TINYINT(1)    NOT NULL DEFAULT 0,      -- prevents being raped, breakable
     PRIMARY KEY (`aID`),
     CONSTRAINT `fk_LSplayers_aID` FOREIGN KEY (`aID`)
         REFERENCES `players` (`aID`) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
--- Migration note (existing databases): the M2 column above is added by
+-- Migration note (existing databases): the M2/M3 columns above are added by
 --   ALTER TABLE `LSplayers` ADD `AdminJailUntil` INT NOT NULL DEFAULT 0;
+--   ALTER TABLE `LSplayers` ADD `Wanted`         INT NOT NULL DEFAULT 0;
+-- M3 (stage 2) cop + jail columns:
+--   ALTER TABLE `LSplayers`
+--     ADD `Score`         INT         NOT NULL DEFAULT 0,
+--     ADD `CopRank`       INT         NOT NULL DEFAULT 0,
+--     ADD `RefillPoints`  INT         NOT NULL DEFAULT 0,
+--     ADD `SeriousCrimes` INT         NOT NULL DEFAULT 0,
+--     ADD `Jailed`        TINYINT(1)  NOT NULL DEFAULT 0,
+--     ADD `JailUntil`     INT         NOT NULL DEFAULT 0,
+--     ADD `Bail`          INT         NOT NULL DEFAULT 0,
+--     ADD `JailReason`    VARCHAR(64) NOT NULL DEFAULT '',
+--     ADD `EscapeChained` TINYINT(1)  NOT NULL DEFAULT 0;
+-- M3 (stage 3) crime/drug/STD columns:
+--   ALTER TABLE `LSplayers`
+--     ADD `Skill`        INT        NOT NULL DEFAULT 0,
+--     ADD `Drugs`        INT        NOT NULL DEFAULT 0,
+--     ADD `STDs`         INT        NOT NULL DEFAULT 0,
+--     ADD `Condoms`      INT        NOT NULL DEFAULT 0,
+--     ADD `ChastityBelt` TINYINT(1) NOT NULL DEFAULT 0;
 -- (repeat for SFplayers/LVplayers when those cities go live).
 
 -- Per-city persistent vehicles (Los Santos)

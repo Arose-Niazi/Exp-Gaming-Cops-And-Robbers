@@ -72,6 +72,25 @@ FUNCTION LoadUserData(playerid)
 	cache_get_value_int(0, "MonthlyActivity",PlayerInfo[playerid][pMonthlyActivity]);
 	cache_get_value_int(0, "Times_GPSUsed",PlayerInfo[playerid][pTimes_GPSUsed]);
 	cache_get_value_int(0, "AdminJailUntil",PlayerInfo[playerid][pAdminJailUntil]);
+	cache_get_value_int(0, "Wanted",PlayerInfo[playerid][pWanted]);	// M3 — wanted level (§2.1)
+	// M3 (stage 2) — cop rewards + jail persistence (design §3).
+	cache_get_value_int(0, "Score",PlayerInfo[playerid][pScore]);
+	cache_get_value_int(0, "CopRank",PlayerInfo[playerid][pCopRank]);
+	cache_get_value_int(0, "RefillPoints",PlayerInfo[playerid][pRefillPoints]);	// M3 — cop /refill points (§3.1)
+	cache_get_value_int(0, "SeriousCrimes",PlayerInfo[playerid][pSeriousCrimes]);
+	cache_get_value_bool(0, "EscapeChained",PlayerInfo[playerid][pEscapeChained]);
+	cache_get_value_int(0, "Bail",PlayerInfo[playerid][pJailBail]);
+	cache_get_value_name(0, "JailReason", PlayerInfo[playerid][pJailReason],64);
+	// JailUntil is stored as absolute unix time (mirrors AdminJailUntil); the
+	// spawn re-jail check (CnR.pwn) re-applies it, or clears it if it lapsed.
+	cache_get_value_int(0, "JailUntil",PlayerInfo[playerid][pJailUntil]);
+	if(PlayerInfo[playerid][pJailUntil] > gettime()) PlayerInfo[playerid][pJailed]=true;
+	// M3 (stage 3) — crime/drug/STD persistence (design §4).
+	cache_get_value_int(0, "Skill",PlayerInfo[playerid][pSkill]);
+	cache_get_value_int(0, "Drugs",PlayerInfo[playerid][pDrugs]);
+	cache_get_value_int(0, "STDs",PlayerInfo[playerid][pSTD]);
+	cache_get_value_int(0, "Condoms",PlayerInfo[playerid][pCondoms]);
+	cache_get_value_bool(0, "ChastityBelt",PlayerInfo[playerid][pChastityBelt]);
 	TogglePlayerSpectating(playerid,false);
 	return 1;
 }

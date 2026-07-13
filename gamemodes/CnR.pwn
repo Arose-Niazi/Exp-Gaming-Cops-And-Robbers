@@ -172,6 +172,15 @@ new Text:ConnectTD[2];
 	#include "CnR\cmds\owner"
 	#include "CnR\cmds\scripter"
 	#include "CnR\systems\bans"
+
+	// ---- M3 : core CnR loop ----
+	#include "CnR\systems\wanted"
+	#include "CnR\systems\jail"
+	#include "CnR\cmds\cop"
+	// ---- M3 (stage 3) : player crime commands (std/drugs before crime.inc) ----
+	#include "CnR\systems\std"
+	#include "CnR\systems\drugs"
+	#include "CnR\cmds\crime"
 #else
 	#include "CnR/server/server_vars"
 	#include "CnR/players/player_vars"
@@ -203,6 +212,15 @@ new Text:ConnectTD[2];
 	#include "CnR/cmds/owner"
 	#include "CnR/cmds/scripter"
 	#include "CnR/systems/bans"
+
+	// ---- M3 : core CnR loop ----
+	#include "CnR/systems/wanted"
+	#include "CnR/systems/jail"
+	#include "CnR/cmds/cop"
+	// ---- M3 (stage 3) : player crime commands (std/drugs before crime.inc) ----
+	#include "CnR/systems/std"
+	#include "CnR/systems/drugs"
+	#include "CnR/cmds/crime"
 #endif
 
 new WeekDays[7][] = {
@@ -359,8 +377,18 @@ public OnPlayerDisconnect(playerid,reason)
 		{
 			mysql_format(g_SQL, string, sizeof(string), "UPDATE players SET LastOnline=NOW(),Online=0 WHERE aID=%d LIMIT 1",PlayerInfo[playerid][pID]);
 			mysql_pquery(g_SQL, string);
+			// M3 — persist the per-city wanted level (LSplayers.Wanted).
+			Wanted_SavePlayer(playerid);
+			// M3 (stage 3) — persist STD bitmask/condoms and drug stash/skill (§4.2/§4.3).
+			STD_SavePlayer(playerid);
+			Drug_SavePlayer(playerid);
 		}
-		
+		// M3 (stage 2) — kill the jail countdown timer + persist the jail row
+		// (Jail_OnDisconnect also unwinds any pending appeal/jury seat).
+		Jail_OnDisconnect(playerid);
+		// M3 (stage 2) — reset the cop /report undo state (static per-slot arrays).
+		Cop_OnDisconnect(playerid);
+
 	}
 	new szDisconnectReason[3][] =
 	{
@@ -499,10 +527,20 @@ public OnPlayerSpawn(playerid)
 		CreateClassTD(playerid);
 	}
 	// Re-apply a still-running admin-jail across relog/respawn (M2 — §11.2).
+	// Admin-jail ALWAYS takes precedence over cop-jail: if an admin-jail is
+	// running we re-place there and skip the cop-jail re-placement below.
 	if(PlayerInfo[playerid][pAdminJailUntil] > gettime())
 		ApplyAdminJail(playerid, 0, "Admin-jail resumed", SERVER_BOT);
-	else if(PlayerInfo[playerid][pAdminJailUntil] != 0)
-		PlayerInfo[playerid][pAdminJailUntil]=0;
+	else
+	{
+		if(PlayerInfo[playerid][pAdminJailUntil] != 0)
+			PlayerInfo[playerid][pAdminJailUntil]=0;
+		// M3 (stage 2) — re-apply a still-running cop-jail sentence (§3.2). Only
+		// reached when NOT admin-jailed, preserving admin-jail precedence.
+		if(!IsPlayerNPC(playerid)) Jail_OnPlayerSpawn(playerid);
+	}
+	// M3 — spawn protection + re-apply wanted name/blip colour on (re)spawn (§2.1, §2.5).
+	if(!IsPlayerNPC(playerid)) Wanted_OnPlayerSpawn(playerid);
 	return 1;
 }
 
@@ -511,6 +549,13 @@ public OnPlayerDeath(playerid,killerid,reason)
 	PlayerInfo[playerid][pInDMZone]=false;
 	if(!IsPlayerNPC(playerid))
 	{
+		// M3 — crime wanted (killer scaling) + death feed / fire "grilled" fix (§2.3, §7.11).
+		Wanted_OnPlayerDeath(playerid, killerid, reason);
+		// M3 (stage 3) — a fresh spawn is clean: clear STDs + drug buzz/overdose (§4.2/§4.3).
+		STD_OnPlayerDeath(playerid);
+		Drug_OnPlayerDeath(playerid);
+		// Dying wipes the victim's wanted level (arrest/takedown/escape all reset here).
+		ClearPlayerWanted(playerid, "");
 		ZoneHideTD(playerid);
 		switch(PedsInfo[PlayerInfo[playerid][pClassID]][PedTeam])
 		{
@@ -546,6 +591,11 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 		case REGISTER_DIALOG_PASSWORD, REGISTER_DIALOG_EMAIL,LOGIN_DIALOG:
 		{
 			REG_LOG_OnDialogResponse(playerid,dialogid,response,inputtext);
+		}
+		// M3 (stage 2) — cop /refill purchase menu.
+		case REFILL_DIALOG:
+		{
+			Refill_OnDialogResponse(playerid, response, listitem);
 		}
 	}
 	return 0;
@@ -617,6 +667,27 @@ public OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
 		Check_SAMP_Elevator(playerid);
 		Check_GRIN_Elevator(playerid);
 	}
+	return 1;
+}
+
+public OnPlayerStateChange(playerid, newstate, oldstate)
+{
+	if(!IsPlayerNPC(playerid))
+	{
+		// M3 — vehicle-jack crime detection (driver-seat theft of an occupied vehicle, §2.3).
+		Wanted_OnPlayerStateChange(playerid, newstate, oldstate);
+	}
+	return 1;
+}
+
+public OnPlayerWeaponShot(playerid, WEAPON:weaponid, BULLET_HIT_TYPE:hittype, hitid, Float:fX, Float:fY, Float:fZ)
+{
+	if(!IsPlayerNPC(playerid))
+	{
+		// M3 — drive-by handling: fold into attack + small wanted (§2.3, open Q9).
+		Wanted_OnPlayerWeaponShot(playerid, _:hittype, hitid);
+	}
+	#pragma unused weaponid, fX, fY, fZ
 	return 1;
 }
 
@@ -783,6 +854,14 @@ FUNCTION GameModeClock()
 		if(!IsPlayerConnected(playerid)) continue;
 		SetPlayerTime(playerid, GameHour, GameMinute);
 	}
+
+	// M3 — wanted-level decay runs on this 1-second tick (no new global timer, §2.4).
+	Wanted_OnGameModeClockTick();
+	// M3 (stage 2) — ticket→warrant escalation on the same tick (§2.4).
+	Cop_OnGameModeClockTick();
+	// M3 (stage 3) — STD HP drain + drug heal/overdose on the same tick (§4.2/§4.3).
+	STD_OnGameModeClockTick();
+	Drug_OnGameModeClockTick();
 
 	format(string, sizeof(string), "%s, %02d:%02d",WeekDays[GameDay],GameHour,GameMinute);
 

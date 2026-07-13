@@ -143,7 +143,73 @@ enum pInfo
 	bool:pDebugMode,			// scripter /debug toggle
 	pVCFreezeUntil,				// cop /visualcontact hold expiry (set in M3; blocks teleport)
 	bool:pHealthHackFlags,		// anti-cheat HP-hack suspicion (detection lands M3)
-	bool:pAimbotFlags			// anti-cheat aimbot suspicion (detection lands M3)
+	bool:pAimbotFlags,			// anti-cheat aimbot suspicion (detection lands M3)
+
+	// ---- M3 : wanted-level system (design §2) ----
+	pWanted,					// 0..MAX_WANTED (LSplayers.Wanted)
+	pWantedDecayCounter,		// seconds accumulated toward the next -1 decay tick
+	pVCByCop,					// playerid of the cop currently holding visual contact (-1 = none)
+	pSpawnProtectUntil,			// gettime() while spawn protection is active (0 = off)
+
+	// ---- M3 (stage 2) : cop + jail system (design §3) ----
+	pScore,						// player score (LSplayers.Score) — cop rewards / arrests
+	pCopRank,					// cop rank ladder 0..10 Recruit->Commissioner (LSplayers.CopRank)
+	pRefillPoints,				// cop /refill points earned by cop work, max REFILL_POINTS_MAX
+	pRefillCooldown,			// gettime() the next /refill is allowed (0 = ready)
+	pDonutCarry,				// /donut heals carried (reset at donut shop), max DONUT_CARRY_MAX
+	pSeriousCrimes,				// count of serious (murder/violent) crimes — blocks appeal (LSplayers.SeriousCrimes)
+
+	// ticket (issued by a cop, WL1-5); escalates to a warrant if unpaid in time
+	pTicketAmount,				// outstanding fine ($) — 0 = no ticket
+	pTicketByCop,				// cop id that issued the ticket (-1 = none)
+	pTicketExpiry,				// gettime() the ticket escalates to a warrant (§2.4)
+
+	// jail (cop-jail, distinct from the M2 admin-jail; admin-jail takes precedence)
+	bool:pJailed,				// currently cop-jailed (LSplayers.Jailed)
+	pJailUntil,					// gettime() the sentence ends (0 = free) [persisted as remaining]
+	pJailStart,					// gettime() the sentence began (for the served-minimum check)
+	pJailBail,					// bail cost to buy out (LSplayers.Bail)
+	pJailReason[64],			// charge text (LSplayers.JailReason)
+	pJailTimer,					// per-player release/tick timer handle (-1 = none)
+	bool:pEscapeChained,		// re-caught escapee, cannot /escape again (LSplayers.EscapeChained)
+
+	// bribe (jailed player offers cash to a nearby cop; cop /accept or /refuse)
+	pBribeTo,					// cop id the bribe was offered to (-1 = none)
+	pBribeAmount,				// bribe amount offered
+	pBribeFrom,					// (on the cop) jailed player id offering the bribe (-1 = none)
+
+	// appeal (jury of online players votes /guilty or /innocent)
+	bool:pOnJury,				// currently sitting on an appeal jury
+	pJuryFor,					// the jailed player this juror is voting on (-1 = none)
+	pAppealYes,					// (on the appellant) innocent votes tallied
+	pAppealNo,					// (on the appellant) guilty votes tallied
+	pAppealJurors,				// (on the appellant) jurors summoned for this appeal
+
+	// ---- M3 (stage 3) : player crime commands (design §4) ----
+	pSkill,						// civilian/cop skill (pickpocket/con-artist/rapist/…) — set at City Hall in M6 (LSplayers.Skill)
+
+	// /rob (§4.1)
+	pRobCooldown,				// gettime() the player may /rob again (per-robber cooldown)
+	pRobbedUntil,				// gettime() this player can be robbed again (per-victim cooldown)
+
+	// /rape + STD (§4.2)
+	pRapeCooldown,				// gettime() the player may /rape again
+	pSTD,						// STD bitmask (LSplayers.STDs) — STD_CHLAMYDIA..STD_MARYLOU
+	pSTDDrainCounter,			// seconds accumulated toward the next STD HP-drain tick
+	pCondoms,					// condoms carried (reduce infection chance) (LSplayers.Condoms)
+	bool:pChastityBelt,			// prevents being raped, breakable (LSplayers.ChastityBelt)
+
+	// /takedrugs + drug system (§4.3)
+	pDrugs,						// grams of drugs carried (LSplayers.Drugs)
+	bool:pHasDrugBag,			// §16 #2: doubles the Drug Dealer carry cap (acquired via M6 refill points)
+	bool:pDrugClickMode,		// /td with no amount → click-mode (5g/click, F exits)
+	pDrugBuzzStage,				// BUZZ_NONE..BUZZ_VERYHIGH (heal speed / buzz length)
+	pDrugEffectUntil,			// gettime() the current buzz ends (0 = not buzzed)
+	pDrugHealCounter,			// seconds accumulated toward the next small heal tick
+	bool:pDrugOverdose,			// currently overdosing (slow death until adrenaline)
+
+	// /jumpkick (§5)
+	pJumpkickCooldown			// gettime() the player may /jumpkick again
 }
 
 // Session-only ignore matrix (bit-packed to save memory): does A ignore B?
@@ -230,6 +296,35 @@ FUNCTION ClearPlayerVariables(playerid)
 	PlayerInfo[playerid][pNoPM]=PlayerInfo[playerid][pShowCommands]=PlayerInfo[playerid][pAdminDuty]=PlayerInfo[playerid][pAdminJailed]=false;
 	PlayerInfo[playerid][pInDMZone]=PlayerInfo[playerid][pDebugMode]=PlayerInfo[playerid][pHealthHackFlags]=PlayerInfo[playerid][pAimbotFlags]=false;
 	for(new i=0; i<sizeof(pIgnored[]); i++) pIgnored[playerid][i]=0;
+
+	// ---- M3 : wanted-level system ----
+	PlayerInfo[playerid][pWanted]=PlayerInfo[playerid][pWantedDecayCounter]=PlayerInfo[playerid][pSpawnProtectUntil]=0;
+	PlayerInfo[playerid][pVCByCop]=-1;
+
+	// ---- M3 (stage 2) : cop + jail system ----
+	PlayerInfo[playerid][pScore]=PlayerInfo[playerid][pCopRank]=PlayerInfo[playerid][pRefillPoints]=0;
+	PlayerInfo[playerid][pRefillCooldown]=PlayerInfo[playerid][pDonutCarry]=PlayerInfo[playerid][pSeriousCrimes]=0;
+	PlayerInfo[playerid][pTicketAmount]=PlayerInfo[playerid][pTicketExpiry]=0;
+	PlayerInfo[playerid][pTicketByCop]=-1;
+	if(PlayerInfo[playerid][pJailTimer] != -1) KillTimer(PlayerInfo[playerid][pJailTimer]);
+	PlayerInfo[playerid][pJailTimer]=-1;
+	PlayerInfo[playerid][pJailed]=PlayerInfo[playerid][pEscapeChained]=false;
+	PlayerInfo[playerid][pJailUntil]=PlayerInfo[playerid][pJailStart]=PlayerInfo[playerid][pJailBail]=0;
+	strdel(PlayerInfo[playerid][pJailReason],0,64);
+	PlayerInfo[playerid][pBribeTo]=PlayerInfo[playerid][pBribeFrom]=-1;
+	PlayerInfo[playerid][pBribeAmount]=0;
+	PlayerInfo[playerid][pOnJury]=false;
+	PlayerInfo[playerid][pJuryFor]=-1;
+	PlayerInfo[playerid][pAppealYes]=PlayerInfo[playerid][pAppealNo]=PlayerInfo[playerid][pAppealJurors]=0;
+
+	// ---- M3 (stage 3) : player crime commands ----
+	PlayerInfo[playerid][pSkill]=0;
+	PlayerInfo[playerid][pRobCooldown]=PlayerInfo[playerid][pRobbedUntil]=PlayerInfo[playerid][pRapeCooldown]=0;
+	PlayerInfo[playerid][pSTD]=PlayerInfo[playerid][pSTDDrainCounter]=PlayerInfo[playerid][pCondoms]=0;
+	PlayerInfo[playerid][pChastityBelt]=false;
+	PlayerInfo[playerid][pDrugs]=PlayerInfo[playerid][pDrugBuzzStage]=PlayerInfo[playerid][pDrugEffectUntil]=PlayerInfo[playerid][pDrugHealCounter]=0;
+	PlayerInfo[playerid][pDrugClickMode]=PlayerInfo[playerid][pDrugOverdose]=PlayerInfo[playerid][pHasDrugBag]=false;
+	PlayerInfo[playerid][pJumpkickCooldown]=0;
 
 	return 1;
 }
