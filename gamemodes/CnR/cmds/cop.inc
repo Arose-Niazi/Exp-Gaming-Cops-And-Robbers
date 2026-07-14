@@ -501,6 +501,10 @@ alias:parole("pl")
 CMD:accept(playerid, params[])
 {
 	#pragma unused params
+	// M6 (stage 3) — /accept doubles as the duel-challenge acceptor (§6.4). If a
+	// pending duel offer was resolved, stop here; else fall through to bribe accept.
+	// arenas.inc is included after this module, so it is reached via CallLocalFunction.
+	if(CallLocalFunction("Duel_TryAccept", "d", playerid)) return 1;
 	if(!IsCop(playerid)) return SendClientMessage(playerid, COLOR_ERROR, "Only law enforcement can accept a bribe.");
 	new briber = PlayerInfo[playerid][pBribeFrom];
 	if(briber == -1 || !IsPlayerConnected(briber) || PlayerInfo[briber][pBribeTo] != playerid || !Jail_IsJailed(briber))

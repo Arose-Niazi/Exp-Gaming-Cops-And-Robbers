@@ -99,7 +99,7 @@ enum
 	BANK_DEPOSIT_DIALOG,    // M4 (stage 1) — deposit amount input
 	BANK_WITHDRAW_DIALOG,   // M4 (stage 1) — withdraw amount input
 	RADIO_DIALOG,           // M4 (stage 2) — /radio preset stream URL picker (cmds/player.inc)
-	CROWBAR_BUY_DIALOG,     // M5 (stage 2) — /clotheswear crowbar confirm/buy prompt (§5.7)
+	CROWBAR_BUY_DIALOG,     // M5 (stage 2) — retired in M6 (the crowbar is now a /clotheswear menu entry, systems/clothes.inc); id kept to preserve enum numbering
 	HOUSE_MENU_DIALOG,      // M5 (stage 3) — /house owner menu (storage/lock/spawn/sell/rent, §9.1)
 	HOUSE_BUY_DIALOG,       // M5 (stage 3) — /buyhouse confirm prompt (§9.1)
 	HOUSE_STORE_DIALOG,     // M5 (stage 3) — /housestore deposit-money input (§9.1)
@@ -630,6 +630,19 @@ enum
 	MISSION_VEHICLE_THEFT,		// 4 — civ, 5 marked cars → chop-shop CP, $15k/car + $75k bonus, LAST car = WL10 (§6.19)
 	MISSION_HOLDUP_MISSION,		// 5 — civ, chain 3 store holdups ($10k+ each) + completion bonus (§6.7)
 	MISSION_AIRPORT_ROBBERY,	// 6 — civ, truck/van/garbage truck, /box box-collection mechanic, boxes→payout (§6.1)
+	// ---- M6 (stage 4) — the final ~12 missions (append, never renumber). --------
+	MISSION_COURIER_DELIVERY,	// 7 — civ, any vehicle, 5 city drops, warrant on pickup, distance pay, 12 game-hr window (§6.2)
+	MISSION_HOUSE_DELIVERY,		// 8 — civ, any vehicle, 5 house drops (some illegal → wanted), 12 game-hr window (§6.8)
+	MISSION_ILLEGAL_IMMIGRANT,	// 9 — innocent civ, pickup+return route, WANTED ON COMPLETION (not pickup), night hides cops (§6.9)
+	MISSION_LAWN_MOWING,		// 10 — civ, needs a mower, timed mow route (as-many-CPs), completion bonus (§6.10)
+	MISSION_PAPERBOY,			// 11 — innocent civ, ON FOOT, 4-min REAL-TIME limit, $500/delivery + count bonus (§6.11)
+	MISSION_PICKPOCKET,			// 12 — civ (Pickpocket skill scales), rob $10k target from players via /pickpocket (§6.12)
+	MISSION_SEXUAL_ENCOUNTER,	// 13 — innocent civ (Rapist/Prostitute scale), 5 encounters via /encounter, 5 game-hr (§6.15)
+	MISSION_TRACTOR,			// 14 — civ, needs a tractor, wraps the /farmjob crop system at CrazyBob's Farm (§6.16)
+	MISSION_FLOWER_DELIVERY,	// 15 — cop OR civ, deliver flowers to 5 players via /flowers, 6 game-hr (§6.5)
+	MISSION_RACE_CHALLENGE,		// 16 — all players, /challenge race framework (28 races as data), +1 finish/+2 podium (§6.13)
+	MISSION_ROUTINE_PATROL,		// 17 — COP, 5 sequential PD checkpoints, $2.5k/cp + $25k bonus = $37.5k (§6.14)
+	MISSION_DOMESTIC_DISTURBANCE,// 18 — COP, drive PD → a player-owned house, faster = bigger bonus (§6.3)
 	MISSION_COUNT				// keep last — number of registered missions (array sizes)
 }
 
@@ -734,6 +747,143 @@ enum
 #define AIRPHASE_DELIVER		2			// timer expired, drive the loot to the hideout
 
 // ============================================================================
+//  M6 (stage 4) — the final ~12 missions — systems/missions.inc (framework rows)
+//  Grounding: docs/GAMEPLAY-DESIGN.md §6.2 Courier, §6.3 Domestic Disturbance,
+//  §6.5 Flower, §6.8 House Delivery, §6.9 Illegal Immigrant, §6.10 Lawn Mowing,
+//  §6.11 Paperboy, §6.12 Pickpocket, §6.13 Race Challenges, §6.14 Routine Patrol,
+//  §6.15 Sexual Encounter, §6.16 Tractor + docs/research/crazybobs-site-full.md
+//  (exact payouts/structure/cooldowns). All payouts move through the Bank_* API.
+//  Most are plain framework rows (route + one switch arm); a few are bespoke
+//  target/real-time mechanics (Paperboy real-time deadline, Flower/Pickpocket/
+//  Sexual target-based, Race checkpoint route, Domestic single-house destination).
+// ============================================================================
+
+// ---- Courier Delivery (§6.2) — smuggle far→city, warrant on pickup ----------
+// Any land vehicle; 5 city drops; 12 game-hr window (= the cooldown). Warrant on
+// pickup (set at start). Distance-scaled bonus baked into the per-cp/bonus pay.
+#define MCOURIER_CP_PAY			6000		// $ per drop [OUR DESIGN — "higher than truck delivery" (§6.2), above MTRUCK]
+#define MCOURIER_BONUS			45000		// completion bonus (distance/time payment folded in) [OUR DESIGN]
+#define MCOURIER_COOLDOWN_HRS	12			// 12 game-hr window/cooldown (§6.2 VERIFIED time limit)
+#define MCOURIER_WANTED_START	4			// smuggling warrant on PICKUP (§6.2 VERIFIED — set at start)
+
+// ---- House Delivery (§6.8) — deliver to houses, some cargo illegal ----------
+// Any land vehicle; 5 house drops (reuse M5 housing coords); 12 game-hr window.
+// A random subset of drops carry illegal cargo → +wanted if a cop is in sight.
+#define MHOUSEDEL_CP_PAY		3500		// $ per house drop [OUR DESIGN — between food ($2.5k) and courier ($6k)]
+#define MHOUSEDEL_BONUS			30000		// completion bonus (time/distance folded in) [OUR DESIGN]
+#define MHOUSEDEL_COOLDOWN_HRS	3			// 3 game-hr cooldown (§6.8 [OUR DESIGN]; 12-hr window is the throttle)
+#define MHOUSEDEL_WANTED_PER_CP	2			// +2 wanted on an ILLEGAL drop if a cop is in sight (§6.8 [OUR DESIGN])
+#define MHOUSEDEL_ILLEGAL_PCT	40			// % chance any given drop carries illegal cargo (§6.8 "some illegal") [OUR DESIGN]
+
+// ---- Illegal Immigrant Transport (§6.9) — WANTED ON COMPLETION not pickup ---
+// Innocent civ; land vehicle; pickup outside city then return — a 5-CP route (the
+// last CP is the city drop). Night reduces cop "sight". Wanted issued only at the
+// FINAL drop (§6.9 VERIFIED), never on pickup.
+#define MIMMIG_CP_PAY			4000		// $ per leg [OUR DESIGN — smuggling premium over truck]
+#define MIMMIG_BONUS			40000		// completion bonus [OUR DESIGN]
+#define MIMMIG_COOLDOWN_HRS		4			// 4 game-hr cooldown (§6.9 [OUR DESIGN]; 12-hr window)
+#define MIMMIG_WANTED_COMPLETE	5			// wanted issued ON COMPLETION for transporting illegals (§6.9 VERIFIED)
+#define MIMMIG_NIGHT_START		20			// game-hour night window start (cops see less) (§6.9 VERIFIED night effect)
+#define MIMMIG_NIGHT_END		6			// game-hour night window end
+#define MIMMIG_COPSIGHT_DAY		80.0		// cop sight radius by day [OUR DESIGN — matches MISSION_COPSIGHT_RANGE]
+#define MIMMIG_COPSIGHT_NIGHT	35.0		// reduced cop sight radius at night (§6.9 VERIFIED) [OUR DESIGN]
+#define MIMMIG_WANTED_ENROUTE	2			// +2 wanted mid-route if a cop is in sight AND it is day (stealth, §6.9) [OUR DESIGN]
+
+// ---- Lawn Mowing (§6.10) — timed mow route, competitive checkpoint count -----
+// LV golf course; needs a lawn mower; reach as many CPs as possible (we run a
+// fixed route + a completion bonus scaled by count). Built-in restart wait on cancel.
+#define MLAWN_CP_PAY			800			// $ per mowed checkpoint [OUR DESIGN — low-stakes "relaxing" job (§6.10)]
+#define MLAWN_BONUS				8000		// completion bonus for the full route [OUR DESIGN]
+#define MLAWN_COOLDOWN_HRS		2			// 2 game-hr cooldown (§6.10 "wait several minutes"/built-in) [OUR DESIGN]
+#define MLAWN_MOWER_MODEL		572			// Mower (SA-MP vehicle model 572) — the lawn-mower gate (§6.10 VERIFIED)
+
+// ---- Paperboy (§6.11) — ON FOOT, 4-MINUTE REAL-TIME limit, $500/delivery -----
+// Innocent civ; walk to house-front checkpoints; a real-time (gettime) deadline on
+// the shared tick, NOT a game-hour window. $500/delivery + a count bonus.
+#define MPAPERBOY_CP_PAY		500			// $500 per delivery (§6.11 VERIFIED)
+#define MPAPERBOY_BONUS			5000		// completion bonus for the full route [OUR DESIGN — "bonus based on total"]
+#define MPAPERBOY_COOLDOWN_HRS	1			// 1 game-hr cooldown (§6.11 "~10 min real-time" — game-hr is ~10 real-min) [OUR DESIGN]
+#define MPAPERBOY_TIME_SECS		240			// 4-minute REAL-TIME limit (§6.11 VERIFIED — gettime deadline on the tick)
+
+// ---- Pickpocket Mission (§6.12) — rob a $10k target from players -------------
+// Target-based (bespoke, not a route): /pickpocket a nearby non-cop; the running
+// take counts toward a $10k goal within a window. Pickpocket skill scales the take.
+#define MPICKPOCKET_TARGET		10000		// total $ to steal from players to complete (§6.12 VERIFIED)
+#define MPICKPOCKET_COOLDOWN_HRS	3		// 3 game-hr cooldown (§6.12 [OUR DESIGN])
+#define MPICKPOCKET_WINDOW_HRS	6			// 6.5 game-hr window rounded to 6 — the run window (§6.12 VERIFIED ~6.5)
+#define MPICKPOCKET_RANGE		3.0			// on-foot reach to pickpocket a target (mirrors ROB_RANGE) [OUR DESIGN]
+#define MPICKPOCKET_CD_SECS		20			// per-target anti-spam cooldown seconds [OUR DESIGN]
+#define MPICKPOCKET_BASE_PCT		15		// % of a target's on-hand cash taken per hit (base) [OUR DESIGN]
+#define MPICKPOCKET_SKILL_PCT	35			// % taken per hit WITH the Pickpocket skill (scales, §6.12) [OUR DESIGN]
+#define MPICKPOCKET_BASE_SUCCESS	60		// base success chance % (a failed hit alerts the target) [OUR DESIGN]
+#define MPICKPOCKET_SKILL_SUCCESS	90		// success chance % WITH the Pickpocket skill (§6.12 "most effective") [OUR DESIGN]
+#define MPICKPOCKET_WANTED		2			// +2 wanted per successful pickpocket (§2.3 /rob) [VERIFIED underlying]
+#define MPICKPOCKET_COMPLETE_BONUS	15000	// completion bonus once the $10k target is met [OUR DESIGN]
+
+// ---- Sexual Encounter (§6.15) — complete 5 encounters via /encounter --------
+// Target-based (bespoke): /encounter a nearby non-cop; 5 successful encounters in
+// the window completes. Rapist/Prostitute skill boosts the per-encounter success.
+#define MSEX_ENCOUNTERS			5			// 5 encounters to complete (§6.15 VERIFIED)
+#define MSEX_COOLDOWN_HRS		3			// 3 game-hr cooldown (§6.15 [OUR DESIGN])
+#define MSEX_WINDOW_HRS			5			// 5 game-hr window (§6.15 VERIFIED)
+#define MSEX_RANGE				3.0			// on-foot reach to a target for /encounter [OUR DESIGN]
+#define MSEX_CD_SECS			20			// per-encounter anti-spam cooldown seconds [OUR DESIGN]
+#define MSEX_BASE_SUCCESS		55			// base per-encounter success chance % [OUR DESIGN]
+#define MSEX_SKILL_SUCCESS		85			// success chance % WITH the Rapist/Prostitute skill (§6.15 VERIFIED boost) [OUR DESIGN]
+#define MSEX_PAY_PER_ENCOUNTER	3000		// $ paid per successful encounter [OUR DESIGN]
+#define MSEX_COMPLETE_BONUS		20000		// completion bonus for all 5 encounters [OUR DESIGN]
+
+// ---- Tractor Mission (§6.16) — wraps the /farmjob crop system ----------------
+// Needs a tractor; the launcher hands off to the M6-stage-2 /farmjob at CrazyBob's
+// Farm (a plow/harvest field route). The mission row carries the launcher marker +
+// cooldown only; the run itself is farming.inc's field-checkpoint loop.
+#define MTRACTOR_COOLDOWN_HRS	2			// 2 game-hr cooldown (§6.16 built-in wait) [OUR DESIGN]
+#define MTRACTOR_MODEL			531			// Tractor (SA-MP vehicle model 531) — the tractor gate (§6.16 VERIFIED)
+
+// ---- Flower Delivery (§6.5) — deliver flowers to 5 players via /flowers ------
+// COP OR CIV; target-based (bespoke): /flowers a nearby player; 5 distinct players
+// in the window completes. No wanted. Can start at the mission marker or a church.
+#define MFLOWER_DELIVERIES		5			// 5 different players to complete (§6.5 VERIFIED)
+#define MFLOWER_COOLDOWN_HRS	2			// 2 game-hr cooldown (§6.5 [OUR DESIGN])
+#define MFLOWER_WINDOW_HRS		6			// 6 game-hr window (§6.5 VERIFIED)
+#define MFLOWER_RANGE			4.0			// on-foot reach to hand flowers to a player [OUR DESIGN]
+#define MFLOWER_PAY_PER			1500		// $ paid per flower delivered [OUR DESIGN]
+#define MFLOWER_COMPLETE_BONUS	12000		// completion bonus for all 5 deliveries [OUR DESIGN — "a cash bonus"]
+
+// ---- Race Challenges (§6.13) — /challenge race framework --------------------
+// A checkpoint race against a par time. First attempt free, then a fee. +1 finish,
+// +2 podium (par-beat). 28 races on the official site — we ship a representative
+// data set spanning land/bike/boat categories; add more by appending g_RaceReg rows.
+#define MRACE_COOLDOWN_HRS		1			// 1 game-hr cooldown between race runs [OUR DESIGN — races are repeatable]
+#define MRACE_RETRY_FEE			5000		// $ for a second+ attempt at a race (first is free, §6.13 VERIFIED) [OUR DESIGN amount]
+#define MRACE_FINISH_PAY		10000		// Top-10/finish cash (§6.13 "Top 10 earns cash") [OUR DESIGN amount]
+#define MRACE_PODIUM_BONUS		15000		// extra cash for a podium (beat the par time) finish [OUR DESIGN]
+#define MRACE_CP_SIZE			8.0			// race-checkpoint radius (bigger for driving speed) [OUR DESIGN]
+#define MRACE_MAX_CHECKPOINTS	8			// max checkpoints in a single race route (array bound) [OUR DESIGN]
+#define MRACE_SELECT_DIALOG		5305		// /challenge race picker dialog id (unique) [OUR DESIGN]
+#define MRACE_CATEGORY_LAND		0			// land vehicles (§6.13)
+#define MRACE_CATEGORY_BIKE		1			// bikes only (§6.13)
+#define MRACE_CATEGORY_BOAT		2			// boats only (§6.13)
+
+// ---- Routine Patrol (§6.14, COP) — 5 sequential PD checkpoints --------------
+// Cop-only; land vehicle; 5 sequential checkpoints; $2,500/cp + $25,000 bonus =
+// $37,500 (VERIFIED verbatim). No wanted. 2 game-hr cooldown.
+#define MPATROL_CP_PAY			2500		// $2,500 per checkpoint (§6.14 VERIFIED)
+#define MPATROL_BONUS			25000		// $25,000 completion bonus → $37,500 total (§6.14 VERIFIED)
+#define MPATROL_COOLDOWN_HRS	2			// 2 game-hr cooldown (§6.14 [OUR DESIGN])
+
+// ---- Domestic Disturbance (§6.3, COP) — drive PD → a player-owned house -----
+// Cop-only; a SINGLE destination (a random player-owned house, reusing M5 housing
+// coords); faster arrival = bigger bonus. No wanted. The bonus decays over a par
+// time. Bespoke single-CP handler (not a multi-drop route).
+#define MDOMESTIC_COOLDOWN_HRS	2			// 2 game-hr cooldown (§6.3 [OUR DESIGN])
+#define MDOMESTIC_BASE_PAY		15000		// guaranteed base bonus for reaching the house [OUR DESIGN]
+#define MDOMESTIC_SPEED_MAX		25000		// max additional speed bonus (arrive within par) [OUR DESIGN]
+#define MDOMESTIC_PAR_SECS		90			// real-seconds "par" — full speed bonus if you beat it (§6.3 "faster=bigger") [OUR DESIGN]
+#define MDOMESTIC_TIMEOUT_SECS	300			// real-seconds before the call is abandoned (no bonus) [OUR DESIGN]
+#define MDOMESTIC_CP_SIZE		4.0			// destination checkpoint radius [OUR DESIGN]
+
+// ============================================================================
 //  M5 (stage 4) — kidnap crime (§4.4) — systems/kidnap.inc
 //  /kidnap (/kd) a nearby non-cop: hold them (force into your vehicle / cuff on
 //  foot), set a ransom (≤$50k), always earn a warrant (+1 civ / +6 cop kidnapped),
@@ -759,6 +909,217 @@ enum
 // SKILL_NONE and the base ransom applies. The id is APPENDED to the skill enum
 // so the M6 skill work is a data change only (mirrors the pickpocket/rapist plan).
 #define SKILL_KIDNAPPER			5			// Kidnapper — appears as Driver, ransom scaling (M6 skill, §4.4)
+
+// ============================================================================
+//  M6 (stage 1) — skills, fighting styles & clothes (design §9.8/§9.7/§5.7,
+//  jobs-progression §1.2/§2, crazybobs-site-full §Skills/§Gym/§Clothes).
+//  systems/skills.inc (/skill), systems/fightstyle.inc (/fightstyle),
+//  systems/clothes.inc (/clotheswear). These ACTIVATE the M3-M5 skill hooks
+//  (rob cap, rape success, drug carry cap, kidnap ransom scaling, carjack-lock
+//  defeat) — all of which already read pSkill — plus persist FightStyle/HasDrugBag.
+// ============================================================================
+
+// ---- Skill ids (pSkill / LSplayers.Skill) — set at City Hall via /skill -----
+// The first six ids are the enum in this file (SKILL_NONE..SKILL_DRUGDEALER) plus
+// SKILL_KIDNAPPER above; the remaining civilian skills are appended here as plain
+// defines (a data change only — each effect already reads pSkill). Cop-family
+// skills are NOT chooseable civilian skills; they follow the team/agency (jobs §1.3).
+#define SKILL_CARJACKER			6			// Car Jacker — defeats vehicle locks (§9.12 / vehicle_own.inc), faster crane sell
+#define SKILL_HITMAN			7			// Hitman — hit contracts (M7+ hits system; effect deferred, choosable now)
+#define SKILL_ARMSDEALER		8			// Arms Dealer — sell weapons to civilians (M7 vendor system; choosable now)
+#define SKILL_STREETVENDOR		9			// Street Vendor — sell items to anyone incl. cops (M7 vendor system)
+#define SKILL_PROSTITUTE		10			// Prostitute — /sex + strip (M7 vendor system)
+#define SKILL_FOODDELIVERY		11			// Food Delivery — sell food/drinks (M7 vendor system)
+#define SKILL_MAX				11			// highest valid civilian skill id (bounds the /skill dialog)
+
+// /skill re-pick (jobs §1.2 — "change skill at City Hall, for a price"). Changeable
+// with a cost + a cooldown so it is not free-swapped mid-fight.
+#define SKILL_CHANGE_COST		25000		// $ charged to CHANGE an existing skill (first pick is free) [OUR DESIGN]
+#define SKILL_CHANGE_CD			300			// seconds between skill changes (5 min re-pick cooldown) [OUR DESIGN]
+#define SKILL_ACTOR_RANGE		6.0			// proximity to a City Hall actor / marker to use /skill (§9.8) [OUR DESIGN]
+#define SKILL_CHANGE_DIALOG		5401		// /skill picker list dialog id (unique — avoids the defines.inc enum)
+// Kidnapper skill ransom scaling (§4.4 — the M6 "ransom scaling" hook). A Kidnapper
+// can demand up to 3x the base ceiling and earns a bigger grab bonus.
+#define KIDNAP_SKILL_RANSOM_MULT	3		// Kidnapper skill ransom ceiling multiplier (§4.4 ransom scaling) [OUR DESIGN]
+#define KIDNAP_SKILL_GRAB_BONUS		4000	// Kidnapper skill grab bonus (vs KIDNAP_GRAB_BONUS base) [OUR DESIGN]
+// Weapon skills (§9.8 resolved: classic feel — max all weapon skills on spawn).
+#define WEAPON_SKILL_LEVEL		999			// SetPlayerSkillLevel level applied to every weapon skill on spawn (Hitman tier, §2.1)
+
+// ---- Fighting styles at the gym (§9.8 / jobs §2.2) — systems/fightstyle.inc --
+// SA-MP FIGHTING_STYLE_* ids: NORMAL(4) BOXING(5) KUNGFU(6) KNEEHEAD(7) GRABKICK(15)
+// ELBOW(16). CB offered 3 options at 3 gyms (Ganton/Garcia/Redsands East). We expose
+// the 3 visually-distinct melee styles (Boxing/Kung-Fu/Knee-head) for a small fee.
+#define FIGHTSTYLE_DEFAULT		4			// FIGHTING_STYLE_NORMAL — the LSplayers.FightStyle default (matches §11.2 DEFAULT 4)
+#define FIGHTSTYLE_FEE			500			// small fee per style change (§9.8 / jobs §2.2 "$500") [DESIGN]
+#define FIGHTSTYLE_GYM_RANGE	8.0			// proximity to a gym marker to use /fightstyle [OUR DESIGN]
+#define FIGHTSTYLE_DIALOG		5402		// /fightstyle picker list dialog id (unique)
+
+// ---- Clothes & accessories (§9.7 / §5.7 / clothes-accessories) — clothes.inc -
+// /clotheswear is the full clothes menu: skins (pSkinsSelected, peds.inc), the
+// crowbar accessory ($40,000, pCrowbarEquipped — unified with the M5 /buycrowbar),
+// and the drug bag ($15,000 — doubles the Drug Dealer carry cap, activates pHasDrugBag).
+#define CLOTHES_SHOP_RANGE		8.0			// proximity to a clothes-shop marker (Binco/ProLaps/Victim/…) [OUR DESIGN]
+#define CLOTHES_SKIN_PRICE		8000		// $ to buy+wear a not-yet-owned civilian skin (owned skins re-worn free) [OUR DESIGN]
+#define DRUGBAG_PRICE			15000		// $ for a drug bag — doubles the Drug Dealer carry cap (§16 #2 / §4.3) [OUR DESIGN]
+#define CLOTHES_MENU_DIALOG		5403		// /clotheswear top menu dialog id (unique)
+#define CLOTHES_SKINS_DIALOG	5404		// /clotheswear -> skins list dialog id (unique)
+
+// ============================================================================
+//  M6 (stage 2) — fishing & farming — systems/fishing.inc + systems/farming.inc
+//  Grounding: docs/GAMEPLAY-DESIGN.md §9.2 (fishing), §9.3 (farming/drug growing),
+//  §10.2 (economy: fish × FISH_MARKET, drugs × DRUG — market mults are M7 stubs),
+//  §11.2 (FishPermits/HuntPermits/DrugSeeds columns), §11.3 (plants table) +
+//  docs/research/economy.md §8-9 + docs/research/crazybobs-site-full.md (Fishing,
+//  Drug Planting & Hunting, Bait Shop). All money moves through the Bank_* API;
+//  drug sales feed pDrugs (Drug_GiveGrams); drug farming respects wanted/cops.
+// ============================================================================
+
+// ---- Bait Shop pricing (economy.md §2.3 — VERIFIED sample prices) ----------
+#define FISHING_ROD_PRICE		20000		// fishing rod — faster + higher catch chance (§9.2 VERIFIED $20,000)
+#define FISH_COOLER_PRICE		20000		// fish cooler — hold more fish (§9.2 VERIFIED $20,000)
+#define FISH_SALES_PERMIT_PRICE	20000		// fish sales permit — sell to players (§9.2 VERIFIED $20,000)
+// Fishing permits sold in bundles (Bait Shop): 5/10/25 = $8,000/$12,000/$20,000.
+#define FISH_PERMIT_BUNDLE_5	8000		// 5-fish permit bundle price (§9.2 VERIFIED)
+#define FISH_PERMIT_BUNDLE_10	12000		// 10-fish permit bundle price (§9.2 VERIFIED)
+#define FISH_PERMIT_BUNDLE_25	20000		// 25-fish permit bundle price (§9.2 VERIFIED)
+#define FISH_PERMIT_MAX			50			// max fishing permits carried (§9.2 VERIFIED "carry up to 50")
+// Hunting permits sold in bundles (Bait Shop): 5/10 deer = $4,000/$6,000.
+#define HUNT_PERMIT_BUNDLE_5	4000		// 5-deer hunting permit bundle price (§9.3 VERIFIED)
+#define HUNT_PERMIT_BUNDLE_10	6000		// 10-deer hunting permit bundle price (§9.3 VERIFIED)
+#define HUNT_PERMIT_MAX			20			// max hunting permits carried (§9.3 VERIFIED "carry up to 20")
+// Drug seeds (24/7/Bait/Refill/Street Vendor): $1,200 each, 5-pack $4,000.
+#define DRUG_SEED_PRICE			1200		// single drug seed price (§9.3 VERIFIED)
+#define DRUG_SEED_BUNDLE_5		4000		// 5-pack drug seed price (§9.3 VERIFIED)
+#define DRUG_SEED_MAX			10			// max seeds carried (§9.3 VERIFIED "carry max 10")
+
+// ---- Fishing (systems/fishing.inc — design §9.2) ---------------------------
+#define FISH_SPOT_RANGE			6.0			// on-foot reach to a pier/fishing spot to /fish [OUR DESIGN]
+#define FISH_CATCH_SECS			5			// seconds to reel in a catch after /fish; rod halves it (§9.2)
+#define FISH_CATCH_SECS_ROD		3			// reel-in seconds WITH a rod (faster, §9.2 VERIFIED "reduces time")
+#define FISH_COOLER_CAP			10			// fish held with a cooler (matches the house-storage fish cap, §9.2)
+#define FISH_NOCOOLER_CAP		2			// fish held without a cooler [OUR DESIGN — cooler is the upgrade]
+#define FISH_WEIGHT_MIN			2			// minimum catch weight (lb) [OUR DESIGN]
+#define FISH_WEIGHT_MAX			85			// maximum catch weight (lb) — heavy catches are rare (§8.2 baby-seal ~80lb)
+#define FISH_BASE_PRICE			8			// $ per (pound × rarity) base — pre-market-mult (§8.2, trout ~$400 anchor) [OUR DESIGN]
+#define FISH_ROD_RARITY_BONUS	1			// a rod nudges the rarity roll up by this much (§9.2 "higher catch chance")
+#define FISH_SKILL_RARITY_BONUS	1			// Fisherman skill nudges the rarity roll up (§9.2 skill perk)
+#define FISH_NOPERMIT_WANTED	1			// +1 wanted for fishing near a cop with no permit (§9.2 VERIFIED)
+#define FISH_COPSIGHT_RANGE		60.0		// a cop within this counts as "watching you fish" [OUR DESIGN]
+#define FISH_BONUS_HOUR			5			// bonus fish announced/claimable at game-hour 05:00 (§9.2 VERIFIED)
+#define FISH_BONUS_REWARD		250000		// large cash reward to the first bonus-fish catcher (§9.2 "large amount") [OUR DESIGN]
+
+// Fish rarity tiers (species class → rarity multiplier + name). Higher tier = rarer
+// + bigger multiplier; the rare top tier (Baby Seal) is the huge payout (§8.2).
+enum
+{
+	FISH_RARITY_COMMON,		// 0 — trout/boot/tin can (×1)
+	FISH_RARITY_UNCOMMON,	// 1 — bass/catfish (×2)
+	FISH_RARITY_RARE,		// 2 — turtle/marlin (×5)
+	FISH_RARITY_LEGENDARY	// 3 — baby seal / killer fish (×12) — the big payout (§8.2)
+}
+#define FISH_RARITY_TIERS		4			// number of rarity tiers (bounds the rarity roll)
+// Rarity roll: random(100) < these thresholds → tier. Legendary is deliberately rare.
+#define FISH_ROLL_LEGENDARY		3			// < this % → legendary (baby seal, §8.2)
+#define FISH_ROLL_RARE			15			// < this % → rare
+#define FISH_ROLL_UNCOMMON		45			// < this % → uncommon; else common
+
+// ---- Farming: drug planting (systems/farming.inc — design §9.3) ------------
+#define MAX_PLANTS				256			// hard array bound (DB `plants` rows loaded on init) [OUR DESIGN]
+#define MAX_PLANTS_PER_PLAYER	5			// max active plants per player (§9.3 VERIFIED "Max 5 active plants")
+#define DRUG_PLANT_GROW_SECS	1200		// ~20 minutes of ACCRUED (online) grow time to full (§9.3 VERIFIED "~20 minutes")
+#define DRUG_PLANT_MAX_GRAMS	200			// full-grown yield (§9.3 VERIFIED "up to 200 grams")
+#define DRUG_PLANT_HARVEST_MIN	50			// minimum grams to harvest for +1 score (§9.3 VERIFIED ">50g")
+#define DRUG_PLANT_RANGE		4.0			// on-foot reach to /harvest / interact with a plant (§9.3)
+#define DRUG_PLANT_SPACING		15.0		// plants must be at least this far apart / from water (§9.3 "not near other plants") [OUR DESIGN]
+#define DRUG_PLANT_CP_SIZE		2.0			// red checkpoint radius on a plant (§9.3 "red checkpoint")
+#define DRUG_PLANT_CP_MODEL		19		    // plant object model near the checkpoint (a bush/plant) [OUR DESIGN]
+#define DRUG_PLANT_ICON_RANGE	60.0		// how far the plant is spottable — cops see it from further (§9.3)
+#define DRUG_PLANT_FERT_MULT	2			// fertilizer multiplies grow speed by this (§9.3 "accelerates growth")
+#define DRUG_DEALER_GROW_MULT	2			// Drug Dealers grow faster (§9.3 VERIFIED "Drug Dealers grow faster")
+#define DRUG_PLANT_WANTED		2			// +2 wanted if a cop is in sight when planting/harvesting (§9.3 illegal) [OUR DESIGN]
+#define DRUG_PLANT_COPSIGHT		60.0		// a cop within this "sees" the illegal farming [OUR DESIGN]
+#define DRUG_SELL_MIN_GRAMS		200			// minimum grams sold at a refill point for +1 score (§9.3 VERIFIED "minimum 200g")
+#define DRUG_SELL_PRICE_PER_G	14			// $ per gram of grown drugs sold at a refill point (pre-market-mult) [OUR DESIGN — Vigora 14g/$13k anchor]
+#define DRUG_SELL_RANGE			6.0			// on-foot reach to a Drug Refill Point to /drugsell [OUR DESIGN]
+
+// ---- Farming: hunting (deer) — design §9.3 (minimal) -----------------------
+#define HUNT_RANGE				20.0		// reach in front of the player to /hunt a deer [OUR DESIGN]
+#define HUNT_NOPERMIT_WANTED	6			// +6 wanted for killing a deer with no hunting permit (§9.3 VERIFIED "+6 wanted")
+#define HUNT_HEAL				25.0		// HP a successful hunt restores (§9.3 VERIFIED "provides health") [OUR DESIGN]
+#define HUNT_CASH_MIN			1500		// meat/bonus cash floor per deer [OUR DESIGN]
+#define HUNT_CASH_MAX			4000		// meat/bonus cash ceiling per deer [OUR DESIGN]
+#define HUNT_CD					30			// per-player /hunt cooldown seconds [OUR DESIGN]
+
+// ---- Legal crop job: CrazyBob's Farm (Flint County, §9.3) ------------------
+// A plow/harvest loop of checkpoints at CrazyBob's Farm for legit low-yield cash.
+// This is the FARM crop SYSTEM (/farmjob); the Tractor MISSION (stage 4) wraps it.
+#define FARM_JOB_FIELDS			5			// number of field checkpoints in a farm-job route (§9.3)
+#define FARM_JOB_CP_SIZE		6.0			// field checkpoint radius (drive the harvester over it)
+#define FARM_JOB_PAY_MIN		500			// $ per field completed floor (§9.3 VERIFIED "$500-$2,000/field")
+#define FARM_JOB_PAY_MAX		2000		// $ per field completed ceiling (§9.3 VERIFIED)
+#define FARM_JOB_BONUS			5000		// completion bonus for all fields [OUR DESIGN]
+#define FARM_JOB_CD				120			// per-player farm-job cooldown seconds after finishing/cancel [OUR DESIGN]
+#define FARM_JOB_RANGE			8.0			// on-foot reach to the CrazyBob's Farm start marker [OUR DESIGN]
+// CrazyBob's Farm start marker (Flint County, south of Easter Bay Intl — §9.3).
+#define FARM_X					(-315.0)
+#define FARM_Y					(-1420.0)
+#define FARM_Z					(25.7)
+
+// ---- Fishing/farming dialog ids (unique — outside the defines.inc enum) -----
+#define BAIT_SHOP_DIALOG		5501		// Bait Shop buy menu (rod/cooler/permits/seeds, §9.2/§9.3)
+#define REFILL_SELL_DIALOG		5502		// Drug Refill Point sell/seed menu (§9.3)
+
+//==============================================================================
+//	M6 (stage 3) : DM / sniper / duel arenas (design §9.6 / jobs §6)
+//==============================================================================
+// Arena kinds (also the pArena value; ARENA_NONE = not in an arena).
+#define ARENA_NONE				0
+#define ARENA_DMS				1			// DM Stadium free-for-all (§6.1)
+#define ARENA_SNIPER			2			// sniper-only arena (§6.5)
+#define ARENA_DUEL				3			// 1v1 duel (§6.4)
+
+// Economy (jobs §6.1 — VERIFIED $5,000 entry / $1,000 per death).
+#define ARENA_ENTRY_FEE			5000		// DMS/sniper entry fee (Bank_TakeCash)
+#define ARENA_DEATH_COST		1000		// charged per death inside DMS/sniper
+#define ARENA_LIFE_AMMO			2500		// ammo per weapon per life (crazybobs dm-stadium page)
+
+// Isolated virtual worlds so arena PvP never touches the city (§6.4). Each arena
+// kind gets its own base VW; duels add the challenger id for a private world.
+#define ARENA_VW_DMS			7100
+#define ARENA_VW_SNIPER			7200
+#define ARENA_VW_DUEL_BASE		7300		// duel VW = base + challenger id (unique per pair)
+
+// DM Stadium (LS) — the existing /lossantosdm warp spot is the LS forum roof arena.
+#define DMS_X					(1544.8907)
+#define DMS_Y					(-1353.6543)
+#define DMS_Z					(329.4738)
+#define DMS_A					(0.0)
+
+// Sniper arena — an isolated rooftop-style spread (LS, reuse the DM stadium area
+// but its own VW so the two never mix).
+#define SNIPER_X				(1476.5)
+#define SNIPER_Y				(-1348.9)
+#define SNIPER_Z				(329.4738)
+#define SNIPER_A				(90.0)
+
+// Duel arena — two facing spawn points on the flat LS forum roof (same confirmed-
+// flat ground as the DM stadium; each pair gets an isolated VW so they never mix).
+#define DUEL_X1					(1524.0)
+#define DUEL_Y1					(-1353.65)
+#define DUEL_Z1					(329.4738)
+#define DUEL_A1					(90.0)
+#define DUEL_X2					(1565.0)
+#define DUEL_Y2					(-1353.65)
+#define DUEL_Z2					(329.4738)
+#define DUEL_A2					(270.0)
+
+#define DUEL_STAKE_MAX			10000000	// sanity cap on a duel stake (both must afford it)
+#define DUEL_OFFER_SECS			30			// seconds a duel challenge stays open before it lapses
+#define DUEL_COUNTDOWN_SECS		3			// 3-2-1 freeze before the duel goes live
+
+// Safe / no-crime zones (design §2.5 / §9.10) — hospital & RPC bar interiors are
+// no-crime. Radius the on-foot proximity check uses to set pInSafeZone.
+#define SAFE_ZONE_RADIUS		25.0
 
 #define isNull(%1) \
                 ((!(%1[0])) || (((%1[0]) == '\1') && (!(%1[1]))))

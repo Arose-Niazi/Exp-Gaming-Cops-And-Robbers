@@ -88,11 +88,14 @@ static bool:Veh_ValidId(vehicleid)
 // Push the door-lock state of `vehicleid` to a single player: the owner (its last
 // driver) always keeps access; everyone else is locked out when gVehLocked is set.
 // SetVehicleParamsForPlayer(veh, forid, objective, doors) — doors=1 locks.
+// M6 (stage 1): a Car Jacker (SKILL_CARJACKER, §9.12) is NEVER door-locked out — the
+// skill defeats vehicle locks, so the client doors stay open for them and they can
+// enter to trigger the lock-break/theft path in Veh_OnPlayerStateChange.
 FUNCTION Veh_RefreshLockForPlayer(vehicleid, forid)
 {
 	if(!Veh_ValidId(vehicleid)) return 0;
 	if(forid == INVALID_PLAYER_ID || !IsPlayerConnected(forid) || IsPlayerNPC(forid)) return 0;
-	new bool:lockOut = (gVehLocked[vehicleid] && gVehLastDriver[vehicleid] != forid);
+	new bool:lockOut = (gVehLocked[vehicleid] && gVehLastDriver[vehicleid] != forid && PlayerInfo[forid][pSkill] != SKILL_CARJACKER);
 	SetVehicleParamsForPlayer(vehicleid, forid, 0, lockOut ? 1 : 0);
 	return 1;
 }
@@ -179,12 +182,28 @@ FUNCTION Veh_OnPlayerStateChange(playerid, newstate, oldstate)
 		if(Veh_ValidId(vehicleid) && gVehLocked[vehicleid] && gVehLastDriver[vehicleid] != playerid)
 		{
 			// The owner entering the DRIVER seat auto-unlocks (handled below); any
-			// other entry into a locked car by a non-owner is ejected.
+			// other entry into a locked car by a non-owner is ejected — UNLESS the
+			// intruder is a Car Jacker (M6 SKILL_CARJACKER, §9.12), whose skill
+			// DEFEATS the lock: they force it open, become the new owner, and the
+			// vehicle unlocks. pSkill is set at City Hall via systems/skills.inc.
 			if(!(newstate == PLAYER_STATE_DRIVER && gVehLastDriver[vehicleid] == playerid))
 			{
-				RemovePlayerFromVehicle(playerid);
-				SendClientMessage(playerid, COLOR_ERROR, "This vehicle is locked.");
-				return 1;
+				if(newstate == PLAYER_STATE_DRIVER && PlayerInfo[playerid][pSkill] == SKILL_CARJACKER)
+				{
+					// Break the lock: clear it, push the new door state to everyone, and
+					// let control fall through to the theft/ownership path below (taking a
+					// locked, owned, not-yours car is still Grand Theft Auto — the skill
+					// only bypasses the door, not the crime).
+					gVehLocked[vehicleid] = false;
+					Veh_RefreshLockForAll(vehicleid);
+					SendClientMessage(playerid, COLOR_SERVER_INFO, ""COL_ORANGE"* Car Jacker: "COL_WHITE"you forced the lock open.");
+				}
+				else
+				{
+					RemovePlayerFromVehicle(playerid);
+					SendClientMessage(playerid, COLOR_ERROR, "This vehicle is locked.");
+					return 1;
+				}
 			}
 		}
 	}

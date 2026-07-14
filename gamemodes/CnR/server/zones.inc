@@ -673,6 +673,10 @@ FUNCTION OnPlayerEnterZone(playerid,areaid)
 	else format(string,sizeof(string),"~w~%s",PlayerInfo[playerid][pZoneName]);
 	PlayerTextDrawSetString(playerid,ZoneNameTD,string);
 	PlayerInfo[playerid][pZone]=zone;
+	// M6 (stage 3) — refresh the general safe / no-crime flag (hospital / RPC) on
+	// zone change (§9.10). arenas.inc is included after this module, so it is
+	// reached via CallLocalFunction.
+	CallLocalFunction("Arena_UpdateSafeZone","d",playerid);
 	return 1;
 }
 
@@ -719,6 +723,8 @@ FUNCTION OnPlayerLeaveZone(playerid,areaid)
 	else format(string,sizeof(string),"~w~%s",PlayerInfo[playerid][pZoneName]);
 	PlayerTextDrawSetString(playerid,ZoneNameTD,string);
 	PlayerInfo[playerid][pZone]=zone;
+	// M6 (stage 3) — refresh the general safe / no-crime flag on zone change (§9.10).
+	CallLocalFunction("Arena_UpdateSafeZone","d",playerid);
 	return 1;
 }
 

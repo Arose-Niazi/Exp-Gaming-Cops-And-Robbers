@@ -234,8 +234,11 @@ FUNCTION Drug_OnPlayerDeath(playerid)
 FUNCTION Drug_SavePlayer(playerid)
 {
 	if(!PlayerInfo[playerid][pLoggedIn]) return 0;
-	new string[96];
-	mysql_format(g_SQL, string, sizeof(string), "UPDATE "TABLE_PLAYERS_C" SET Drugs=%d, Skill=%d WHERE aID=%d LIMIT 1", PlayerInfo[playerid][pDrugs], PlayerInfo[playerid][pSkill], PlayerInfo[playerid][pID]);
+	new string[128];
+	// M6 (stage 1) — Skill (set at City Hall via /skill) and HasDrugBag (bought via
+	// /clotheswear, doubles the Drug Dealer carry cap) live in the crime/drug domain,
+	// so they persist through this same crime/drug UPDATE (no competing query).
+	mysql_format(g_SQL, string, sizeof(string), "UPDATE "TABLE_PLAYERS_C" SET Drugs=%d, Skill=%d, HasDrugBag=%d WHERE aID=%d LIMIT 1", PlayerInfo[playerid][pDrugs], PlayerInfo[playerid][pSkill], PlayerInfo[playerid][pHasDrugBag] ? 1 : 0, PlayerInfo[playerid][pID]);
 	mysql_pquery(g_SQL, string);
 	return 1;
 }

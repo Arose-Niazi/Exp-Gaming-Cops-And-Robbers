@@ -256,6 +256,15 @@ enum pInfo
 	Float:pMissionRouteZ[MISSION_MAX_CHECKPOINTS],	// active route checkpoint coords (Z)
 	pMissionCooldown[MISSION_COUNT],	// last-completion game-hour stamp per mission (0 = never) [persisted, packed]
 
+	// ---- M6 (stage 4) : bespoke mission state (Paperboy real-time / target / race / domestic) — session only ----
+	pMissionDeadline,				// gettime() a real-time mission (Paperboy §6.11 / Domestic §6.3) expires (0 = none)
+	pMissionStartHour,				// game-hour a windowed target mission (Pickpocket/Sexual/Flower) started (window expiry check)
+	pMissionTargetCd,				// gettime() the next target action (pickpocket/encounter/flower) is allowed (anti-spam)
+	pMissionRaceId,					// which g_RaceReg race is active (Race Challenge §6.13), or -1
+	Float:pMissionDestX,			// single-destination coords (Domestic Disturbance §6.3 — the target house)
+	Float:pMissionDestY,
+	Float:pMissionDestZ,
+
 	// ---- M5 (stage 1) : vehicle ownership — CB-simple model (design §9.12) --
 	pLastVehicle,						// vehicleid this player last drove as DRIVER (INVALID_VEHICLE_ID = none) — /lock//unlock act on it (session only)
 
@@ -278,7 +287,59 @@ enum pInfo
 	pAirportDeadline,					// gettime() the current airport phase (collect / deliver) expires
 	pAirportVehicle,					// the truck/van/garbage-truck the airport run is bound to (-1 = none)
 	pAirportSite,						// which airport site index this run belongs to
-	pBoxCollectCooldown					// gettime() the next /box grab is allowed (anti-spam) [OUR DESIGN]
+	pBoxCollectCooldown,				// gettime() the next /box grab is allowed (anti-spam) [OUR DESIGN]
+
+	// ---- M6 (stage 1) : skills, fighting styles & clothes (design §9.8/§9.7) ----
+	pFightStyle,						// chosen GTA fighting style (SetPlayerFightingStyle) — persisted (LSplayers.FightStyle, default 4), re-applied on spawn (§9.8)
+	pSkillChangeCd,						// gettime() the player may /skill (change skill) again — re-pick cooldown (session; §9.8) [OUR DESIGN]
+
+	// ---- M6 (stage 2) : fishing & farming (design §9.2/§9.3) ---------------
+	// Fishing (§9.2) — persisted permits/rod/cooler + a compact cooler aggregate.
+	pFishPermits,						// fishing permits held (LSplayers.FishPermits, ≤50, 1 fish/permit)
+	pHuntPermits,						// hunting permits held (LSplayers.HuntPermits, ≤20, deer)
+	pDrugSeeds,							// drug plant seeds held (LSplayers.DrugSeeds, ≤10)
+	bool:pHasFishingRod,				// owns a fishing rod (LSplayers.HasFishingRod — faster/higher catch)
+	bool:pHasFishCooler,				// owns a fish cooler (LSplayers.HasFishCooler — bigger catch capacity)
+	bool:pHasFishSalesPermit,			// owns a fish sales permit (LSplayers.FishSalesPermit — sell to players)
+	pCoolerCount,						// fish in the cooler (LSplayers.CoolerCount, 0..cap)
+	pCoolerWeight,						// total pounds of fish in the cooler (LSplayers.CoolerWeight)
+	pCoolerValue,						// accumulated base $ value of the cooler contents (LSplayers.CoolerValue, pre-market-mult)
+	bool:pFishing,						// currently reeling in a catch (session — the /fish wait)
+	pFishTimer,							// per-player /fish reel-in timer handle (-1 = none)
+	Float:pFishX,						// fishing-spot position locked at /fish start (moved-away check)
+	Float:pFishY,
+	Float:pFishZ,
+	// Farming (§9.3) — plants are DB rows; these are session refs / cooldowns.
+	pPlantCount,						// how many active plants this player owns right now (own-cap MAX_PLANTS_PER_PLAYER) — recounted on load/plant/harvest
+	pFarmJobCooldown,					// gettime() the player may start a farm job again (§9.3 legal crop, session)
+	pHuntCooldown,						// gettime() the player may /hunt again (§9.3, session)
+
+	// ---- M6 (stage 3) : DM/sniper/duel arenas (design §9.6) — all session-only --
+	pArena,								// current arena kind (ARENA_NONE/DMS/SNIPER/DUEL) — suppresses wanted/arrest, respawns inside
+	// Pre-arena snapshot restored on /leave or duel end (clean loadout restore, §6.4).
+	bool:pArenaSaved,					// true while a snapshot is held (guards a double save/restore)
+	Float:pArenaBackX,					// prior world position (X/Y/Z/angle)
+	Float:pArenaBackY,
+	Float:pArenaBackZ,
+	Float:pArenaBackA,
+	pArenaBackInt,						// prior interior + virtual world
+	pArenaBackVW,
+	Float:pArenaBackHP,					// prior health + armour
+	Float:pArenaBackArmour,
+	pArenaBackWeap[13],					// prior 13 weapon-slot weapon ids
+	pArenaBackAmmo[13],					// prior 13 weapon-slot ammo counts
+	// Duel state (§6.4) — a challenge/accept escrow pair.
+	pDuelOpponent,						// the other duellist's playerid (-1 = none)
+	pDuelChallenger,					// the id that OWNS the duel VW (lower/initiating id) — for VW derivation
+	pDuelStake,							// escrowed stake this player anted (winner takes the sum)
+	pDuelOfferTo,						// (on challenger) id the pending challenge was sent to (-1 = none)
+	pDuelOfferFrom,						// (on target) id that challenged this player (-1 = none)
+	pDuelOfferStake,					// stake proposed in the pending challenge
+	pDuelOfferExpiry,					// gettime() the pending challenge lapses
+	bool:pInDuel,						// true once both are teleported into a live duel (mid-duel quit = forfeit)
+
+	// ---- M6 (stage 3) : safe / no-crime zones (design §2.5 / §9.10) ------------
+	bool:pInSafeZone					// inside a hospital/RPC safe zone (no-crime; extends pInPoliceProperty)
 }
 
 // Session-only ignore matrix (bit-packed to save memory): does A ignore B?
@@ -419,6 +480,10 @@ FUNCTION ClearPlayerVariables(playerid)
 	// Cooldown stamps are loaded from the DB in loading_data; clear the slots on a
 	// fresh connect so a relog into a not-yet-loaded slot cannot read stale data.
 	for(new i=0; i<MISSION_COUNT; i++) PlayerInfo[playerid][pMissionCooldown][i]=0;
+	// M6 (stage 4) bespoke mission state (session only).
+	PlayerInfo[playerid][pMissionDeadline]=PlayerInfo[playerid][pMissionStartHour]=PlayerInfo[playerid][pMissionTargetCd]=0;
+	PlayerInfo[playerid][pMissionRaceId]=-1;
+	PlayerInfo[playerid][pMissionDestX]=PlayerInfo[playerid][pMissionDestY]=PlayerInfo[playerid][pMissionDestZ]=0.0;
 
 	// ---- M5 (stage 1) : vehicle ownership — CB-simple model ----------------
 	PlayerInfo[playerid][pLastVehicle]=INVALID_VEHICLE_ID;
@@ -452,6 +517,42 @@ FUNCTION ClearPlayerVariables(playerid)
 	PlayerInfo[playerid][pAirportBoxes]=PlayerInfo[playerid][pAirportDeadline]=0;
 	PlayerInfo[playerid][pAirportVehicle]=-1;
 	PlayerInfo[playerid][pAirportSite]=PlayerInfo[playerid][pBoxCollectCooldown]=0;
+
+	// ---- M6 (stage 1) : skills, fighting styles & clothes (design §9.8/§9.7) ----
+	// pFightStyle is loaded from the DB in loading_data; default to NORMAL(4) on a
+	// fresh connect so a not-yet-loaded slot can't read stale data. The change
+	// cooldown is session-only.
+	PlayerInfo[playerid][pFightStyle]=FIGHTSTYLE_DEFAULT;
+	PlayerInfo[playerid][pSkillChangeCd]=0;
+
+	// ---- M6 (stage 2) : fishing & farming (design §9.2/§9.3) ---------------
+	// Permits/rod/cooler/cooler-aggregate + plant-count are loaded from the DB in
+	// loading_data; zero them on a fresh connect so a not-yet-loaded slot can't read
+	// stale data. The reel-in timer + session cooldowns are session-only.
+	PlayerInfo[playerid][pFishPermits]=PlayerInfo[playerid][pHuntPermits]=PlayerInfo[playerid][pDrugSeeds]=0;
+	PlayerInfo[playerid][pHasFishingRod]=PlayerInfo[playerid][pHasFishCooler]=PlayerInfo[playerid][pHasFishSalesPermit]=false;
+	PlayerInfo[playerid][pCoolerCount]=PlayerInfo[playerid][pCoolerWeight]=PlayerInfo[playerid][pCoolerValue]=0;
+	if(PlayerInfo[playerid][pFishTimer] != -1) KillTimer(PlayerInfo[playerid][pFishTimer]);
+	PlayerInfo[playerid][pFishTimer]=-1;
+	PlayerInfo[playerid][pFishing]=false;
+	PlayerInfo[playerid][pFishX]=PlayerInfo[playerid][pFishY]=PlayerInfo[playerid][pFishZ]=0.0;
+	PlayerInfo[playerid][pPlantCount]=PlayerInfo[playerid][pFarmJobCooldown]=PlayerInfo[playerid][pHuntCooldown]=0;
+
+	// ---- M6 (stage 3) : DM/sniper/duel arenas (design §9.6) — session-only -----
+	PlayerInfo[playerid][pArena]=ARENA_NONE;
+	PlayerInfo[playerid][pArenaSaved]=false;
+	PlayerInfo[playerid][pArenaBackX]=PlayerInfo[playerid][pArenaBackY]=PlayerInfo[playerid][pArenaBackZ]=PlayerInfo[playerid][pArenaBackA]=0.0;
+	PlayerInfo[playerid][pArenaBackInt]=PlayerInfo[playerid][pArenaBackVW]=0;
+	PlayerInfo[playerid][pArenaBackHP]=PlayerInfo[playerid][pArenaBackArmour]=0.0;
+	for(new i=0; i<13; i++) { PlayerInfo[playerid][pArenaBackWeap][i]=0; PlayerInfo[playerid][pArenaBackAmmo][i]=0; }
+	PlayerInfo[playerid][pDuelOpponent]=PlayerInfo[playerid][pDuelChallenger]=-1;
+	PlayerInfo[playerid][pDuelStake]=0;
+	PlayerInfo[playerid][pDuelOfferTo]=PlayerInfo[playerid][pDuelOfferFrom]=-1;
+	PlayerInfo[playerid][pDuelOfferStake]=PlayerInfo[playerid][pDuelOfferExpiry]=0;
+	PlayerInfo[playerid][pInDuel]=false;
+
+	// ---- M6 (stage 3) : safe / no-crime zones (design §2.5 / §9.10) ------------
+	PlayerInfo[playerid][pInSafeZone]=false;
 
 	return 1;
 }

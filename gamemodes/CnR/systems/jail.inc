@@ -105,15 +105,20 @@ static Jail_Place(playerid)
 FUNCTION Jail_SavePlayer(playerid)
 {
 	if(!PlayerInfo[playerid][pLoggedIn]) return 0;
-	new string[544];	// headroom for Money/Bank/Tax + RefillPoints + LottoNumber + Crowbar/RobHistory + HouseSpawnID + a 64-char (escaped) JailReason
+	new string[832];	// headroom for Money/Bank/Tax + RefillPoints + LottoNumber + Crowbar/RobHistory + HouseSpawnID + FightStyle + fishing/farming cols + a 64-char (escaped) JailReason
 	mysql_format(g_SQL, string, sizeof(string),
-		"UPDATE "TABLE_PLAYERS_C" SET Money=%d, BankMoney=%d, TaxOwed=%d, LifeInsurance=%d, HealthInsExpiry=%d, Score=%d, CopRank=%d, RefillPoints=%d, SeriousCrimes=%d, Jailed=%d, JailUntil=%d, Bail=%d, JailReason='%e', EscapeChained=%d, LottoNumber=%d, CrowbarEquipped=%d, RobberyHistory=%d, HouseSpawnID=%d WHERE aID=%d LIMIT 1",
+		"UPDATE "TABLE_PLAYERS_C" SET Money=%d, BankMoney=%d, TaxOwed=%d, LifeInsurance=%d, HealthInsExpiry=%d, Score=%d, CopRank=%d, RefillPoints=%d, SeriousCrimes=%d, Jailed=%d, JailUntil=%d, Bail=%d, JailReason='%e', EscapeChained=%d, LottoNumber=%d, CrowbarEquipped=%d, RobberyHistory=%d, HouseSpawnID=%d, FightStyle=%d, FishPermits=%d, HuntPermits=%d, DrugSeeds=%d, HasFishingRod=%d, HasFishCooler=%d, FishSalesPermit=%d, CoolerCount=%d, CoolerWeight=%d, CoolerValue=%d WHERE aID=%d LIMIT 1",
 		PlayerInfo[playerid][pMoney],
 		PlayerInfo[playerid][pBankMoney], PlayerInfo[playerid][pTaxOwed], PlayerInfo[playerid][pLifeInsurance], PlayerInfo[playerid][pHealthInsExpiry],
 		PlayerInfo[playerid][pScore], PlayerInfo[playerid][pCopRank], PlayerInfo[playerid][pRefillPoints], PlayerInfo[playerid][pSeriousCrimes],
 		PlayerInfo[playerid][pJailed] ? 1 : 0, PlayerInfo[playerid][pJailUntil], PlayerInfo[playerid][pJailBail],
 		PlayerInfo[playerid][pJailReason], PlayerInfo[playerid][pEscapeChained] ? 1 : 0, PlayerInfo[playerid][pLottoNumber],
-		PlayerInfo[playerid][pCrowbarEquipped] ? 1 : 0, PlayerInfo[playerid][pRobberyHistory], PlayerInfo[playerid][pHouseSpawn], PlayerInfo[playerid][pID]);
+		PlayerInfo[playerid][pCrowbarEquipped] ? 1 : 0, PlayerInfo[playerid][pRobberyHistory], PlayerInfo[playerid][pHouseSpawn], PlayerInfo[playerid][pFightStyle],
+		// M6 (stage 2) — fishing & farming persistence (design §9.2/§9.3/§11.2).
+		PlayerInfo[playerid][pFishPermits], PlayerInfo[playerid][pHuntPermits], PlayerInfo[playerid][pDrugSeeds],
+		PlayerInfo[playerid][pHasFishingRod] ? 1 : 0, PlayerInfo[playerid][pHasFishCooler] ? 1 : 0, PlayerInfo[playerid][pHasFishSalesPermit] ? 1 : 0,
+		PlayerInfo[playerid][pCoolerCount], PlayerInfo[playerid][pCoolerWeight], PlayerInfo[playerid][pCoolerValue],
+		PlayerInfo[playerid][pID]);
 	mysql_pquery(g_SQL, string);
 	return 1;
 }

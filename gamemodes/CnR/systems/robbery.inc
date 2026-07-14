@@ -48,10 +48,9 @@
 		Robbery_CrowbarShortenSecs(playerid, base) : safe-crack seconds after the crowbar reduction
 		Holdup_CrowbarEquipped(playerid)     : bool the holdup upgrade reads for its wait/rate bonus
 
-	Commands:
-		/clotheswear (/cw)                   (civ, on-foot)  crowbar buy/toggle (full clothes system lands M6)
-		/buycrowbar                          (civ, on-foot)  direct crowbar buy ($40,000)
-		/crowbar                             (civ)           unequip the crowbar
+	Commands (crowbar buy/remove UI moved to systems/clothes.inc in M6 — this module
+	keeps only the crowbar EFFECT + the Robbery_BuyCrowbar/Robbery_RemoveCrowbar publics
+	the clothes menu calls):
 		/shoplift                            (civ, on-foot)  §5.1 — low-risk store item steal
 		/bankrob (/robbank)                  (civ)           §5.3 — start a bank-safe crack at a bank checkpoint
 		/casinorob                           (civ)           §5.4 — start a casino-safe crack
@@ -604,13 +603,15 @@ FUNCTION Robbery_OnDisconnect(playerid)
 }
 
 //==============================================================================
-//	The crowbar (clothing item) — buy / equip / unequip (§5.7)
+//	The crowbar (clothing item) — buy / remove path (§5.7)
 //==============================================================================
 
-// Shared crowbar purchase path. $40,000 via Bank_TakeCash. Full clothes-system
-// integration (visual attachment + /clotheswear slot menu) lands in M6 — for M5
-// this is the crowbar-only entry so the item is buyable and functional now.
-static Robbery_BuyCrowbar(playerid)
+// Shared crowbar purchase path. $40,000 via Bank_TakeCash. The item's UI (the
+// /clotheswear menu entry, /buycrowbar, /crowbar) lives in systems/clothes.inc as
+// of M6 (the clothes system) — this stays here because the crowbar's crime EFFECT
+// (holdup/safe-crack readers, arrest confiscation) is owned by this module. Clothes
+// calls this public to buy+equip so /buycrowbar and the clothes menu are unified.
+FUNCTION Robbery_BuyCrowbar(playerid)
 {
 	if(!PlayerInfo[playerid][pLoggedIn]) return SendClientMessage(playerid, COLOR_ERROR, "You must be logged in.");
 	if(PlayerInfo[playerid][pCrowbarEquipped]) return SendClientMessage(playerid, COLOR_ERROR, "You already have a crowbar equipped. Use /crowbar to put it away.");
@@ -631,59 +632,15 @@ static Robbery_BuyCrowbar(playerid)
 	return 1;
 }
 
-// /clotheswear (/cw) — the official crowbar activation command (§5.7). The full
-// clothes system lands in M6; for now this is the crowbar buy/toggle entry.
-CMD:clotheswear(playerid, params[])
+// Put the crowbar away (unequip). §5.7 remove path — called from /crowbar (clothes.inc).
+FUNCTION Robbery_RemoveCrowbar(playerid)
 {
-	if(!PlayerInfo[playerid][pLoggedIn]) return SendClientMessage(playerid, COLOR_ERROR, "You must be logged in.");
-	// Already equipped -> tapping /clotheswear confirms it's on.
-	if(PlayerInfo[playerid][pCrowbarEquipped])
-		return SendClientMessage(playerid, COLOR_SERVER_INFO, ""COL_GREEN"* Crowbar: "COL_WHITE"equipped. Use "COL_YELLOW"/crowbar"COL_WHITE" to put it away.");
-	#pragma unused params
-	// Offer the crowbar buy (the only clothing item wired in M5).
-	new caption[192];
-	format(caption, sizeof(caption), ""COL_WHITE"The "COL_YELLOW"Crowbar"COL_WHITE" is a clothing item that lowers your robbery/holdup time and\nraises your register take. It is confiscated if you are arrested with a robbery on record.\n\nPrice: "COL_GREEN"$%d"COL_WHITE" cash. Buy it now?", CROWBAR_PRICE);
-	ShowPlayerDialog(playerid, CROWBAR_BUY_DIALOG, DIALOG_STYLE_MSGBOX, "Clothing — Crowbar", caption, "Buy", "Cancel");
-	return 1;
-}
-alias:clotheswear("cw")
-
-// /buycrowbar — direct buy (skips the dialog), also sold at Truck Stops / Zero's
-// RC Shop / Bait Shops (§5.7). Proximity to a vendor is not gated in M5 (the
-// clothes-vendor placement lands with the M6 clothes system) — noted TODO(M6).
-CMD:buycrowbar(playerid, params[])
-{
-	#pragma unused params
-	return Robbery_BuyCrowbar(playerid);
-}
-
-// /crowbar — put the crowbar away (unequip). §5.7 remove command.
-CMD:crowbar(playerid, params[])
-{
-	#pragma unused params
 	if(!PlayerInfo[playerid][pLoggedIn]) return SendClientMessage(playerid, COLOR_ERROR, "You must be logged in.");
 	if(!PlayerInfo[playerid][pCrowbarEquipped]) return SendClientMessage(playerid, COLOR_ERROR, "You do not have a crowbar equipped. Buy one with /clotheswear.");
 	PlayerInfo[playerid][pCrowbarEquipped] = false;
 	Jail_SavePlayer(playerid);
 	SendClientMessage(playerid, COLOR_SERVER_INFO, ""COL_GREEN"* Crowbar put away."COL_WHITE" Re-equip it with "COL_YELLOW"/clotheswear"COL_WHITE".");
 	return 1;
-}
-
-// Crowbar-buy dialog resolution (routed from OnDialogResponse in CnR.pwn).
-FUNCTION Robbery_OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
-{
-	#pragma unused listitem
-	#pragma unused inputtext
-	switch(dialogid)
-	{
-		case CROWBAR_BUY_DIALOG:
-		{
-			if(!response) return 1;	// Cancel
-			Robbery_BuyCrowbar(playerid);
-			return 1;
-		}
-	}
-	return 0;
 }
 
 //==============================================================================

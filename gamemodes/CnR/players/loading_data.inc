@@ -88,6 +88,9 @@ FUNCTION LoadUserData(playerid)
 	// M3 (stage 3) — crime/drug/STD persistence (design §4).
 	cache_get_value_int(0, "Skill",PlayerInfo[playerid][pSkill]);
 	cache_get_value_int(0, "Drugs",PlayerInfo[playerid][pDrugs]);
+	// M6 (stage 1) — the drug bag doubles the Drug Dealer carry cap (§4.3/§16 #2);
+	// bought via /clotheswear, persisted so it survives relogs (drugs.inc reads it).
+	cache_get_value_bool(0, "HasDrugBag",PlayerInfo[playerid][pHasDrugBag]);
 	cache_get_value_int(0, "STDs",PlayerInfo[playerid][pSTD]);
 	cache_get_value_int(0, "Condoms",PlayerInfo[playerid][pCondoms]);
 	cache_get_value_bool(0, "ChastityBelt",PlayerInfo[playerid][pChastityBelt]);
@@ -110,9 +113,28 @@ FUNCTION LoadUserData(playerid)
 	// included after this module, so it is reached via CallLocalFunction.
 	cache_get_value_int(0, "HouseSpawnID",PlayerInfo[playerid][pHouseSpawn]);
 	CallLocalFunction("House_OnPlayerLogin", "d", playerid);
+	// M6 (stage 1) — chosen fighting style (LSplayers.FightStyle, default 4=NORMAL).
+	// Re-applied with SetPlayerFightingStyle on every spawn (§9.8). Column DEFAULT is
+	// 4, so a first-time / migrated row loads NORMAL; guard against a garbage read.
+	cache_get_value_int(0, "FightStyle",PlayerInfo[playerid][pFightStyle]);
+	if(PlayerInfo[playerid][pFightStyle] < 0) PlayerInfo[playerid][pFightStyle]=FIGHTSTYLE_DEFAULT;
+	// M6 (stage 2) — fishing & farming persistence (design §9.2/§9.3/§11.2). Permits,
+	// rod/cooler/sales-permit flags and the compact cooler aggregate (count + pounds +
+	// accumulated base value) survive relogs; the plant-count is tallied from the
+	// plants table by Farm_OnPlayerLogin (farming.inc is included after this module).
+	cache_get_value_int(0, "FishPermits",PlayerInfo[playerid][pFishPermits]);
+	cache_get_value_int(0, "HuntPermits",PlayerInfo[playerid][pHuntPermits]);
+	cache_get_value_int(0, "DrugSeeds",PlayerInfo[playerid][pDrugSeeds]);
+	cache_get_value_bool(0, "HasFishingRod",PlayerInfo[playerid][pHasFishingRod]);
+	cache_get_value_bool(0, "HasFishCooler",PlayerInfo[playerid][pHasFishCooler]);
+	cache_get_value_bool(0, "FishSalesPermit",PlayerInfo[playerid][pHasFishSalesPermit]);
+	cache_get_value_int(0, "CoolerCount",PlayerInfo[playerid][pCoolerCount]);
+	cache_get_value_int(0, "CoolerWeight",PlayerInfo[playerid][pCoolerWeight]);
+	cache_get_value_int(0, "CoolerValue",PlayerInfo[playerid][pCoolerValue]);
+	CallLocalFunction("Farm_OnPlayerLogin", "d", playerid);
 	// M4 (stage 3) — mission cooldowns: one packed '|'-delimited column of per-mission
 	// game-hour completion stamps (§6). Parse into the per-mission stamp array.
-	new missionCd[128];
+	new missionCd[255];	// widened 128->255 in M6 stage 4 for the 19-mission roster
 	cache_get_value_name(0, "MissionCooldowns", missionCd, sizeof(missionCd));
 	Mission_LoadCooldowns(playerid, missionCd);
 	TogglePlayerSpectating(playerid,false);

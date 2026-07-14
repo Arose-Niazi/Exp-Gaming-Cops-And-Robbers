@@ -67,6 +67,13 @@ ApplyAdminJail(playerid, mins, const reason[], const byname[])
 	ResetPlayerWeapons(playerid);
 	TogglePlayerControllable(playerid, false);
 
+	// M6 — force the player out of any arena so a death-respawn cannot re-place
+	// them in the arena VW and skip the admin-jail (jail-bypass fix).
+	PlayerInfo[playerid][pArena] = ARENA_NONE;
+	PlayerInfo[playerid][pInDMZone] = false;
+	PlayerInfo[playerid][pArenaSaved] = false;
+	PlayerInfo[playerid][pInDuel] = false;
+
 	// (Re)arm the per-player release timer for the remaining time.
 	if(PlayerInfo[playerid][pAdminJailTimer] != -1)
 	{

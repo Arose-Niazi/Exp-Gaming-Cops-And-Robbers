@@ -201,7 +201,24 @@ new Text:ConnectTD[2];
 	#include "CnR\systems\missions"
 	// ---- M5 (stage 4) : kidnap crime + the 3 M5 robbery missions (§4.4/§6.1/§6.7/§6.19) ----
 	#include "CnR\systems\kidnap"
+	// ---- M6 (stage 1) : skills, fighting styles & clothes (§9.8/§9.7/§5.7) ----
+	// (after robbery/drugs/kidnap/vehicle_own — clothes calls Robbery_BuyCrowbar,
+	// skills calls Veh_OnConnect + Drug_SavePlayer.)
+	#include "CnR\systems\skills"
+	#include "CnR\systems\fightstyle"
+	#include "CnR\systems\clothes"
+	// ---- M6 (stage 2) : fishing & farming (§9.2/§9.3) ----
+	// economy_stub first (StockMarket_UpdateEarnings no-op the sell paths call);
+	// fishing/farming call Bank_*, Drug_*, Jail_*, GivePlayerWanted, IsCop (all above).
+	#include "CnR\systems\economy_stub"
+	#include "CnR\systems\fishing"
+	#include "CnR\systems\farming"
 	#include "CnR\cmds\player"
+	// ---- M6 (stage 3) : DM/sniper/duel arenas, DJ radio (§9.6/§8.1) ----
+	// (after teleport.inc — arenas reuse StripParachute; after bank/jail/missions/
+	// wanted — arenas call Bank_*/Jail_IsJailed/Mission_IsOnMission/ClearPlayerWanted.)
+	#include "CnR\systems\arenas"
+	#include "CnR\cmds\dj"
 #else
 	#include "CnR/server/server_vars"
 	#include "CnR/players/player_vars"
@@ -259,7 +276,24 @@ new Text:ConnectTD[2];
 	#include "CnR/systems/missions"
 	// ---- M5 (stage 4) : kidnap crime + the 3 M5 robbery missions (§4.4/§6.1/§6.7/§6.19) ----
 	#include "CnR/systems/kidnap"
+	// ---- M6 (stage 1) : skills, fighting styles & clothes (§9.8/§9.7/§5.7) ----
+	// (after robbery/drugs/kidnap/vehicle_own — clothes calls Robbery_BuyCrowbar,
+	// skills calls Veh_OnConnect + Drug_SavePlayer.)
+	#include "CnR/systems/skills"
+	#include "CnR/systems/fightstyle"
+	#include "CnR/systems/clothes"
+	// ---- M6 (stage 2) : fishing & farming (§9.2/§9.3) ----
+	// economy_stub first (StockMarket_UpdateEarnings no-op the sell paths call);
+	// fishing/farming call Bank_*, Drug_*, Jail_*, GivePlayerWanted, IsCop (all above).
+	#include "CnR/systems/economy_stub"
+	#include "CnR/systems/fishing"
+	#include "CnR/systems/farming"
 	#include "CnR/cmds/player"
+	// ---- M6 (stage 3) : DM/sniper/duel arenas, DJ radio (§9.6/§8.1) ----
+	// (after teleport.inc — arenas reuse StripParachute; after bank/jail/missions/
+	// wanted — arenas call Bank_*/Jail_IsJailed/Mission_IsOnMission/ClearPlayerWanted.)
+	#include "CnR/systems/arenas"
+	#include "CnR/cmds/dj"
 #endif
 
 new WeekDays[7][] = {
@@ -290,6 +324,10 @@ public OnGameModeInit()
 	Veh_Init();	// M5 (stage 1) — reset per-vehicle ownership/lock state for a fresh session (§9.12)
 	Robbery_Init();	// M5 (stage 2) — create bank/casino/special robbery checkpoints + bank map icons (§5.3-5.6)
 	House_Init();	// M5 (stage 3) — load all houses (async) + build entrance pickups/labels/map icons (§9.1)
+	FightStyle_Init();	// M6 (stage 1) — create the 3 gym markers + map icons (Ganton/Garcia/Redsands East, §9.8)
+	Clothes_Init();	// M6 (stage 1) — create clothes-shop + crowbar-vendor map icons (§9.7/§5.7)
+	Fishing_Init();	// M6 (stage 2) — create Bait Shop / fishing-spot / fish-market map icons (§9.2)
+	Farm_Init();	// M6 (stage 2) — load the plants table (async) + create refill-point/farm map icons (§9.3)
 	mysql_log(ERROR | WARNING);
 	EnableStuntBonusForAll(false); //Disabling stunt bonus.
 	DisableInteriorEnterExits();  // will disable all interior enter/exits in the game.
@@ -363,6 +401,12 @@ public OnGameModeExit()
 	// and sweep any active Airport Robbery box pickups.
 	Robbery_Cleanup();
 	House_Cleanup();
+	// M6 (stage 1) — destroy the gym markers + clothes-shop map icons (§9.8/§9.7).
+	FightStyle_Cleanup();
+	Clothes_Cleanup();
+	// M6 (stage 2) — destroy fishing/farming map icons + all plant checkpoints/objects (§9.2/§9.3).
+	Fishing_Cleanup();
+	Farm_Cleanup();
 	for(new i = 0; i < MAX_PLAYERS; i++) Mission_AirportCleanup(i);
 	DestroyZones();
 	KillTimer(ServerInfo[sTimer]);
@@ -461,6 +505,15 @@ public OnPlayerDisconnect(playerid,reason)
 		Veh_OnDisconnect(playerid);
 		// M5 (stage 3) — drop the inside-house session marker + buy-dialog target (§9.1).
 		House_OnDisconnect(playerid);
+		// M6 (stage 2) — kill the reel-in timer + end an active farm job; persist the
+		// player's plant grow-progress (plants freeze while the owner is offline, §9.2/§9.3).
+		Fishing_OnDisconnect(playerid);
+		Farm_OnDisconnect(playerid);
+		// M6 (stage 3) — a live duel is a forfeit (opponent takes the pot, §6.4) + drop
+		// pending duel offers both ways; arena state is session-only so it just falls
+		// away. Then end a DJ broadcast if this was the streaming DJ (§8.1).
+		Arena_OnDisconnect(playerid);
+		DJ_OnDisconnect(playerid);
 
 	}
 	new szDisconnectReason[3][] =
@@ -599,6 +652,17 @@ public OnPlayerSpawn(playerid)
 		ZoneShowTD(playerid);
 		CreateClassTD(playerid);
 	}
+	// M6 (stage 3) — arena (re)spawn: a DMS/sniper death-respawn stays INSIDE the
+	// arena with a fresh kit; a died-out/duel-loss applies the deferred loadout
+	// restore. If handled, skip the city jail/wanted/house placement (an arena
+	// player is never jailed) but still apply skills/fighting style + DJ sync (§9.6).
+	if(!IsPlayerNPC(playerid) && Arena_OnPlayerSpawn(playerid))
+	{
+		Skills_ApplyOnSpawn(playerid);
+		FightStyle_ApplyOnSpawn(playerid);
+		DJ_SyncPlayer(playerid);
+		return 1;
+	}
 	// Re-apply a still-running admin-jail across relog/respawn (M2 — §11.2).
 	// Admin-jail ALWAYS takes precedence over cop-jail: if an admin-jail is
 	// running we re-place there and skip the cop-jail re-placement below.
@@ -619,11 +683,30 @@ public OnPlayerSpawn(playerid)
 	// their house instead of the city spawn (§9.1).
 	if(!IsPlayerNPC(playerid))
 		House_OnPlayerSpawn(playerid);
+	// M6 (stage 1) — max all weapon skills (classic feel, §9.8/§2.1) + re-apply the
+	// saved fighting style (SetPlayerFightingStyle) on every spawn (§9.8).
+	if(!IsPlayerNPC(playerid))
+	{
+		Skills_ApplyOnSpawn(playerid);
+		FightStyle_ApplyOnSpawn(playerid);
+	}
+	// M6 (stage 3) — if a DJ broadcast is live, tune this (re)spawning player in (§8.1).
+	if(!IsPlayerNPC(playerid)) DJ_SyncPlayer(playerid);
 	return 1;
 }
 
 public OnPlayerDeath(playerid,killerid,reason)
 {
+	// M6 (stage 3) — arena death (DMS/sniper respawn-inside + $1k fee, or duel
+	// first-blood/forfeit resolution). The death feed runs FIRST, while pInDMZone is
+	// still set on both parties, so the killer gains no wanted for a legal-DM kill;
+	// Arena_OnPlayerDeath then resolves it and short-circuits the city death path.
+	if(!IsPlayerNPC(playerid) && Arena_IsInArena(playerid))
+	{
+		Wanted_OnPlayerDeath(playerid, killerid, reason);	// death feed only (wanted suppressed by pInDMZone)
+		Arena_OnPlayerDeath(playerid, killerid);
+		return 1;
+	}
 	PlayerInfo[playerid][pInDMZone]=false;
 	if(!IsPlayerNPC(playerid))
 	{
@@ -647,6 +730,9 @@ public OnPlayerDeath(playerid,killerid,reason)
 		Mission_OnPlayerDeath(playerid);
 		// M5 (stage 4) — death on either side of a kidnap link releases the victim (§4.4).
 		Kidnap_OnPlayerDeath(playerid, killerid);
+		// M6 (stage 2) — a cast fishing line / active farm job ends on death (§9.2/§9.3).
+		Fishing_OnPlayerDeath(playerid);
+		Farm_OnPlayerDeath(playerid);
 		// Dying wipes the victim's wanted level (arrest/takedown/escape all reset here).
 		ClearPlayerWanted(playerid, "");
 		ZoneHideTD(playerid);
@@ -705,10 +791,10 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 		{
 			Mission_OnDialogResponse(playerid, response, listitem);
 		}
-		// M5 (stage 2) — /clotheswear crowbar buy confirm dialog (§5.7).
-		case CROWBAR_BUY_DIALOG:
+		// M6 (stage 4) — /challenge Race Challenge picker (§6.13) — start the chosen race.
+		case MRACE_SELECT_DIALOG:
 		{
-			Robbery_OnDialogResponse(playerid, dialogid, response, listitem, inputtext);
+			Mission_RaceOnDialog(playerid, response, listitem);
 		}
 		// M5 (stage 3) — house owner menu + buy confirm + storage input dialogs (§9.1).
 		case HOUSE_MENU_DIALOG, HOUSE_BUY_DIALOG, HOUSE_STORE_DIALOG, HOUSE_WITHDRAW_DIALOG:
@@ -716,6 +802,15 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 			House_OnDialogResponse(playerid, dialogid, response, listitem, inputtext);
 		}
 	}
+	// M6 (stage 1) — /skill picker, /fightstyle picker, /clotheswear menu + skins list.
+	// These use standalone high dialog ids (5401-5404, unique — outside the enum), so
+	// route them after the enum switch (they return 0 if the id isn't theirs).
+	Skills_OnDialogResponse(playerid, dialogid, response, listitem);
+	FightStyle_OnDialogResponse(playerid, dialogid, response, listitem);
+	Clothes_OnDialogResponse(playerid, dialogid, response, listitem);
+	// M6 (stage 2) — Bait Shop buy menu (rod/cooler/permits/seeds, §9.2/§9.3). Uses a
+	// standalone high dialog id (5501) outside the enum; returns 0 if not its dialog.
+	Fishing_OnDialogResponse(playerid, dialogid, response, listitem);
 	return 0;
 }
 
@@ -759,7 +854,13 @@ public OnPlayerEnterCheckpoint(playerid)
 // CPs). The module prints the "type /bankrob" hint; the command re-checks range.
 public OnPlayerEnterDynamicCP(playerid, STREAMER_TAG_CP:checkpointid)
 {
-	if(!IsPlayerNPC(playerid)) Robbery_OnEnterCP(playerid, checkpointid);
+	if(!IsPlayerNPC(playerid))
+	{
+		Robbery_OnEnterCP(playerid, checkpointid);
+		// M6 (stage 2) — legal farm-job field checkpoints (§9.3). Returns 0 unless the
+		// player is on a farm job and this is their next field.
+		Farm_OnPlayerEnterCP(playerid, checkpointid);
+	}
 	return 1;
 }
 
@@ -1002,6 +1103,9 @@ FUNCTION GameModeClock()
 	// M4 (stage 2) — guard for the once-per-game-day lotto draw (§10.3). Static so
 	// it persists across ticks; reset to -1 on the game-week rollover below.
 	static lastLottoDay = -1;
+	// M6 (stage 2) — guard for the once-per-game-day bonus-fish announce (§9.2). Same
+	// pattern as the lotto guard; reset on the game-week rollover below.
+	static lastBonusFishDay = -1;
 	GameMinute ++;
 	if(GameMinute == 60)
 	{
@@ -1026,6 +1130,15 @@ FUNCTION GameModeClock()
 		{
 			lastLottoDay = GameDay;
 			Lotto_Draw();
+		}
+
+		// M6 (stage 2) — daily BONUS FISH announced at game-hour 05:00 (§9.2), on the
+		// same hour-transition mechanism as the lotto draw. Guarded once-per-game-day;
+		// the first player to /fish after this wins the reward (resolved in fishing.inc).
+		if(GameHour == FISH_BONUS_HOUR && lastBonusFishDay != GameDay)
+		{
+			lastBonusFishDay = GameDay;
+			Fishing_OnBonusHour();
 		}
 
 		if(GameHour == 24)
@@ -1055,6 +1168,8 @@ FUNCTION GameModeClock()
 				// M4 (stage 2) — reset the lotto draw guard on the week rollover
 				// (§10.3: "Guard vars reset per game-week rollover").
 				lastLottoDay = -1;
+				// M6 (stage 2) — reset the bonus-fish guard on the same rollover.
+				lastBonusFishDay = -1;
 			}
 			format(string, sizeof(string), "%s",WeekDays[GameDay]);
 			TextDrawSetString(DaysOfWeek, string);
@@ -1086,6 +1201,12 @@ FUNCTION GameModeClock()
 	Robbery_OnTick();
 	// M5 (stage 4) — kidnap hideout delivery + escape guard on the same tick (§4.4).
 	Kidnap_OnTick();
+	// M6 (stage 2) — drug-plant growth on the same 1-second tick (§9.3): each plant
+	// accrues grow-seconds only while its owner is online (no offline growth). No new
+	// global timer — reuses this clock like every other system.
+	Farm_OnGameModeClockTick();
+	// M6 (stage 3) — expire stale pending duel challenges on the same tick (§6.4).
+	Arena_OnGameModeClockTick();
 
 	format(string, sizeof(string), "%s, %02d:%02d",WeekDays[GameDay],GameHour,GameMinute);
 

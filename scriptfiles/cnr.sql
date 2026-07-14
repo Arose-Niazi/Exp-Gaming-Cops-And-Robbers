@@ -80,12 +80,27 @@ CREATE TABLE IF NOT EXISTS `LSplayers` (
     -- M4 (stage 3): mission framework — one compact '|'-delimited column holds the
     -- per-mission last-completion GAME-HOUR stamp (g_GameDayCounter*24+GameHour),
     -- one value per registered mission, mirroring the SkinsSelected packing (§6).
-    `MissionCooldowns` VARCHAR(128) NOT NULL DEFAULT '',     -- '|'-delimited game-hour completion stamps, one per mission
+    `MissionCooldowns` VARCHAR(255) NOT NULL DEFAULT '',     -- '|'-delimited game-hour completion stamps, one per mission (widened 128->255 in M6 stage 4: 19 missions x up-to-9-char stamps overruns 128)
     -- M5 (stage 2): robbery system + crowbar (design §5.7/§5.8/§11.2)
     `CrowbarEquipped` TINYINT(1)    NOT NULL DEFAULT 0,      -- crowbar clothing item equipped (§5.7 — shortens robbery time + raises register take)
     `RobberyHistory`  INT           NOT NULL DEFAULT 0,      -- bitmask ROB_HOLDUP|ROB_BANK|ROB_CASINO|ROB_HOUSE|ROB_SPECIAL — drives crowbar confiscation on arrest
     -- M5 (stage 3): housing system (design §9.1/§11.3)
     `HouseSpawnID`    INT           NOT NULL DEFAULT -1,     -- houses.ID this player spawns at (/sethousespawn), -1 = default city spawn
+    -- M6 (stage 1): skills, fighting styles & clothes (design §9.8/§9.7/§11.2)
+    `FightStyle`      INT           NOT NULL DEFAULT 4,      -- chosen GTA fighting style (SetPlayerFightingStyle) — 4=NORMAL default; set at a gym via /fightstyle (§9.8)
+    `HasDrugBag`      TINYINT(1)    NOT NULL DEFAULT 0,      -- drug bag owned — doubles the Drug Dealer carry cap (§4.3/§16 #2), bought via /clotheswear
+    -- M6 (stage 2): fishing & farming (design §9.2/§9.3/§11.2)
+    `FishPermits`     INT           NOT NULL DEFAULT 0,      -- fishing permits held (carry up to 50, 1 fish/permit, §9.2)
+    `HuntPermits`     INT           NOT NULL DEFAULT 0,      -- hunting permits held (carry up to 20, kill deer w/o = +6 wanted, §9.3)
+    `DrugSeeds`       INT           NOT NULL DEFAULT 0,      -- drug plant seeds held (carry up to 10, §9.3)
+    `HasFishingRod`   TINYINT(1)    NOT NULL DEFAULT 0,      -- fishing rod owned (faster/higher catch chance, §9.2)
+    `HasFishCooler`   TINYINT(1)    NOT NULL DEFAULT 0,      -- fish cooler owned (bigger catch capacity, §9.2)
+    `FishSalesPermit` TINYINT(1)    NOT NULL DEFAULT 0,      -- fish sales permit (sell fish to players, §9.2)
+    -- Cooler is a compact aggregate inventory (no per-fish table): count + total pounds
+    -- + total sale value (weight×rarity already folded in). Sold via /fishsellall (§9.2).
+    `CoolerCount`     INT           NOT NULL DEFAULT 0,      -- fish currently in the cooler (0..cap)
+    `CoolerWeight`    INT           NOT NULL DEFAULT 0,      -- total pounds of fish in the cooler
+    `CoolerValue`     INT           NOT NULL DEFAULT 0,      -- accumulated base sale value of the cooler contents ($, pre-market-mult)
     PRIMARY KEY (`aID`),
     CONSTRAINT `fk_LSplayers_aID` FOREIGN KEY (`aID`)
         REFERENCES `players` (`aID`) ON DELETE CASCADE
@@ -125,7 +140,9 @@ CREATE TABLE IF NOT EXISTS `LSplayers` (
 -- M4 (stage 3) mission cooldown column (design §6) — one packed '|'-delimited
 -- column holding a game-hour completion stamp per registered mission:
 --   ALTER TABLE `LSplayers`
---     ADD `MissionCooldowns` VARCHAR(128) NOT NULL DEFAULT '';
+--     ADD `MissionCooldowns` VARCHAR(255) NOT NULL DEFAULT '';
+-- (M6 stage 4 widened this 128->255 for the full 19-mission roster; existing
+--  servers should widen it too:  ALTER TABLE `LSplayers` MODIFY `MissionCooldowns` VARCHAR(255) NOT NULL DEFAULT '';)
 -- M5 (stage 2) robbery system + crowbar columns (design §5.7/§5.8/§11.2):
 --   ALTER TABLE `LSplayers`
 --     ADD `CrowbarEquipped` TINYINT(1) NOT NULL DEFAULT 0,
@@ -134,6 +151,21 @@ CREATE TABLE IF NOT EXISTS `LSplayers` (
 -- the player spawns at (/sethousespawn), -1 = default city spawn:
 --   ALTER TABLE `LSplayers`
 --     ADD `HouseSpawnID` INT NOT NULL DEFAULT -1;
+-- M6 (stage 1) skills/fighting-style/clothes columns (design §9.8/§9.7/§11.2):
+--   ALTER TABLE `LSplayers`
+--     ADD `FightStyle` INT        NOT NULL DEFAULT 4,
+--     ADD `HasDrugBag` TINYINT(1) NOT NULL DEFAULT 0;
+-- M6 (stage 2) fishing/farming columns (design §9.2/§9.3/§11.2):
+--   ALTER TABLE `LSplayers`
+--     ADD `FishPermits`     INT        NOT NULL DEFAULT 0,
+--     ADD `HuntPermits`     INT        NOT NULL DEFAULT 0,
+--     ADD `DrugSeeds`       INT        NOT NULL DEFAULT 0,
+--     ADD `HasFishingRod`   TINYINT(1) NOT NULL DEFAULT 0,
+--     ADD `HasFishCooler`   TINYINT(1) NOT NULL DEFAULT 0,
+--     ADD `FishSalesPermit` TINYINT(1) NOT NULL DEFAULT 0,
+--     ADD `CoolerCount`     INT        NOT NULL DEFAULT 0,
+--     ADD `CoolerWeight`    INT        NOT NULL DEFAULT 0,
+--     ADD `CoolerValue`     INT        NOT NULL DEFAULT 0;
 -- (repeat for SFplayers/LVplayers when those cities go live).
 
 -- Per-city persistent vehicles (Los Santos)
@@ -181,6 +213,29 @@ CREATE TABLE IF NOT EXISTS `houses` (
     `LastVisited`  DATETIME   NULL DEFAULT NULL,            -- last time the owner visited (2-week inactivity decay, §3.2)
     PRIMARY KEY (`ID`)
 ) ENGINE=InnoDB;
+
+-- Drug plants (M6 stage 2 — design §9.3/§11.3). One row per planted drug crop.
+-- OwnerAID = players.aID of the planter. Plants grow over ~20 minutes real time
+-- from PlantedAt (unix seconds) toward DRUG_PLANT_MAX_GRAMS; Grams is the current
+-- yield snapshot. Plants persist across relogs but DO NOT grow while offline — the
+-- growth is recomputed from a "grow-seconds accrued" model on the game-clock tick
+-- (GrowSecs) so an offline gap does not advance them. Cops/players can destroy a
+-- plant (row deleted). Loaded on init, CRUD is async (mysql_pquery).
+CREATE TABLE IF NOT EXISTS `plants` (
+    `ID`         INT      NOT NULL AUTO_INCREMENT,
+    `OwnerAID`   INT      NOT NULL DEFAULT 0,               -- players.aID of the planter
+    `X`          FLOAT    NOT NULL DEFAULT 0,               -- world position of the plant
+    `Y`          FLOAT    NOT NULL DEFAULT 0,
+    `Z`          FLOAT    NOT NULL DEFAULT 0,
+    `Grams`      INT      NOT NULL DEFAULT 0,               -- current yield snapshot (0..DRUG_PLANT_MAX_GRAMS)
+    `GrowSecs`   INT      NOT NULL DEFAULT 0,               -- grow-seconds accrued (only advances while owner online, §9.3 "no offline growth")
+    `Fertilized` TINYINT(1) NOT NULL DEFAULT 0,             -- fertilized (grows faster but attracts deer, §9.3)
+    `PlantedAt`  DATETIME NULL DEFAULT NULL,                -- when it was planted (audit)
+    PRIMARY KEY (`ID`)
+) ENGINE=InnoDB;
+
+-- Migration note (existing databases): the M6 (stage 2) plants table (design §11.3):
+--   (run the CREATE TABLE above; no ALTER needed — it is a new table.)
 
 -- Server-wide statistics (keyed by STATS_VERSION)
 CREATE TABLE IF NOT EXISTS `server_data` (

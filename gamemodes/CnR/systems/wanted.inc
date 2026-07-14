@@ -161,9 +161,12 @@ FUNCTION GivePlayerWanted(playerid, amount, const reason[])
 	if(!IsPlayerConnected(playerid)) return 0;
 	if(amount <= 0) return 0;
 
-	// No wanted gain inside DM zones / safe zones / spawn protection (§2.5).
+	// No wanted gain inside DM zones / safe zones / spawn protection (§2.5). The
+	// safe-zone set is police property (pInPoliceProperty) plus the general no-crime
+	// zones (hospital / RPC) flagged by pInSafeZone (M6 stage 3, §9.10).
 	if(PlayerInfo[playerid][pInDMZone]) return 0;
 	if(PlayerInfo[playerid][pInPoliceProperty]) return 0;
+	if(PlayerInfo[playerid][pInSafeZone]) return 0;
 	if(IsPlayerSpawnProtected(playerid)) return 0;
 
 	new oldTier = WantedTierOf(PlayerInfo[playerid][pWanted]);

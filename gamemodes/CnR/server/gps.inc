@@ -45,9 +45,99 @@ enum {
 };
 
 
+//==============================================================================
+//	M6 (stage 3) : GPS destination category data + routing (design §9.9)
+//==============================================================================
+// Real Los Santos SA coordinates per category (the active city). Each category
+// routes to the NEAREST entry of that type via the RouteConnector engine below
+// (SetGPS -> CalculatePath). Coords are ground positions for the RouteConnector
+// node lookup. The plural "list" categories reuse the same tables (route nearest).
+// SOURCE: canonical GTA:SA Los Santos landmark map coordinates (crazybobs places
+// pages give the counts/areas; exact node coords are the standard SA map values).
+
+static const Float:g_GPS_CityHalls[][3] = {
+	{ 1481.2, -1770.5, 18.8 }		// LS City Hall (Pershing Square civic area)
+};
+static const Float:g_GPS_PDs[][3] = {
+	{ 1554.9, -1675.6, 16.2 },		// LS Police HQ (Pershing Square) — the main PD
+	{ 1836.2, -1682.5, 13.4 }		// LS Precinct (East Beach)
+};
+static const Float:g_GPS_Hospitals[][3] = {
+	{ 1172.2, -1323.6, 15.4 },		// All Saints General Hospital (central LS)
+	{ 2034.0, -1403.0, 17.2 }		// East LS hospital
+};
+static const Float:g_GPS_Banks[][3] = {
+	{ 1462.4, -1013.9, 26.8 },		// LS bank / financial (Mulholland)
+	{ 1352.0, -1758.0, 13.5 }		// LS downtown bank
+};
+static const Float:g_GPS_247[][3] = {
+	{ 1352.5, -1758.8, 13.5 },		// 24/7 Commerce
+	{ 2421.5, -1509.4, 24.0 },		// 24/7 East LS (Jefferson)
+	{ 1833.9, -1842.2, 13.6 },		// 24/7 Conference Center
+	{ 2105.5, -1791.0, 13.6 }		// 24/7 Idlewood
+};
+static const Float:g_GPS_Bait[][3] = {
+	{ 372.900, -2045.000, 7.800 },	// Santa Maria Pier bait shop (fishing, §9.2)
+	{ 626.700, 1699.400,  6.900 }	// Red County / Montgomery bait shop
+};
+static const Float:g_GPS_Clothes[][3] = {
+	{ 2093.2, -1163.2, 24.4 },		// Binco (Idlewood)
+	{ 1454.7, -1288.5, 13.5 },		// ZIP (Downtown / Pershing area)
+	{ 2578.2, -1288.6, 45.4 }		// Sub Urban / Victim (East LS)
+};
+static const Float:g_GPS_Pet[][3] = {
+	{ 2569.5, -1263.5, 40.3 }		// LS pet store (East LS)
+};
+static const Float:g_GPS_Crane[][3] = {
+	{ 2836.5, -1345.6, 3.5 }		// LS Car Sell Crane (Ocean Docks)
+};
+static const Float:g_GPS_CarSale[][3] = {
+	{ 2836.5, -1345.6, 3.5 },		// Car Sell Crane (also a car-sale point)
+	{ 2160.5, -1170.9, 25.9 }		// LS car dealership
+};
+static const Float:g_GPS_Towns[][3] = {
+	{ 2495.4, -1687.5, 13.5 },		// East Los Santos
+	{ 1481.2, -1770.5, 18.8 },		// Commerce (city centre)
+	{ 2200.0, -1150.0, 25.0 }		// Ganton / Idlewood
+};
+
+// Route to the NEAREST entry in `list` of `count` rows, label `dest`. Increments
+// the Times_GPSUsed stat (now writable, §9.9). Returns 1 if a route was requested.
+static GPS_RouteNearest(playerid, const Float:list[][3], count, const dest[])
+{
+	if(count <= 0) return SendClientMessage(playerid, COLOR_ERROR, "No GPS data for that destination yet."), 0;
+	new Float:px, Float:py, Float:pz;
+	GetPlayerPos(playerid, px, py, pz);
+	new best = -1;
+	new Float:bestDist = 999999.0, Float:d;
+	for(new i = 0; i < count; i++)
+	{
+		d = VectorSize(px - list[i][0], py - list[i][1], pz - list[i][2]);
+		if(best == -1 || d < bestDist) { best = i; bestDist = d; }
+	}
+	if(best == -1) return 0;
+	GPS_RegisterUse(playerid);
+	SetGPS(playerid, list[best][0], list[best][1], list[best][2], dest);
+	return 1;
+}
+
+// Bump + persist the Times_GPSUsed stat (LSplayers column — was read-only, §9.9).
+static GPS_RegisterUse(playerid)
+{
+	PlayerInfo[playerid][pTimes_GPSUsed]++;
+	ServerInfo[sTimes_GPSUsed]++;
+	if(PlayerInfo[playerid][pLoggedIn])
+	{
+		new q[128];
+		mysql_format(g_SQL, q, sizeof(q), "UPDATE "TABLE_PLAYERS_C" SET Times_GPSUsed=%d WHERE aID=%d LIMIT 1", PlayerInfo[playerid][pTimes_GPSUsed], PlayerInfo[playerid][pID]);
+		mysql_pquery(g_SQL, q);
+	}
+	return 1;
+}
+
 GPS_OnPlayerDisconnect(playerid)
 {
-	if(PlayerInfo[playerid][GPS_Destination] != -1) 
+	if(PlayerInfo[playerid][GPS_Destination] != -1)
 	{
 		DisableGPS(playerid);
 	}
@@ -159,31 +249,46 @@ OnGPSMenu(playerid,option1,option2,option3)
 					else format(string,sizeof(string),"~b~~h~%d ~p~- Map Markers",options+1);
 					ShowTextDrawMenuItems(playerid, options+2, " ", string, "",GPS_MAP_MARKER);
 				}
-				/*case GPS_ROBBERY:
-				case GPS_MISSION:
-				case GPS_C_CITY_HALL:
-				case GPS_C_PD:
+				// M6 (stage 3) — destination category routing (§9.9). Each "Closest X"
+				// and its plural list route to the NEAREST real LS landmark of that
+				// type via GPS_RouteNearest (increments Times_GPSUsed).
+				case GPS_C_CITY_HALL, GPS_CITY_HALLS:
+					GPS_RouteNearest(playerid, g_GPS_CityHalls, sizeof(g_GPS_CityHalls), "Closest City Hall");
+				case GPS_C_PD, GPS_POLICE:
+					GPS_RouteNearest(playerid, g_GPS_PDs, sizeof(g_GPS_PDs), "Closest Police Department");
 				case GPS_C_HOSPITAL:
-				case GPS_C_BANK:
-				case GPS_C_24_7:
+					GPS_RouteNearest(playerid, g_GPS_Hospitals, sizeof(g_GPS_Hospitals), "Closest Hospital");
+				case GPS_C_BANK, GPS_BANKS:
+					GPS_RouteNearest(playerid, g_GPS_Banks, sizeof(g_GPS_Banks), "Closest Bank");
+				case GPS_C_24_7, GPS_24_7:
+					GPS_RouteNearest(playerid, g_GPS_247, sizeof(g_GPS_247), "Closest 24-7");
 				case GPS_C_BAIT:
-				case GPS_C_CLOTHES:
+					GPS_RouteNearest(playerid, g_GPS_Bait, sizeof(g_GPS_Bait), "Closest Bait Shop");
+				case GPS_C_CLOTHES, GPS_CLOTHES:
+					GPS_RouteNearest(playerid, g_GPS_Clothes, sizeof(g_GPS_Clothes), "Closest Clothes Store");
 				case GPS_C_PET:
+					GPS_RouteNearest(playerid, g_GPS_Pet, sizeof(g_GPS_Pet), "Closest Pet Store");
 				case GPS_C_CRANE:
-				case GPS_POLICE:
-				case GPS_CITY_HALLS:
-				case GPS_BANKS:
-				case GPS_24_7:
+					GPS_RouteNearest(playerid, g_GPS_Crane, sizeof(g_GPS_Crane), "Closest Car-Sell Crane");
 				case GPS_CAR_SALE:
+					GPS_RouteNearest(playerid, g_GPS_CarSale, sizeof(g_GPS_CarSale), "Closest Car Sale Point");
 				case GPS_TOWNS:
-				case GPS_ROBBERY_LOC:
-				case GPS_CLOTHES:
-				case GPS_CUSTOM:*/
+					GPS_RouteNearest(playerid, g_GPS_Towns, sizeof(g_GPS_Towns), "Closest Town");
+				case GPS_ROBBERY, GPS_MISSION, GPS_ROBBERY_LOC:
+					// Robbery hideouts / mission destinations use their own live checkpoint
+					// systems (M5 robbery, M4 missions), not stored GPS nodes — no static
+					// data to route here. DEFERRED (see the report note).
+					SendClientMessage(playerid, COLOR_ERROR, "That destination is provided in-mission, not by the GPS menu.");
+				case GPS_CUSTOM:
+					// Custom saved locations need a per-player saved-location table that
+					// does not exist yet — DEFERRED. Use a Map Marker (/gps -> Map Markers).
+					SendClientMessage(playerid, COLOR_ERROR, "Custom locations are not set up. Place a Map Marker on the map instead.");
 				case GPS_MAP_MARKER:
 				{
 					if(PlayerInfo[playerid][pCustomMapMarker][0] == 0.0 && PlayerInfo[playerid][pCustomMapMarker][1] == 0.0 && PlayerInfo[playerid][pCustomMapMarker][2] == 0.0) return SendClientMessage(playerid,COLOR_ERROR,"No map marker found, please (re)add it.");
+					GPS_RegisterUse(playerid);
 					SetGPS(playerid,PlayerInfo[playerid][pCustomMapMarker][0],PlayerInfo[playerid][pCustomMapMarker][1],PlayerInfo[playerid][pCustomMapMarker][2],"Custom Map Marker");
-					
+
 				}
 				
 			}

@@ -74,6 +74,14 @@
 FUNCTION Kidnap_IsVictim(playerid)
 	return (PlayerInfo[playerid][pKidnappedBy] != -1);
 
+// M6 (stage 1) — the Kidnapper SKILL ransom-scaling hook (§4.4). A player who chose
+// SKILL_KIDNAPPER at City Hall can demand a higher ransom ceiling; everyone else is
+// capped at the base KIDNAP_RANSOM_MAX. pSkill is set by systems/skills.inc (/skill).
+static Kidnap_RansomMaxFor(playerid)
+	return (PlayerInfo[playerid][pSkill] == SKILL_KIDNAPPER)
+		? (KIDNAP_RANSOM_MAX * KIDNAP_SKILL_RANSOM_MULT)
+		: KIDNAP_RANSOM_MAX;
+
 // A valid non-cop kidnap victim: connected, logged-in, human, not the actor, not
 // a cop, not jailed, not already kidnapped, not spawn-protected / DM-zoned.
 static bool:Kidnap_ValidVictim(playerid, targetid)
@@ -370,10 +378,12 @@ CMD:kidnap(playerid, params[])
 	if(GetPlayerInterior(playerid) != GetPlayerInterior(targetid) || GetPlayerVirtualWorld(playerid) != GetPlayerVirtualWorld(targetid))
 		return SendClientMessage(playerid, COLOR_ERROR, "You cannot reach that person.");
 
-	// Clamp the ransom to the cap (§4.4 ≤ $50,000). Base ransom applies — Kidnapper
-	// skill scaling is an M6 skill; the flag below is set but no bonus is applied yet.
+	// Clamp the ransom to the skill-scaled cap (§4.4). Base players cap at $50,000;
+	// a Kidnapper (SKILL_KIDNAPPER, set via /skill in skills.inc) can demand more —
+	// this is the M6 "ransom scaling" hook now live.
+	new ransomMax = Kidnap_RansomMaxFor(playerid);
 	if(ransom < 0) ransom = 0;
-	if(ransom > KIDNAP_RANSOM_MAX) ransom = KIDNAP_RANSOM_MAX;
+	if(ransom > ransomMax) ransom = ransomMax;
 
 	// Commit the grab.
 	PlayerInfo[playerid][pKidnapCooldown] = gettime() + KIDNAP_CD;
@@ -392,8 +402,9 @@ CMD:kidnap(playerid, params[])
 	// Point the KIDNAPPER at the hideout with a checkpoint (drive the victim there).
 	SetPlayerCheckpoint(playerid, KIDNAP_HIDEOUT_X, KIDNAP_HIDEOUT_Y, KIDNAP_HIDEOUT_Z, 5.0);
 
-	// Small grab bonus (§4.4 "small bonus on kidnap").
-	Bank_GiveCash(playerid, KIDNAP_GRAB_BONUS);
+	// Small grab bonus (§4.4 "small bonus on kidnap"). A Kidnapper (SKILL_KIDNAPPER)
+	// earns the larger bonus — part of the M6 kidnapper-skill activation.
+	Bank_GiveCash(playerid, (PlayerInfo[playerid][pSkill] == SKILL_KIDNAPPER) ? KIDNAP_SKILL_GRAB_BONUS : KIDNAP_GRAB_BONUS);
 
 	// Always a warrant (§4.4): +1 per civilian, +6 per cop kidnapped. The victim is
 	// never a cop here (the gate blocks it), so this is the civilian value — the cop
@@ -440,15 +451,15 @@ CMD:ransom(playerid, params[])
 {
 	if(PlayerInfo[playerid][pKidnapVictim] == -1)
 		return SendClientMessage(playerid, COLOR_ERROR, "You are not holding anyone to ransom.");
-	new amount;
+	new amount, ransomMax = Kidnap_RansomMaxFor(playerid);	// skill-scaled cap (§4.4 — Kidnapper skill)
 	if(sscanf(params, "d", amount))
 	{
 		new msg[128];
-		format(msg, sizeof(msg), "USAGE: /ransom [amount]  (current ransom: $%d, max $%d)", PlayerInfo[playerid][pKidnapRansom], KIDNAP_RANSOM_MAX);
+		format(msg, sizeof(msg), "USAGE: /ransom [amount]  (current ransom: $%d, max $%d)", PlayerInfo[playerid][pKidnapRansom], ransomMax);
 		return SendClientMessage(playerid, COLOR_SERVER_INFO, msg);
 	}
 	if(amount < 0) amount = 0;
-	if(amount > KIDNAP_RANSOM_MAX) amount = KIDNAP_RANSOM_MAX;
+	if(amount > ransomMax) amount = ransomMax;
 	PlayerInfo[playerid][pKidnapRansom] = amount;
 
 	new victimid = PlayerInfo[playerid][pKidnapVictim], msg[128];

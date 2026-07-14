@@ -206,6 +206,32 @@ FUNCTION House_NearestOwned(playerid, Float:range)
 	return best;
 }
 
+// Pick a random OWNED house and fill its entrance coords (fx/fy/fz). Returns 1 if a
+// house was picked, 0 if the server has no owned houses. Reused by the M6 Domestic
+// Disturbance mission (§6.3 — respond to a player-owned house). Direct call (housing
+// is included before missions.inc), so the float references work.
+FUNCTION House_RandomOwnedCoords(&Float:fx, &Float:fy, &Float:fz)
+{
+	new count = 0;
+	for(new i = 0; i < gHouseCount; i++)
+		if(gHouseInfo[i][hOwnerAID] != 0) count++;
+	if(count == 0) return 0;
+	new pick = random(count), seen = 0;
+	for(new i = 0; i < gHouseCount; i++)
+	{
+		if(gHouseInfo[i][hOwnerAID] == 0) continue;
+		if(seen == pick)
+		{
+			fx = gHouseInfo[i][hX];
+			fy = gHouseInfo[i][hY];
+			fz = gHouseInfo[i][hZ];
+			return 1;
+		}
+		seen++;
+	}
+	return 0;
+}
+
 // Is the owner of `house` online? Fills `ownerid` with their playerid. Public — the
 // house robbery requires the owner to be online (§5.5).
 FUNCTION House_IsOwnerOnline(house, &ownerid)
