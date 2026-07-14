@@ -91,6 +91,20 @@ FUNCTION LoadUserData(playerid)
 	cache_get_value_int(0, "STDs",PlayerInfo[playerid][pSTD]);
 	cache_get_value_int(0, "Condoms",PlayerInfo[playerid][pCondoms]);
 	cache_get_value_bool(0, "ChastityBelt",PlayerInfo[playerid][pChastityBelt]);
+	// M4 (stage 1) — bank / taxes / insurance persistence (design §10/§11.2).
+	cache_get_value_int(0, "BankMoney",PlayerInfo[playerid][pBankMoney]);
+	cache_get_value_int(0, "TaxOwed",PlayerInfo[playerid][pTaxOwed]);
+	cache_get_value_int(0, "LifeInsurance",PlayerInfo[playerid][pLifeInsurance]);
+	cache_get_value_int(0, "HealthInsExpiry",PlayerInfo[playerid][pHealthInsExpiry]);
+	// M4 (stage 2) — lotto ticket for the current game-day (§9.5). Cleared for
+	// all rows (online + offline) by the bulk UPDATE in Lotto_Draw(); loading a
+	// non-zero value here means the draw has not yet run this game-day.
+	cache_get_value_int(0, "LottoNumber",PlayerInfo[playerid][pLottoNumber]);
+	// M4 (stage 3) — mission cooldowns: one packed '|'-delimited column of per-mission
+	// game-hour completion stamps (§6). Parse into the per-mission stamp array.
+	new missionCd[128];
+	cache_get_value_name(0, "MissionCooldowns", missionCd, sizeof(missionCd));
+	Mission_LoadCooldowns(playerid, missionCd);
 	TogglePlayerSpectating(playerid,false);
 	return 1;
 }

@@ -96,16 +96,23 @@ static Jail_Place(playerid)
 }
 
 // Persist the current jail row (absolute JailUntil + bail/reason/chained).
+// This is the single per-player LSplayers disconnect/state UPDATE — M4 (stage 1)
+// folded the bank/tax/insurance columns in here (BankMoney/TaxOwed/LifeInsurance/
+// HealthInsExpiry) rather than adding a second competing UPDATE. Any subsystem
+// that mutates those fields (bank.inc) just writes PlayerInfo and this save picks
+// them up on disconnect/release; bank.inc also calls this directly after a
+// deposit/withdraw so the money core is durable without a separate query.
 FUNCTION Jail_SavePlayer(playerid)
 {
 	if(!PlayerInfo[playerid][pLoggedIn]) return 0;
-	new string[320];	// headroom for Money+RefillPoints + a 64-char (escaped) JailReason
+	new string[448];	// headroom for Money/Bank/Tax + RefillPoints + LottoNumber + a 64-char (escaped) JailReason
 	mysql_format(g_SQL, string, sizeof(string),
-		"UPDATE "TABLE_PLAYERS_C" SET Money=%d, Score=%d, CopRank=%d, RefillPoints=%d, SeriousCrimes=%d, Jailed=%d, JailUntil=%d, Bail=%d, JailReason='%e', EscapeChained=%d WHERE aID=%d LIMIT 1",
+		"UPDATE "TABLE_PLAYERS_C" SET Money=%d, BankMoney=%d, TaxOwed=%d, LifeInsurance=%d, HealthInsExpiry=%d, Score=%d, CopRank=%d, RefillPoints=%d, SeriousCrimes=%d, Jailed=%d, JailUntil=%d, Bail=%d, JailReason='%e', EscapeChained=%d, LottoNumber=%d WHERE aID=%d LIMIT 1",
 		PlayerInfo[playerid][pMoney],
+		PlayerInfo[playerid][pBankMoney], PlayerInfo[playerid][pTaxOwed], PlayerInfo[playerid][pLifeInsurance], PlayerInfo[playerid][pHealthInsExpiry],
 		PlayerInfo[playerid][pScore], PlayerInfo[playerid][pCopRank], PlayerInfo[playerid][pRefillPoints], PlayerInfo[playerid][pSeriousCrimes],
 		PlayerInfo[playerid][pJailed] ? 1 : 0, PlayerInfo[playerid][pJailUntil], PlayerInfo[playerid][pJailBail],
-		PlayerInfo[playerid][pJailReason], PlayerInfo[playerid][pEscapeChained] ? 1 : 0, PlayerInfo[playerid][pID]);
+		PlayerInfo[playerid][pJailReason], PlayerInfo[playerid][pEscapeChained] ? 1 : 0, PlayerInfo[playerid][pLottoNumber], PlayerInfo[playerid][pID]);
 	mysql_pquery(g_SQL, string);
 	return 1;
 }

@@ -94,7 +94,11 @@ enum
 	ADMIN_INFO_DIALOG,      // M2 — generic read-only info dialog (aka/ips/osearch/ajailed/flag lists)
 	ADMIN_INFO_DIALOG2,     // M2 — second generic info dialog (async result formatting)
 	COP_INFO_DIALOG,        // M3 (stage 2) — cop lists (/suspects /warrants /mostwanted /jaillist)
-	REFILL_DIALOG           // M3 (stage 2) — cop /refill menu (HP/armour/weapons)
+	REFILL_DIALOG,          // M3 (stage 2) — cop /refill menu (HP/armour/weapons)
+	BANK_DIALOG,            // M4 (stage 1) — bank menu (/bank /atm — balance + deposit/withdraw)
+	BANK_DEPOSIT_DIALOG,    // M4 (stage 1) — deposit amount input
+	BANK_WITHDRAW_DIALOG,   // M4 (stage 1) — withdraw amount input
+	RADIO_DIALOG            // M4 (stage 2) — /radio preset stream URL picker (cmds/player.inc)
 };
 
 enum
@@ -347,6 +351,191 @@ enum
 #define JUMPKICK_RANGE			2.0			// reach in front of the player (§5)
 #define JUMPKICK_DAMAGE			8.0			// melee HP damage on a landed jump-kick (§5)
 #define JUMPKICK_CD				5			// per-player cooldown seconds [OUR DESIGN]
+
+// ============================================================================
+//  M4 (stage 1) — bank, taxes & insurance (the money core) — systems/bank.inc
+//  Grounding: docs/GAMEPLAY-DESIGN.md §10, §11.2, §11.4 + docs/research/economy.md
+//  §1 (money flow, bank interest, taxes, insurance).
+// ============================================================================
+
+// ---- Money safety rail -----------------------------------------------------
+// Every money amount is validated positive/integer and clamped below this cap
+// so no single deposit/withdraw/transfer/interest step can overflow the signed
+// 32-bit cell (max 2,147,483,647). economy.md §1.3 notes CB caps a single
+// withdraw at 99,999,999; we use a higher headroom cap here.
+#define MAX_MONEY				2000000000	// hard ceiling for cash/bank per player (overflow guard)
+
+// GameModeClock() advances 1 game-minute per real second, so one game-day =
+// 24*60 = 1440 real seconds. Used to express insurance durations in game-days.
+#define SECS_PER_GAME_DAY		1440
+
+// ---- Bank interest (economy.md §1.3 — ~5-15% every 2 game days) ------------
+// We pick 8% as a middle value of the researched 5-15% band. Paid on BankMoney
+// on the game-clock day schedule (every BANK_INTEREST_DAYS game-days) via
+// Bank_OnGameDay() hooked into GameModeClock's day transition — no new timer.
+#define BANK_INTEREST_PCT		8			// % of BankMoney paid as interest (research band 5-15%)
+#define BANK_INTEREST_DAYS		2			// pay interest every N game-days (economy.md §1.3)
+
+// ---- /givecash (/pay) hand-cash transfer (economy.md §1.3, §10) ------------
+// NOT a bank transfer: physical cash handed to a nearby player. Anti-abuse:
+// positive integer amount, giver must hold it, proximity + cooldown, logged.
+#define GIVECASH_RANGE			5.0			// on-foot reach to hand cash to a nearby player
+#define GIVECASH_CD				10			// per-giver cooldown seconds (anti-spam) [OUR DESIGN]
+#define GIVECASH_MIN			1			// minimum hand-cash amount
+
+// ---- Taxes (economy.md §1.4 — every 2 game-days; GAMEPLAY §10) -------------
+// Wealth tax: on cash+bank once it exceeds the threshold (donators pVip immune,
+// economy.md §1.4). Income tax: on money earned since the last bill. Both run on
+// the game-clock day schedule via Tax_OnGameDay(). Deduct bank-first then cash;
+// any unpayable remainder accrues to TaxOwed and is chased next tick.
+#define TAX_DAYS				2			// run the tax tick every N game-days (economy.md §1.4)
+#define WEALTH_TAX_THRESHOLD	10000000	// wealth (cash+bank) above this is taxed (economy.md §1.4: ~$10M)
+#define WEALTH_TAX_PCT			12			// wealth-tax rate on the amount OVER the threshold (economy.md §1.4)
+#define INCOME_TAX_PCT			7			// income-tax rate on money earned since last bill (economy.md §1.4)
+
+// ---- Insurance (economy.md §1.5/§1.6; GAMEPLAY §11.2) ----------------------
+// Medical fee charged on death from cash-first-then-bank unless the player holds
+// active Health Insurance (HealthInsExpiry > now). Life Insurance is a stored
+// policy count that waives the medical fee AND preserves weapons on death.
+#define MEDICAL_FEE				5000		// flat medical fee on death (economy.md §1.5) [OUR DESIGN — CB scales it]
+#define HEALTH_INS_PRICE		15000		// /buyinsurance health cover price [OUR DESIGN]
+#define HEALTH_INS_DAYS			5			// health cover duration in game-days (economy.md §1.6: 5 game-days)
+#define LIFE_INS_PRICE			75000		// life policy price (economy.md §1.6: ~$75,000)
+#define LIFE_INS_MAX			3			// max life policies held at once (economy.md §1.6)
+
+// ============================================================================
+//  M4 (stage 2) — lotto, money events, /ad + /advert, holdup base
+//  Grounding: docs/GAMEPLAY-DESIGN.md §5.2 (holdup), §7 (/moneybag /moneyrush
+//  /ad /advert /radio), §9.5 (lotto), §10.3 (the clock-tick draw fix), §11.4
+//  (server_data.LottoJackpot) + docs/research/economy.md §4-6.
+// ============================================================================
+
+// ---- Lotto (systems/lotto.inc — design §9.5 / §10.3) -----------------------
+// Pick-a-number lotto: buy a ticket for the game-day, drawn at game-hour 18
+// inside GameModeClock's hour transition (NOT a real-time timer — the legacy
+// "lottery timer bug" fix, §10.3). Jackpot lives in server_data.LottoJackpot.
+#define LOTTO_MAX				125			// pick range 1..125 (§9.5)
+#define LOTTO_TICKET_PRICE		5000		// ticket price via Bank_TakeCash (§9.5)
+#define LOTTO_DRAW_HOUR			18			// draw fires at this game-hour (§9.5 / §10.3)
+#define LOTTO_JACKPOT_BASE		1000000		// jackpot floor after a paid-out/rolled draw (§9.5 / §11.4)
+#define LOTTO_WIN_SCORE			5			// score to each winner (§9.5, "+5 score")
+#define LOTTO_PLAY_SCORE		1			// participation score to a winner (§9.5, "+1 participation")
+
+// ---- Money bag (systems/moneybag.inc — design §7 / economy §5) -------------
+// One hidden bag at a time; the finder is paid a random reward. Zone hint is
+// coarse (warmer/colder by distance). Bag times out + relocates.
+#define MONEYBAG_REWARD_MIN		250000		// reward floor  random(250k..2M) (§7)
+#define MONEYBAG_REWARD_MAX		2000000		// reward ceiling random(250k..2M) (§7)
+#define MONEYBAG_PICKUP_RANGE	3.0			// reach to grab the bag on foot [OUR DESIGN]
+#define MONEYBAG_TIMEOUT_SECS	600			// bag relocates if unclaimed for this long [OUR DESIGN]
+#define MONEYBAG_HINT_CD		5			// per-player /moneybag hint cooldown seconds [OUR DESIGN]
+#define MONEYBAG_HINT_WARM		60.0		// within this: "very warm"  [OUR DESIGN]
+#define MONEYBAG_HINT_HOT		150.0		// within this: "warm"       [OUR DESIGN]
+#define MONEYBAG_HINT_MILD		400.0		// within this: "cold"       [OUR DESIGN]
+#define MONEYBAG_MODEL			1550		// money-bag pickup model (Money) [OUR DESIGN]
+
+// ---- Money rush (systems/moneyrush.inc — design §7/§8.2 / economy §6.2) ----
+// Owner-started cash-rain event: dynamic pickups worth random(1k..25k) grabbed
+// via Bank_GiveCash, PvP allowed during, per-event leaderboard, cooldown.
+#define MONEYRUSH_CASH_MIN		1000		// pickup cash floor   random(1k..25k) (§7)
+#define MONEYRUSH_CASH_MAX		25000		// pickup cash ceiling random(1k..25k) (§7)
+#define MONEYRUSH_DURATION		180			// event length seconds [OUR DESIGN]
+#define MONEYRUSH_COOLDOWN		600			// cooldown before the next rush [OUR DESIGN]
+#define MONEYRUSH_PICKUPS		40			// dynamic pickups scattered per event [OUR DESIGN]
+#define MONEYRUSH_PICKUP_MODEL	1212		// money pickup model (Money) [OUR DESIGN]
+#define MONEYRUSH_SPREAD		120.0		// pickups scatter radius around the arena [OUR DESIGN]
+// Arena centre (Los Santos — Glen Park, an open flat area) [OUR DESIGN].
+#define MONEYRUSH_X				(1990.0)
+#define MONEYRUSH_Y				(-1440.0)
+#define MONEYRUSH_Z				(13.5)
+
+// ---- /ad adrenaline + /advert paid ad (cmds/player.inc — design §7/§4.2/§4.3)
+// /ad = adrenaline pill: full heal + STD cure-all + overdose clear; carry up to
+// ADRENALINE_MAX. /advert = paid server-wide coloured line.
+#define ADRENALINE_MAX			3			// adrenaline pills carried (§7, "carry 3")
+#define ADRENALINE_START		1			// starter pill granted on first /ad (acquisition deferred)
+#define ADVERT_COST				200			// /advert cost via Bank_TakeCash (§7)
+#define ADVERT_COOLDOWN			90			// /advert cooldown seconds (§7)
+#define ADVERT_MAX_CHARS		100			// /advert text cap (§7)
+
+// ---- Store holdup base (systems/holdup.inc — design §5.2) -------------------
+// On-foot near a store/24-7 clerk actor: +7 wanted, ~10s clerk wait, then pays
+// $2000-6000/sec for a short duration. Full robbery system + crowbar bonus M5.
+#define HOLDUP_WANTED			7			// wanted set on holdup start (§5.2, +7 Felon)
+#define HOLDUP_CLERK_WAIT		10			// seconds the clerk waits before the register opens (§5.2)
+#define HOLDUP_PAYOUT_SECS		6			// seconds the register pays out for [OUR DESIGN]
+#define HOLDUP_RATE_MIN			2000		// register payout floor per second (§5.2)
+#define HOLDUP_RATE_MAX			6000		// register payout ceiling per second (§5.2)
+#define HOLDUP_STORE_CD			300			// per-player holdup cooldown seconds (§5.2 [OUR DESIGN])
+#define HOLDUP_ACTOR_RANGE		4.0			// reach to a store clerk actor to start [OUR DESIGN]
+
+// ============================================================================
+//  M4 (stage 3) — reusable mission framework + 4 core missions — systems/missions.inc
+//  Grounding: docs/GAMEPLAY-DESIGN.md §6 (missions intro), §6.4 Drug Delivery,
+//  §6.18 Truck Delivery, §6.17 Trash Pickup, §6.6 Food Delivery, §6.20 (milestone
+//  placement) + docs/research/crazybobs-site-full.md (§Missions, exact payouts).
+//
+//  The framework is DATA-DRIVEN: every mission is a row in MissionReg[] (id, name,
+//  type civ/cop, cooldown in game-hours, requires-vehicle + accepted model set,
+//  payout-per-checkpoint, all-complete bonus, per-checkpoint wanted-if-cop) plus a
+//  small route table (MissionRoute[]) of candidate checkpoint coords the launcher
+//  picks from. M5/M6 add a mission in ~30 lines: append a MissionReg row, add its
+//  route coords, and (only if it needs bespoke logic) a couple of switch arms.
+// ============================================================================
+
+// ---- Mission ids (index into MissionReg[]) — APPEND new missions, never renumber.
+enum
+{
+	MISSION_DRUG_DELIVERY,		// 0 — civ, 5 CP, $5k/cp + $50k bonus, 5 game-hr CD, +2 wanted/cp if cop near (§6.4)
+	MISSION_TRUCK_DELIVERY,		// 1 — civ, needs a delivery truck, 5 CP route, 12 game-hr window/CD (§6.18)
+	MISSION_TRASH_PICKUP,		// 2 — civ, needs a Trashmaster, 5 CP, $2.5k/cp + $25k bonus (§6.17)
+	MISSION_FOOD_DELIVERY,		// 3 — civ, needs a food vehicle, 5 CP, $2.5k/cp + $25k bonus (§6.6)
+	MISSION_COUNT				// keep last — number of registered missions (array sizes)
+}
+
+// ---- Mission type flags (MissionReg[][mType]) — gate civ-vs-cop entry (§6). ----
+#define MISSION_TYPE_CIVILIAN	0			// civilians only (IsCivilian gate)
+#define MISSION_TYPE_COP		1			// cops only (IsCop gate)
+
+// ---- Framework tunables ----------------------------------------------------
+#define MISSION_MAX_CHECKPOINTS	6			// max checkpoints a route can have (array bound; all 4 use 5)
+#define MISSION_MAX_ROUTE_POOL	10			// candidate points per mission the launcher samples from
+#define MISSION_CP_SIZE			5.0			// race-checkpoint radius (delivery routes)
+#define MISSION_START_CP_SIZE	4.0			// on-foot/vehicle reach at a launcher marker [OUR DESIGN]
+#define MISSION_OFFROUTE_DIST	3000.0		// abort if this far from the active checkpoint (stuck/teleport guard)
+#define MISSION_COPSIGHT_RANGE	80.0		// a cop within this (line-of-city sight) counts as "in sight" (§6.4) [OUR DESIGN]
+#define MISSION_START_DIALOG	5301		// /missions launcher list dialog id (unique — avoids the defines.inc enum)
+
+// ---- Game-time cooldown clock ----------------------------------------------
+// Missions cool down in GAME hours, not real seconds. We stamp completion with a
+// monotonic game-hour = g_GameDayCounter*24 + GameHour (never rewinds on the
+// game-week rollover because g_GameDayCounter is monotonic). A mission is ready
+// when (nowGameHour - lastStamp) >= its cooldown, or the stamp is 0 (never done).
+#define MISSION_HOURS_PER_DAY	24
+
+// ---- Per-mission payouts / cooldowns (VERIFIED from §6 + Score Guide) -------
+// Drug Delivery (§6.4): $5,000/cp + $50,000 all-5 bonus = $75k; 5 game-hr CD.
+#define MDRUG_CP_PAY			5000
+#define MDRUG_BONUS				50000
+#define MDRUG_COOLDOWN_HRS		5
+#define MDRUG_WANTED_PER_CP		2			// +2 wanted per checkpoint if a cop is in sight (§6.4)
+
+// Truck Delivery (§6.18): base pay per delivery; 12 game-hr window/cooldown.
+// Payout formula not published — [OUR DESIGN] a per-cp base + a completion bonus
+// comparable to the trash/food loop (trucks are longer hauls, so a touch higher).
+#define MTRUCK_CP_PAY			4000
+#define MTRUCK_BONUS			30000
+#define MTRUCK_COOLDOWN_HRS		12
+
+// Trash Pickup (§6.17): $2,500/cp + $25,000 all-5 bonus = $37,500; 2 game-hr CD.
+#define MTRASH_CP_PAY			2500
+#define MTRASH_BONUS			25000
+#define MTRASH_COOLDOWN_HRS		2
+
+// Food Delivery (§6.6): $2,500/cp + $25,000 all-5 bonus = $37,500; 2 game-hr CD.
+#define MFOOD_CP_PAY			2500
+#define MFOOD_BONUS				25000
+#define MFOOD_COOLDOWN_HRS		2
 
 #define isNull(%1) \
                 ((!(%1[0])) || (((%1[0]) == '\1') && (!(%1[1]))))

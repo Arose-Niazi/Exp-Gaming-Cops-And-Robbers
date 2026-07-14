@@ -15,6 +15,10 @@
 		/lgoto <name>        — teleport to a named saved location (SCRIPTER)
 		/debug               — toggle debug output (SCRIPTER)
 
+	M4 (stage 2) scripter commands live in their system modules (design §8.3):
+		/alotto              — force a lotto draw for testing (systems/lotto.inc)
+		/addmoneybag         — spawn a money bag chosen/random (systems/moneybag.inc)
+
 	Functions Being Called:
 		messages: SendMessageToAdmins, SendMessageToOwners, IRC_SendMessage
 		owner:    GrantRefreshPlayer

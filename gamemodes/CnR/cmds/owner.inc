@@ -128,14 +128,31 @@ CMD:makeregular(playerid, params[]) return GrantBoolFlag(playerid, params, "Regu
 CMD:makedj(playerid, params[])      return GrantBoolFlag(playerid, params, "Dj", "dj");
 CMD:makedonator(playerid, params[]) return GrantBoolFlag(playerid, params, "Vip", "donator");
 
-CMD:startmoneyrush(playerid)
+// M4 (stage 2) — start (or force-end) the money-rush cash-rain event (§8.2).
+// The event mechanics live in systems/moneyrush.inc; this is the owner gate.
+CMD:startmoneyrush(playerid, params[])
 {
 	if(PlayerInfo[playerid][pRank] < SERVER_OWNER) return SendClientMessage(playerid, COLOR_ERROR, ERROR_NOT_ADMIN);
-	// Shell for M2 — full cash-rain event lands in M4 (systems/moneyrush.inc).
+
+	// /startmoneyrush stop → force-end a running rush early.
+	if(!isNull(params) && !strcmp(params, "stop", true))
+	{
+		if(!Moneyrush_IsActive()) return SendClientMessage(playerid, COLOR_ERROR, "No money-rush event is running.");
+		Moneyrush_ForceEnd(playerid);
+		new s[128];
+		format(s, sizeof(s), "%s (%d) force-ended the money-rush event.", PlayerInfo[playerid][pUserName], playerid);
+		SendMessageToAdmins(COLOR_ADMIN_INFO, s);
+		IRC_SendMessage(s, IRC_ADMIN_COLOR_INFO);
+		return 1;
+	}
+
+	if(Moneyrush_IsActive()) return SendClientMessage(playerid, COLOR_ERROR, "A money-rush event is already running. Use /startmoneyrush stop to end it.");
+	if(!Moneyrush_Start(playerid))
+		return SendClientMessage(playerid, COLOR_ERROR, "The money-rush is on cooldown — try again shortly.");
+
 	new string[128];
-	format(string, sizeof(string), ""COL_YELLOW"A Money Rush event has been announced by %s! (event mechanics arrive in M4)", PlayerInfo[playerid][pUserName]);
-	SendClientMessageToAll(COLOR_SERVER_INFO, string);
-	SendClientMessage(playerid, COLOR_ADMIN_INFO, "TODO(M4): wire the money-rush event (systems/moneyrush.inc).");
-	IRC_SendMessage("A Money Rush event was announced (shell).", IRC_ADMIN_COLOR_INFO);
+	format(string, sizeof(string), "%s (%d) started a money-rush event.", PlayerInfo[playerid][pUserName], playerid);
+	SendMessageToAdmins(COLOR_ADMIN_INFO, string);
+	IRC_SendMessage(string, IRC_ADMIN_COLOR_INFO);
 	return 1;
 }

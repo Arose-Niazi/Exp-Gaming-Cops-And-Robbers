@@ -209,7 +209,40 @@ enum pInfo
 	bool:pDrugOverdose,			// currently overdosing (slow death until adrenaline)
 
 	// /jumpkick (§5)
-	pJumpkickCooldown			// gettime() the player may /jumpkick again
+	pJumpkickCooldown,			// gettime() the player may /jumpkick again
+
+	// ---- M4 (stage 1) : bank, taxes & insurance (design §10/§11.2) ----------
+	pBankMoney,					// banked cash (LSplayers.BankMoney) — safe from robbery/medical fees
+	pTaxOwed,					// unpaid tax carried forward (LSplayers.TaxOwed) — chased next tax tick
+	pLifeInsurance,				// active life-insurance policy count (LSplayers.LifeInsurance), max LIFE_INS_MAX
+	pHealthInsExpiry,			// gettime() health insurance lapses (LSplayers.HealthInsExpiry, 0 = none)
+	pGiveCashCooldown,			// gettime() the player may /givecash again (anti-abuse)
+
+	// ---- M4 (stage 2) : lotto, money events, /ad + /advert, holdup ----------
+	pLottoNumber,				// lotto number picked for the current game-day (LSplayers.LottoNumber, 0 = no ticket)
+	pAdrenaline,				// adrenaline pills carried (/ad — full heal + STD cure + OD clear), max ADRENALINE_MAX
+	pAdvertCooldown,			// gettime() the player may /advert again (§7)
+	pHoldupCooldown,			// gettime() the player may /holdup again (§5.2)
+	bool:pHoldingUp,			// currently mid-holdup (clerk wait / register payout running)
+	pHoldupTimer,				// per-player holdup sequence timer handle (-1 = none)
+	pHoldupStage,				// holdup sequence step (0 = clerk wait, 1..HOLDUP_PAYOUT_SECS = paying)
+	pHoldupTake,				// running total taken from the register this holdup
+	Float:pHoldupX,				// store position locked at holdup start (leave-the-zone check)
+	Float:pHoldupY,
+	Float:pHoldupZ,
+	bool:pInMoneyRush,			// joined the active money-rush event
+	pMoneyRushEarned,			// cash grabbed during the current money-rush (per-event leaderboard)
+
+	// ---- M4 (stage 3) : reusable mission framework (design §6) --------------
+	pOnMission,					// active mission id (index into MissionReg[]), or -1 = none
+	pMissionCheckpoint,			// current checkpoint index reached so far (0..route length)
+	pMissionRouteLen,			// number of checkpoints in the active route (usually 5)
+	pMissionVehicle,			// vehicle id the mission is bound to (vehicle missions), or -1
+	pMissionData,				// generic per-mission scratch slot (running earnings this run)
+	Float:pMissionRouteX[MISSION_MAX_CHECKPOINTS],	// active route checkpoint coords (X)
+	Float:pMissionRouteY[MISSION_MAX_CHECKPOINTS],	// active route checkpoint coords (Y)
+	Float:pMissionRouteZ[MISSION_MAX_CHECKPOINTS],	// active route checkpoint coords (Z)
+	pMissionCooldown[MISSION_COUNT]		// last-completion game-hour stamp per mission (0 = never) [persisted, packed]
 }
 
 // Session-only ignore matrix (bit-packed to save memory): does A ignore B?
@@ -325,6 +358,31 @@ FUNCTION ClearPlayerVariables(playerid)
 	PlayerInfo[playerid][pDrugs]=PlayerInfo[playerid][pDrugBuzzStage]=PlayerInfo[playerid][pDrugEffectUntil]=PlayerInfo[playerid][pDrugHealCounter]=0;
 	PlayerInfo[playerid][pDrugClickMode]=PlayerInfo[playerid][pDrugOverdose]=PlayerInfo[playerid][pHasDrugBag]=false;
 	PlayerInfo[playerid][pJumpkickCooldown]=0;
+
+	// ---- M4 (stage 1) : bank, taxes & insurance ----------------------------
+	PlayerInfo[playerid][pBankMoney]=PlayerInfo[playerid][pTaxOwed]=0;
+	PlayerInfo[playerid][pLifeInsurance]=PlayerInfo[playerid][pHealthInsExpiry]=PlayerInfo[playerid][pGiveCashCooldown]=0;
+
+	// ---- M4 (stage 2) : lotto, money events, /ad + /advert, holdup ---------
+	PlayerInfo[playerid][pLottoNumber]=PlayerInfo[playerid][pAdrenaline]=0;
+	PlayerInfo[playerid][pAdvertCooldown]=PlayerInfo[playerid][pHoldupCooldown]=0;
+	if(PlayerInfo[playerid][pHoldupTimer] != -1) KillTimer(PlayerInfo[playerid][pHoldupTimer]);
+	PlayerInfo[playerid][pHoldupTimer]=-1;
+	PlayerInfo[playerid][pHoldingUp]=PlayerInfo[playerid][pInMoneyRush]=false;
+	PlayerInfo[playerid][pHoldupStage]=PlayerInfo[playerid][pHoldupTake]=PlayerInfo[playerid][pMoneyRushEarned]=0;
+	PlayerInfo[playerid][pHoldupX]=PlayerInfo[playerid][pHoldupY]=PlayerInfo[playerid][pHoldupZ]=0.0;
+
+	// ---- M4 (stage 3) : reusable mission framework -------------------------
+	PlayerInfo[playerid][pOnMission]=-1;
+	PlayerInfo[playerid][pMissionVehicle]=-1;
+	PlayerInfo[playerid][pMissionCheckpoint]=PlayerInfo[playerid][pMissionRouteLen]=PlayerInfo[playerid][pMissionData]=0;
+	for(new i=0; i<MISSION_MAX_CHECKPOINTS; i++)
+	{
+		PlayerInfo[playerid][pMissionRouteX][i]=PlayerInfo[playerid][pMissionRouteY][i]=PlayerInfo[playerid][pMissionRouteZ][i]=0.0;
+	}
+	// Cooldown stamps are loaded from the DB in loading_data; clear the slots on a
+	// fresh connect so a relog into a not-yet-loaded slot cannot read stale data.
+	for(new i=0; i<MISSION_COUNT; i++) PlayerInfo[playerid][pMissionCooldown][i]=0;
 
 	return 1;
 }

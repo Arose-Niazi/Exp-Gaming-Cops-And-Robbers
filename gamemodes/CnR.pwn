@@ -130,6 +130,9 @@ new GameDay = 0;
 new GameHour = 0;
 new GameMinute = 0;
 new GameWeather = 0;
+// M4 (stage 1) — monotonic game-day counter (never resets on week rollover) that
+// drives the every-N-game-days bank-interest + tax schedule (design §10.3).
+new g_GameDayCounter = 0;
 
 new fine_weather_ids[] = {1,2,3,4,5,6,7,12,13,14,15,17,18,24,25,26,27,28,29,30,40};
 new foggy_weather_ids[] = {9,19,20,31,32};
@@ -181,6 +184,16 @@ new Text:ConnectTD[2];
 	#include "CnR\systems\std"
 	#include "CnR\systems\drugs"
 	#include "CnR\cmds\crime"
+	// ---- M4 (stage 1) : bank, taxes & insurance (the money core) ----
+	#include "CnR\systems\bank"
+	// ---- M4 (stage 2) : lotto, money events, /ad + /advert, holdup base ----
+	#include "CnR\systems\lotto"
+	#include "CnR\systems\moneybag"
+	#include "CnR\systems\moneyrush"
+	#include "CnR\systems\holdup"
+	// ---- M4 (stage 3) : reusable mission framework + 4 core missions ----
+	#include "CnR\systems\missions"
+	#include "CnR\cmds\player"
 #else
 	#include "CnR/server/server_vars"
 	#include "CnR/players/player_vars"
@@ -221,6 +234,16 @@ new Text:ConnectTD[2];
 	#include "CnR/systems/std"
 	#include "CnR/systems/drugs"
 	#include "CnR/cmds/crime"
+	// ---- M4 (stage 1) : bank, taxes & insurance (the money core) ----
+	#include "CnR/systems/bank"
+	// ---- M4 (stage 2) : lotto, money events, /ad + /advert, holdup base ----
+	#include "CnR/systems/lotto"
+	#include "CnR/systems/moneybag"
+	#include "CnR/systems/moneyrush"
+	#include "CnR/systems/holdup"
+	// ---- M4 (stage 3) : reusable mission framework + 4 core missions ----
+	#include "CnR/systems/missions"
+	#include "CnR/cmds/player"
 #endif
 
 new WeekDays[7][] = {
@@ -303,6 +326,8 @@ public OnGameModeInit()
 	SAMP_Elevator_Initialize();
 	GRIN_Elevator_Initialize();
 	LoadActors();
+	// M4 (stage 2) — mark the money-rush pickup slots empty (arrays default to 0).
+	Moneyrush_Init();
 	return 1;
 }
 
@@ -310,6 +335,9 @@ public OnGameModeExit()
 {
 	SAMP_Elevator_Destroy();
 	GRIN_Elevator_Destroy();
+	// M4 (stage 2) — destroy any money-bag / money-rush dynamic pickups.
+	Moneybag_Cleanup();
+	Moneyrush_Cleanup();
 	DestroyZones();
 	KillTimer(ServerInfo[sTimer]);
 	DeleteInterior();
@@ -382,12 +410,19 @@ public OnPlayerDisconnect(playerid,reason)
 			// M3 (stage 3) — persist STD bitmask/condoms and drug stash/skill (§4.2/§4.3).
 			STD_SavePlayer(playerid);
 			Drug_SavePlayer(playerid);
+			// M4 (stage 3) — persist the mission cooldown stamps (§6).
+			Mission_SavePlayer(playerid);
 		}
 		// M3 (stage 2) — kill the jail countdown timer + persist the jail row
 		// (Jail_OnDisconnect also unwinds any pending appeal/jury seat).
 		Jail_OnDisconnect(playerid);
 		// M3 (stage 2) — reset the cop /report undo state (static per-slot arrays).
 		Cop_OnDisconnect(playerid);
+		// M4 (stage 2) — kill any running holdup timer + drop the money-rush seat.
+		Holdup_OnDisconnect(playerid);
+		Moneyrush_OnDisconnect(playerid);
+		// M4 (stage 3) — persist cooldowns (if logged in) + drop active-mission state.
+		Mission_OnDisconnect(playerid);
 
 	}
 	new szDisconnectReason[3][] =
@@ -554,6 +589,15 @@ public OnPlayerDeath(playerid,killerid,reason)
 		// M3 (stage 3) — a fresh spawn is clean: clear STDs + drug buzz/overdose (§4.2/§4.3).
 		STD_OnPlayerDeath(playerid);
 		Drug_OnPlayerDeath(playerid);
+		// M4 (stage 1) — medical fee on death unless insured (design §11.2, economy
+		// §1.5/§1.6). Returns 1 if a life policy was consumed (weapons preserved);
+		// SA-MP always drops weapons on death, so the weapon-save is best-effort and
+		// left as a stage-1 note (return value reserved for the M6 weapon system).
+		Bank_OnPlayerDeath(playerid);
+		// M4 (stage 2) — a holdup in progress is aborted on death (§5.2).
+		Holdup_OnPlayerDeath(playerid);
+		// M4 (stage 3) — an active mission is aborted on death (§6, clean up CP).
+		Mission_OnPlayerDeath(playerid);
 		// Dying wipes the victim's wanted level (arrest/takedown/escape all reset here).
 		ClearPlayerWanted(playerid, "");
 		ZoneHideTD(playerid);
@@ -597,6 +641,21 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 		{
 			Refill_OnDialogResponse(playerid, response, listitem);
 		}
+		// M4 (stage 1) — bank menu + deposit/withdraw amount input dialogs.
+		case BANK_DIALOG, BANK_DEPOSIT_DIALOG, BANK_WITHDRAW_DIALOG:
+		{
+			Bank_OnDialogResponse(playerid, dialogid, response, listitem, inputtext);
+		}
+		// M4 (stage 2) — /radio preset stream URL picker.
+		case RADIO_DIALOG:
+		{
+			Radio_OnDialogResponse(playerid, response, listitem);
+		}
+		// M4 (stage 3) — /missions (/work) job launcher list — start the chosen job.
+		case MISSION_START_DIALOG:
+		{
+			Mission_OnDialogResponse(playerid, response, listitem);
+		}
 	}
 	return 0;
 }
@@ -617,7 +676,15 @@ public OnPlayerLeaveDynamicArea(playerid,areaid)
 	{
 		if(PlayerInfo[playerid][GPS_Destination] != -1) GPS_OnPlayerLeaveRoute(playerid,areaid);
 		OnPlayerLeaveZone(playerid,areaid);
-	}	
+	}
+	return 1;
+}
+
+// M4 (stage 3) — mission delivery routes use per-player RACE checkpoints; each
+// drop is scored + paid here via the mission framework's dispatcher.
+public OnPlayerEnterRaceCheckpoint(playerid)
+{
+	if(!IsPlayerNPC(playerid) && Mission_IsOnMission(playerid)) Mission_OnCheckpoint(playerid);
 	return 1;
 }
 
@@ -676,6 +743,9 @@ public OnPlayerStateChange(playerid, newstate, oldstate)
 	{
 		// M3 — vehicle-jack crime detection (driver-seat theft of an occupied vehicle, §2.3).
 		Wanted_OnPlayerStateChange(playerid, newstate, oldstate);
+		// M4 (stage 3) — a vehicle mission auto-cancels when the driver leaves the
+		// bound mission vehicle (§6.17/§6.18 "auto-cancels if the vehicle is lost").
+		Mission_OnPlayerStateChange(playerid, newstate, oldstate);
 	}
 	return 1;
 }
@@ -733,6 +803,9 @@ public OnPlayerCommandPerformed(playerid, cmd[], params[], result, flags)
 public OnPlayerPickUpDynamicPickup(playerid, pickupid)
 {
 	Interior_PlayerPickup(playerid,pickupid);
+	// M4 (stage 2) — money-bag grab + money-rush cash pickups (design §7).
+	Moneybag_OnPickup(playerid, pickupid);
+	Moneyrush_OnPickup(playerid, pickupid);
 	return 1;
 }
 
@@ -816,6 +889,9 @@ CMD:skin(playerid,params[])
 FUNCTION GameModeClock()
 {
 	new string[75];
+	// M4 (stage 2) — guard for the once-per-game-day lotto draw (§10.3). Static so
+	// it persists across ticks; reset to -1 on the game-week rollover below.
+	static lastLottoDay = -1;
 	GameMinute ++;
 	if(GameMinute == 60)
 	{
@@ -830,19 +906,42 @@ FUNCTION GameModeClock()
 			else SetWeather(wet_weather_ids[random(sizeof(wet_weather_ids))]);
 			GameWeather = 0;
 		}
+		// M4 (stage 2) — LOTTO DRAW bound to the IN-GAME clock hour transition,
+		// NOT a real-time timer (design §10.3 — the legacy "lottery timer bug"
+		// fix). The draw fires when GameHour reaches LOTTO_DRAW_HOUR (18), guarded
+		// by the last-drawn game-day so it fires exactly once per game-day and
+		// never double-fires on a skipped/relogged hour. The guard is reset on the
+		// game-week rollover below.
+		if(GameHour == LOTTO_DRAW_HOUR && lastLottoDay != GameDay)
+		{
+			lastLottoDay = GameDay;
+			Lotto_Draw();
+		}
+
 		if(GameHour == 24)
 		{
 			GameMinute = 0;
 			GameHour = 0;
 			GameDay ++;
-			
-			
+
+
+			// M4 (stage 1) — day-transition money hooks (design §10.3): bank
+			// interest + tax tick fire on the game-clock day rollover (NO new
+			// global timer). GameDay resets each game-week, so we drive the
+			// every-N-days schedule off a monotonic counter that never resets.
+			g_GameDayCounter++;
+			Bank_OnGameDay(g_GameDayCounter);
+			Tax_OnGameDay(g_GameDayCounter);
+
 			if(GameDay == 7)
 			{
 				GameDay = 0;
 				ServerInfo[sWeeksCompleted]++;
 				mysql_format(g_SQL,string,sizeof(string),"UPDATE "SERVER_TABLE" Set WeeksCompleted=%d WHERE Version=%d",ServerInfo[sWeeksCompleted],STATS_VERSION);
 				mysql_pquery(g_SQL,string);
+				// M4 (stage 2) — reset the lotto draw guard on the week rollover
+				// (§10.3: "Guard vars reset per game-week rollover").
+				lastLottoDay = -1;
 			}
 			format(string, sizeof(string), "%s",WeekDays[GameDay]);
 			TextDrawSetString(DaysOfWeek, string);
@@ -862,6 +961,13 @@ FUNCTION GameModeClock()
 	// M3 (stage 3) — STD HP drain + drug heal/overdose on the same tick (§4.2/§4.3).
 	STD_OnGameModeClockTick();
 	Drug_OnGameModeClockTick();
+	// M4 (stage 2) — money-bag timeout/relocate + money-rush duration on the same
+	// 1-second tick (no new global timers, design §7).
+	Moneybag_OnTick();
+	Moneyrush_OnTick();
+	// M4 (stage 3) — mission off-route / jailed guard on the same tick (§6, no new
+	// timer). Game-hour cooldowns need no tick — they read the clock on demand.
+	Mission_OnTick();
 
 	format(string, sizeof(string), "%s, %02d:%02d",WeekDays[GameDay],GameHour,GameMinute);
 

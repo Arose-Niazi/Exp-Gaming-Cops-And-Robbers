@@ -70,6 +70,17 @@ CREATE TABLE IF NOT EXISTS `LSplayers` (
     `STDs`            INT           NOT NULL DEFAULT 0,      -- STD bitmask Chlamydia..Mary Lou (§4.2)
     `Condoms`         INT           NOT NULL DEFAULT 0,      -- condoms carried (reduce infection chance)
     `ChastityBelt`    TINYINT(1)    NOT NULL DEFAULT 0,      -- prevents being raped, breakable
+    -- M4 (stage 1): bank, taxes & insurance — the money core (design §10/§11.2)
+    `BankMoney`       INT           NOT NULL DEFAULT 0,      -- banked cash (safe from robbery/medical fees)
+    `TaxOwed`         INT           NOT NULL DEFAULT 0,      -- unpaid tax carried forward to the next tax tick
+    `LifeInsurance`   INT           NOT NULL DEFAULT 0,      -- active life-insurance policy count (0..3)
+    `HealthInsExpiry` INT           NOT NULL DEFAULT 0,      -- unix time health cover lapses (0 = none)
+    -- M4 (stage 2): lotto, money events (design §9.5/§11.2)
+    `LottoNumber`     INT           NOT NULL DEFAULT 0,      -- lotto number picked for the game-day (0 = no ticket)
+    -- M4 (stage 3): mission framework — one compact '|'-delimited column holds the
+    -- per-mission last-completion GAME-HOUR stamp (g_GameDayCounter*24+GameHour),
+    -- one value per registered mission, mirroring the SkinsSelected packing (§6).
+    `MissionCooldowns` VARCHAR(128) NOT NULL DEFAULT '',     -- '|'-delimited game-hour completion stamps, one per mission
     PRIMARY KEY (`aID`),
     CONSTRAINT `fk_LSplayers_aID` FOREIGN KEY (`aID`)
         REFERENCES `players` (`aID`) ON DELETE CASCADE
@@ -96,6 +107,20 @@ CREATE TABLE IF NOT EXISTS `LSplayers` (
 --     ADD `STDs`         INT        NOT NULL DEFAULT 0,
 --     ADD `Condoms`      INT        NOT NULL DEFAULT 0,
 --     ADD `ChastityBelt` TINYINT(1) NOT NULL DEFAULT 0;
+-- M4 (stage 1) bank / taxes / insurance columns (the money core, §10/§11.2).
+-- `Score` already exists (added by M3 stage 2) — do NOT re-add it here.
+--   ALTER TABLE `LSplayers`
+--     ADD `BankMoney`       INT NOT NULL DEFAULT 0,
+--     ADD `TaxOwed`         INT NOT NULL DEFAULT 0,
+--     ADD `LifeInsurance`   INT NOT NULL DEFAULT 0,
+--     ADD `HealthInsExpiry` INT NOT NULL DEFAULT 0;
+-- M4 (stage 2) lotto column (design §9.5/§11.2):
+--   ALTER TABLE `LSplayers`
+--     ADD `LottoNumber`     INT NOT NULL DEFAULT 0;
+-- M4 (stage 3) mission cooldown column (design §6) — one packed '|'-delimited
+-- column holding a game-hour completion stamp per registered mission:
+--   ALTER TABLE `LSplayers`
+--     ADD `MissionCooldowns` VARCHAR(128) NOT NULL DEFAULT '';
 -- (repeat for SFplayers/LVplayers when those cities go live).
 
 -- Per-city persistent vehicles (Los Santos)
@@ -119,8 +144,16 @@ CREATE TABLE IF NOT EXISTS `server_data` (
     `Version`        INT NOT NULL,
     `WeeksCompleted` INT NOT NULL DEFAULT 0,
     `Times_GPSUsed`  INT NOT NULL DEFAULT 0,
+    -- M4 (stage 2): accumulating lotto jackpot (design §9.5/§11.4)
+    `LottoJackpot`   INT NOT NULL DEFAULT 1000000,
     PRIMARY KEY (`Version`)
 ) ENGINE=InnoDB;
+
+-- Migration note (existing databases): the M4 (stage 2) lotto jackpot column
+-- (design §11.4). The full §11.4 block also plans PrimeRate + per-branch bank
+-- robbery cooldowns; those land with the M5 robbery system.
+--   ALTER TABLE `server_data`
+--     ADD `LottoJackpot` INT NOT NULL DEFAULT 1000000;
 
 -- Streamed interiors / teleports (admin-built via /addinterior)
 CREATE TABLE IF NOT EXISTS `Interiors` (
