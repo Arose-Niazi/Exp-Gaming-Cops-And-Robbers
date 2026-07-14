@@ -2,13 +2,13 @@
 
 Cops-vs-robbers gamemode for GTA:SA multiplayer on **open.mp**, targeting
 **SA-MP 0.3.7 clients** (no 0.3.DL). The original SA-MP 0.3.7 tree is preserved
-under `legacy/` and tagged/released as `v0.3.7-legacy`.
+in the **`v0.3.7-legacy`** tag / GitHub release (kept out of the working tree).
 
 ## Build
 
 Compiler: **QAWNO** (`qawno/pawncc.exe` Windows, `qawno/pawncc` Linux,
-`qawno/mac/pawncc` macOS). Do **not** use pawno — the legacy compiler lives
-under `legacy/pawno/` only.
+`qawno/mac/pawncc` macOS). Do **not** use pawno — it is not in the repo; the old
+pawno tree lives only in the `v0.3.7-legacy` snapshot.
 
 Compile the gamemode (Windows):
 
@@ -67,16 +67,16 @@ LSvehicles, server_data, Interiors, Actors). Never commit real credentials.
 - **IRC bridge retired** — the `IRC_Send*` wrappers in
   `gamemodes/CnR/players/messages.inc` are kept as no-ops so call sites
   survive; wire a Discord (or other) bridge through them later.
-- **Bans filterscript not yet ported** — `CallForChecking` short-circuits to
-  `BanCheckDone(playerid, 0)`; reintroduce a native ban lookup there. The
-  legacy `Bans.pwn` (under `legacy/filterscripts/`) contains burned credentials
-  — never reuse them.
+- **Native ban system shipped (M2)** — `systems/bans.inc` replaced the legacy
+  Bans filterscript; `CallForChecking` now does an async name/IP/serial ban
+  lookup. The old `Bans.pwn` (with burned credentials) exists only in the
+  `v0.3.7-legacy` snapshot — never reuse them.
 - **Backdoors removed at the port** — the hardcoded master-password hash and
   the unguarded click-teleport are gone; never reintroduce name/hash-based
   auth bypasses.
 - The rcon password in `config.json` is a rotate-before-deploy placeholder.
-- `.pdb` files are gitignored; `qawno/`, `components/`, `plugins/`, `legacy/`
-  are linguist-vendored.
+- `.pdb` files are gitignored; `qawno/`, `components/`, `plugins/` are
+  linguist-vendored.
 - The Mini-Missions reference project's **weapon-config** include is
   deliberately NOT used here (per project decision) — do not add
   `weapon-config.inc` or its death/damage rewiring.

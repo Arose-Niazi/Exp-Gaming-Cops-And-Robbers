@@ -3,8 +3,8 @@
 	Cops and Robbers Script — open.mp edition (SA-MP 0.3.7 clients).
 	Scripted by Arose Niazi.
 	Scripting started on 11th October 2017
-	Ported to open.mp: July 2026 (legacy SA-MP tree preserved under legacy/
-	and tagged v0.3.7-legacy). The IRC bridge was retired in the port.
+	Ported to open.mp: July 2026 (legacy SA-MP tree preserved in the
+	v0.3.7-legacy tag/release). The IRC bridge was retired in the port.
 
 	Credits:
 		SA-MP team / open.mp team

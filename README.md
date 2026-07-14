@@ -10,9 +10,9 @@
 ![Compiler](https://img.shields.io/badge/compiler-QAWNO%203.10-blue)
 ![Status](https://img.shields.io/badge/status-gameplay%20complete%20(M2–M7)%20%E2%9C%94-brightgreen)
 
-> 🗃️ The original SA-MP 0.3.7 tree is preserved under [`legacy/`](./legacy)
-> and released as
-> [**v0.3.7-legacy**](https://github.com/Arose-Niazi/Exp-Gaming-Cops-And-Robbers/releases/tag/v0.3.7-legacy).
+> 🗃️ The original SA-MP 0.3.7 tree is preserved in the
+> [**v0.3.7-legacy**](https://github.com/Arose-Niazi/Exp-Gaming-Cops-And-Robbers/releases/tag/v0.3.7-legacy)
+> tag / release (kept out of the working tree — `git checkout v0.3.7-legacy` to browse it).
 
 ---
 
@@ -119,7 +119,6 @@ Exp-Gaming-Cops-And-Robbers/
 │                            #   whirlpool, RouteConnector)
 ├── qawno/                   # QAWNO compiler + modern includes
 ├── scriptfiles/             # GPS.dat, geoip.db, cnr.sql, map data
-├── legacy/                  # preserved SA-MP 0.3.7 tree (see v0.3.7-legacy)
 ├── config.json              # open.mp server config (0.3.7 clients allowed)
 ├── config.test.json         # local test profile
 ├── compile.py               # batch compiler (gamemode + filterscripts)

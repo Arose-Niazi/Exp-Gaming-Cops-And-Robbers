@@ -25,4 +25,3 @@ gamemodes/*.pwn    linguist-language=Pawn
 qawno/**        linguist-vendored
 components/**   linguist-vendored
 plugins/**      linguist-vendored
-legacy/**       linguist-vendored
