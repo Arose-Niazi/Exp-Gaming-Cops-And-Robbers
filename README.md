@@ -8,7 +8,7 @@
 ![Platform](https://img.shields.io/badge/platform-open.mp%20%7C%20SA--MP%200.3.7-brightgreen)
 ![Language](https://img.shields.io/badge/language-Pawn-orange)
 ![Compiler](https://img.shields.io/badge/compiler-QAWNO%203.10-blue)
-![Status](https://img.shields.io/badge/status-Milestone%201%20%E2%9C%94-yellow)
+![Status](https://img.shields.io/badge/status-gameplay%20complete%20(M2–M7)%20%E2%9C%94-brightgreen)
 
 > 🗃️ The original SA-MP 0.3.7 tree is preserved under [`legacy/`](./legacy)
 > and released as
@@ -107,7 +107,11 @@ Exp-Gaming-Cops-And-Robbers/
 │   ├── CnR.pwn              # entry point (compile → CnR.amx)
 │   └── CnR/
 │       ├── players/         # auth, loading, spawns, peds, menus, messages,
-│       │                    #   vehicles, elevators, commands
+│       │                    #   vehicles, elevators, base commands
+│       ├── systems/         # gameplay systems (wanted, jail, bank, housing,
+│       │                    #   robberies, missions, stocks, fishing, farming …)
+│       ├── cmds/            # command modules (admin, arrest, crime, economy,
+│       │                    #   robbery, property, job, arena, DJ, owner …)
 │       └── server/          # defines, colors, db_config, zones, interiors,
 │                            #   actors, GPS engine, misc
 ├── components/              # open.mp components (auto-load)
@@ -124,8 +128,9 @@ Exp-Gaming-Cops-And-Robbers/
 
 ---
 
-## ✅ Systems in place (from the legacy build, now on open.mp)
+## ✅ Full feature set (M1–M7 shipped, 0 errors / 0 warnings)
 
+### 🏗️ Foundation (M1 — scaffold)
 Accounts (MySQL + Whirlpool, auto-login), classes/teams (~240 skins; CIVIL,
 POLICE, SHERIFF, FBI, UC_COP), 466-zone name HUD, streamed interiors with
 teleport pickups (admin builder), shop/service NPC actors (admin builder),
@@ -134,19 +139,77 @@ vehicles, two object-elevator systems, textdraw menu framework, accelerated
 game clock + weather, rank hierarchy with scoped messaging, proxy/VPN
 detection.
 
-## 🗺️ Roadmap
+### 🛡️ Moderation & accounts (M2)
+- Rank tiers: `SERVER_PLAYER` → `SERVER_OWNER` + `SERVER_SCRIPTER` (Scripter)
+- PM / reply system (`/pm` `/reply` `/r` `/nopm` `/ignore`), flood throttle
+- Full admin suite: `/warn` `/kick` `/ban` `/unban` `/mute` `/ajail` (fixed),
+  `/aduty`, `/aka` `/ips` (offline-capable), `/showcommands`, `/akick`
+- Native ban system (IP, serial, name) — replaces legacy Bans filterscript
+- Teleport commands + DM-zone flags; owner/scripter grant commands
 
-The actual cops-and-robbers gameplay — robberies, arrests, wanted levels,
-jail, economy, shop interactions, missions — was planned but never built in
-the legacy code. It lands next, on this open.mp foundation:
+### 🔫 Core CnR loop (M3)
+- **10-level wanted system** — star HUD, cop visual-contact decay (wanted drops
+  if no cop has line-of-sight for the decay window)
+- **Cop commands:** `/arrest` `/ticket` `/vc` (visual contact) `/su` (suspect
+  upgrade) `/cuff` `/backup`; rank gates on special cop abilities
+- **Jail:** bail, bribe, jury appeal (`JURY_SIZE 15`), escape, breakout;
+  spectator lock while incarcerated
+- **Crimes:** `/rob` (skill-capped pickpocket), `/rape` + STD infection system,
+  `/takedrugs` + overdose mechanic; fire "grilled" death fix
+- Spawn protection, safe zones, DM zones; Routine Patrol + Domestic
+  Disturbance missions
 
-- Robbery / hideout system, missions, wanted levels & arrests, jail
-- Shop menus behind the 26 actor types (bank, 24-7, ammunation, …)
-- GPS destination categories (engine works; handlers were stubs)
-- Player `/settings`, warnings system, activity stats, gender changes
-- Vehicle ownership & economy
-- Native ban system (replacing the legacy Bans filterscript)
-- San Fierro & Las Venturas
+### 💰 Economy & events (M4)
+- **Bank:** `/deposit` `/withdraw` `/atm` `/givecash`; interest, tax, insurance
+- **Lotto:** jackpot draw fires on the game clock (`clock-tick` fix); buy
+  tickets in-game
+- **Moneybag / Moneyrush** pickups; `/ad` adrenaline boost + `/advert`
+- Store holdup base; Drug Delivery, Truck Delivery, Trash Pickup, Food
+  Delivery missions
+
+### 🏠 Property & big crime (M5)
+- **CB-simple vehicle ownership:** `/lock` / `/unlock` on last-driven car;
+  GTA-theft detection; dealership flow
+- **Full robberies system:** shoplifting, store holdup, bank robbery (per-branch
+  cooldowns), casino robbery, house robbery, special robbery (v23-style),
+  crowbar for forced entry
+- **Housing:** buy / sell / rent / storage / spawn point / superlock; house
+  actor and pickup set
+- **Kidnap:** bind + ransom flow
+- Vehicle Theft, Holdup Mission, Airport Robbery missions
+
+### 🎣 Jobs, activities & arenas (M6)
+- Criminal / civilian **skill trees**; **fighting styles** (learned)
+- **Clothes** system (outfit slots, gender toggle)
+- **Fishing** (`/fish`, rod item, catch table)
+- **Drug farming** (plant → harvest cycle) + **legal crop job**
+- **DM Stadium**, **sniper arena**, **duel arena**
+- **GPS destination categories** fully wired (previously engine-only stubs)
+- **DJ radio** (stream control commands)
+- All remaining missions — **19 missions total** across all categories
+
+### 📈 Stock market & full economy (M7)
+- **21 tradable stocks** — buy / sell / portfolio HUD
+- Stock prices multiply weapon shop / 24-7 / house / fish / crop prices
+  (economy integration table)
+- **Prime rate** wiring; **dividends** + bankruptcy events
+- **Daily market tick** fires on the game clock; `stock_reports` table keeps
+  last 30 periods
+
+## 🗺️ Status / what's next
+
+The full CB:CNR feature set is implemented and committed (M2–M7, 0/0
+build, booting). Remaining work is tuning and polish:
+
+- **Not yet populated:** San Fierro and Las Venturas city areas (scaffolded,
+  no gameplay content placed)
+- **Deferred niceties:** hunting AI, fishing tournaments, 24/28 race
+  challenges, cash weapon/vehicle shops that would light up the AMMUNATION /
+  `VEHICLE_DEALERSHIP` stock feeds, ATM / shop proximity gates, co-owned houses
+
+See **`docs/GAMEPLAY-DESIGN.md` §14** for owner tuning questions (prices,
+cooldowns, balance) and **§16** for code follow-ups from site research
+(constants / behaviours to adjust in already-built stages).
 
 ---
 
