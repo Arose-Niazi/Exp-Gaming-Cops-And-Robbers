@@ -1094,6 +1094,49 @@ flags** + **safe-zone (no-crime) flags** to zone/area records for §2.5.
   as "grilled." Lands in `CnR.pwn` death handler.
 - **GameModeClock lottery-timer bug** *[roster + economy §4.2]*: see §10.3.
 
+### 9.12 Vehicle ownership — CB-simple model (M5) *[OWNER SPEC 2026-07-14]*
+Deliberately minimal, exactly as CB:CNR did it. **Supersedes the M3 `/lock`
+stub** in `cmds/crime.inc` (delete `gVehicleLocked` + the two commands there and
+move ownership+lock into `systems/vehicle_own.inc`). No DB persistence — this is
+transient, per-vehicle runtime state.
+
+**Model — "your last-driven vehicle":**
+- Track, per vehicle, its **last driver** (`gVehLastDriver[vehicleid]`) and a
+  per-player **last vehicle driven as driver** (`pLastVehicle`). `/lock`/`/unlock`
+  act on the caller's `pLastVehicle`.
+- **Commands only**: `/lock` (`/lk`), `/unlock` (`/ulk`). Nothing else.
+- **Must be on foot** — reject if the caller is in any vehicle ("can't run
+  commands from inside a vehicle").
+- **Locked vehicle → no one can enter it** (any seat). Implement with
+  `SetVehicleParamsForPlayer(veh, otherid, objective, doors=1)` for everyone
+  except the owner, and eject/deny attempts by others.
+- **Owner enters → auto-unlock** (on `OnPlayerStateChange` into the driver seat
+  of their locked `pLastVehicle`, clear the lock).
+- **Ownership follows the wheel**: if **another player becomes the driver** of a
+  vehicle, they become its last driver — the previous owner **loses** the ability
+  to `/lock`/`/unlock` it (and if it was locked, that other driver taking it is
+  the theft path below, not a silent transfer — a locked car blocks entry, so an
+  ownership change only happens on an *unlocked* car or a successful re-steal).
+
+**Theft = crime (GTA), CB rules:**
+- Taking the **driver seat** of a vehicle that **already has a last driver**
+  (someone has driven it before) and is **not yours** → **grand theft auto**:
+  give wanted (`WANTED_GTA`, small — e.g. +2) via `GivePlayerWanted`, "Grand Theft
+  Auto" reason.
+- **Pristine exception**: a vehicle **never driven by anyone** (no last driver —
+  a fresh spawn) is free to take — **no crime**; you simply become its owner.
+- **Re-steal grace**: taking back **your own** vehicle (you are its last driver,
+  or were within `VEH_RESTEAL_GRACE` ≈ a few minutes) is **not** a crime.
+- Cops taking vehicles: no GTA wanted for on-duty cop-type teams (they commandeer).
+- Ties into **Vehicle Theft mission** (§6.19) and **Car Jacker skill** (M6) —
+  but the base ownership/theft model ships in M5 with no skill dependency.
+
+State (runtime only, `systems/vehicle_own.inc`): `gVehLastDriver[MAX_VEHICLES]`
+(playerid or INVALID), `gVehLocked[MAX_VEHICLES]` (bool), `gVehLastDriveTime`
+(for the grace window), `pLastVehicle` (pInfo, session). Reset on
+`OnVehicleSpawn`/`OnVehicleDeath` (clear last driver so a respawned car is
+pristine again) and on player disconnect (clear their ownership marks).
+
 ---
 
 ## 10. Economy integration table  *(the "one economy" model)*  *[economy §7.3]*
