@@ -2,16 +2,16 @@
 
 	Player crime command suite for Cops And Robbers script
 	Scripted by Arose Niazi.
-	Milestone 3 (stage 3) — design §4 (crime commands) + §5 (/jumpkick).
+	Milestone 3 (stage 3) - design §4 (crime commands) + §5 (/jumpkick).
 
 	The civilian side of the core loop: /rob a nearby player's cash (skill-capped),
 	/rape a nearby target (spreads STDs via std.inc), /takedrugs from the held
 	stash (buzz/overdose handled inside drugs.inc), and /jumpkick a player in
 	front. /usecondom equips a carried condom for the next rape defence. Vehicle
 	/lock//unlock + ownership moved to systems/vehicle_own.inc in M5 (§9.12). Every
-	crime is gated identically — not a cop,
+	crime is gated identically - not a cop,
 	not jailed, not spawn-protected, not in a DM zone, on-foot proximity, and a
-	per-player cooldown — and calls GivePlayerWanted so the wanted/cop/jail loop
+	per-player cooldown - and calls GivePlayerWanted so the wanted/cop/jail loop
 	responds. Builds on the stage-1 wanted API, the stage-2 jail system and the
 	std.inc / drugs.inc modules (their public API is used here, not reimplemented).
 
@@ -33,11 +33,11 @@
 		drugs:   Drug_Consume, DrugCarryCap
 
 	Deferred to later milestones (noted at each site):
-		- Drug acquisition (buy/grow/deal) → economy/dealer + farming (M6/M7); no
+		- Drug acquisition (buy/grow/deal) -> economy/dealer + farming (M6/M7); no
 		  §4 testing-grant path is specified, so /takedrugs only spends drugs the
 		  player already carries (0 today until the dealer/shop system lands).
-		- Condom / chastity-belt / cure purchases → /shop + medic economy (M4/M6).
-		- House locking (co-owners, persistence) → M5 housing (§9.1). Vehicle
+		- Condom / chastity-belt / cure purchases -> /shop + medic economy (M4/M6).
+		- House locking (co-owners, persistence) -> M5 housing (§9.1). Vehicle
 		  ownership + /lock//unlock landed in M5 systems/vehicle_own.inc (§9.12).
 */
 
@@ -45,7 +45,7 @@
 //	Internal helpers
 //==============================================================================
 
-// Shared crime gate — a civilian who can currently commit a crime. Rejects cops,
+// Shared crime gate - a civilian who can currently commit a crime. Rejects cops,
 // jailed players, spawn-protected players and DM-zone players with a message so
 // every crime handler reads identically (§2.5 / §4). Returns 1 if allowed.
 static bool:Crime_CanCommit(playerid)
@@ -115,7 +115,7 @@ static Crime_RobCapFor(playerid)
 	return ROB_CAP_BASE;									// SKILL_NONE / any other tier
 }
 
-// Rob success chance % for a player's skill tier (§4.1 — Pickpocket very high,
+// Rob success chance % for a player's skill tier (§4.1 - Pickpocket very high,
 // Con Artist moderate, everyone else the base rate).
 static Crime_RobSuccessFor(playerid)
 {
@@ -128,7 +128,7 @@ static Crime_RobSuccessFor(playerid)
 }
 
 //==============================================================================
-//	/rob (/rb) — rob a player's cash-in-hand (design §4.1)
+//	/rob (/rb) - rob a player's cash-in-hand (design §4.1)
 //==============================================================================
 
 CMD:rob(playerid, params[])
@@ -138,7 +138,7 @@ CMD:rob(playerid, params[])
 	if(gettime() < PlayerInfo[playerid][pRobCooldown])
 	{
 		new err[96];
-		format(err, sizeof(err), "You are still catching your breath — try again in %d seconds.", PlayerInfo[playerid][pRobCooldown] - gettime());
+		format(err, sizeof(err), "You are still catching your breath - try again in %d seconds.", PlayerInfo[playerid][pRobCooldown] - gettime());
 		return SendClientMessage(playerid, COLOR_ERROR, err);
 	}
 
@@ -164,7 +164,7 @@ CMD:rob(playerid, params[])
 
 	// The victim must still be robbable this cycle (per-victim cooldown, §4.1).
 	if(gettime() < PlayerInfo[targetid][pRobbedUntil])
-		return SendClientMessage(playerid, COLOR_ERROR, "That person was robbed too recently — try someone else.");
+		return SendClientMessage(playerid, COLOR_ERROR, "That person was robbed too recently - try someone else.");
 
 	// Only cash-in-hand is robbable (bank cash is safe, §4.1).
 	if(PlayerInfo[targetid][pMoney] <= 0)
@@ -179,7 +179,7 @@ CMD:rob(playerid, params[])
 	PlayerInfo[playerid][pRobCooldown] = gettime() + ROB_CD;
 	PlayerInfo[targetid][pRobbedUntil] = gettime() + ROB_CD;
 
-	// Success roll (skill-gated, §4.1). A failed rob still lifts wanted — you
+	// Success roll (skill-gated, §4.1). A failed rob still lifts wanted - you
 	// were caught with your hand in someone's pocket.
 	if(random(100) >= Crime_RobSuccessFor(playerid))
 	{
@@ -209,14 +209,14 @@ CMD:rob(playerid, params[])
 	format(string, sizeof(string), ""COL_RED"* You were robbed! "COL_WHITE"%s (%d) took "COL_RED"$%d"COL_WHITE" of your cash.", PlayerInfo[playerid][pUserName], playerid, amount);
 	SendClientMessage(targetid, COLOR_ERROR, string);
 
-	// Wanted for the completed crime (§2.3 — +2, attributed).
+	// Wanted for the completed crime (§2.3 - +2, attributed).
 	GivePlayerWanted(playerid, ROB_WANTED, "Robbery of a player");
 	return 1;
 }
 alias:rob("rb")
 
 //==============================================================================
-//	/rape (/ra) — proximity, chance-based, may infect (design §4.2)
+//	/rape (/ra) - proximity, chance-based, may infect (design §4.2)
 //==============================================================================
 
 CMD:rape(playerid, params[])
@@ -226,7 +226,7 @@ CMD:rape(playerid, params[])
 	if(gettime() < PlayerInfo[playerid][pRapeCooldown])
 	{
 		new err[96];
-		format(err, sizeof(err), "You cannot do that again yet — wait %d seconds.", PlayerInfo[playerid][pRapeCooldown] - gettime());
+		format(err, sizeof(err), "You cannot do that again yet - wait %d seconds.", PlayerInfo[playerid][pRapeCooldown] - gettime());
 		return SendClientMessage(playerid, COLOR_ERROR, err);
 	}
 
@@ -252,11 +252,11 @@ CMD:rape(playerid, params[])
 	// The cooldown starts on the attempt (Rapist skill shortens it in M6).
 	PlayerInfo[playerid][pRapeCooldown] = gettime() + RAPE_CD;
 
-	// A chastity belt prevents the act outright (breakable — M6 owns the break
+	// A chastity belt prevents the act outright (breakable - M6 owns the break
 	// roll; today it simply blocks, per §4.2).
 	if(PlayerInfo[targetid][pChastityBelt])
 	{
-		SendClientMessage(playerid, COLOR_ERROR, ""COL_RED"* They are wearing a chastity belt "COL_WHITE"— you cannot rape them.");
+		SendClientMessage(playerid, COLOR_ERROR, ""COL_RED"* They are wearing a chastity belt "COL_WHITE"- you cannot rape them.");
 		SendClientMessage(targetid, COLOR_SERVER_INFO, "Your chastity belt protected you from a rape attempt.");
 		return 1;
 	}
@@ -264,11 +264,11 @@ CMD:rape(playerid, params[])
 	// Success roll (§4.2). Rapist skill + carrying several STDs push toward ~100%.
 	new chance = RAPE_SUCCESS_BASE;
 	if(PlayerInfo[playerid][pSkill] == SKILL_RAPIST) chance += 30;
-	chance += STD_Count(playerid) * 10;						// several STDs → near-certain
+	chance += STD_Count(playerid) * 10;						// several STDs -> near-certain
 	if(chance > 100) chance = 100;
 	if(random(100) >= chance)
 	{
-		SendClientMessage(playerid, COLOR_ERROR, ""COL_RED"* Your attempt failed "COL_WHITE"— they got away.");
+		SendClientMessage(playerid, COLOR_ERROR, ""COL_RED"* Your attempt failed "COL_WHITE"- they got away.");
 		SendClientMessage(targetid, COLOR_WANTED_YELLOW, "Someone tried to assault you but you escaped.");
 		GivePlayerWanted(playerid, RAPE_WANTED, "Attempted rape");
 		return 1;
@@ -281,7 +281,7 @@ CMD:rape(playerid, params[])
 	if(hp < 0.0) hp = 0.0;
 	SetPlayerHealth(targetid, hp);
 
-	// Infection roll — a condom drastically cuts the chance (§4.2). A Rapist can
+	// Infection roll - a condom drastically cuts the chance (§4.2). A Rapist can
 	// pass a tier they don't personally carry; STD_GiveRandom picks a tier the
 	// victim doesn't already have.
 	new infectChance = (PlayerInfo[targetid][pCondoms] > 0) ? RAPE_INFECT_CONDOM : RAPE_INFECT_BASE;
@@ -295,7 +295,7 @@ CMD:rape(playerid, params[])
 	}
 	else if(PlayerInfo[targetid][pCondoms] > 0)
 	{
-		// Condom held — spend it and spare the infection.
+		// Condom held - spend it and spare the infection.
 		PlayerInfo[targetid][pCondoms]--;
 		SendClientMessage(targetid, COLOR_SERVER_INFO, "Your condom protected you from infection this time.");
 	}
@@ -303,7 +303,7 @@ CMD:rape(playerid, params[])
 	PlayerInfo[playerid][pScore] += RAPE_SCORE;
 
 	new string[144];
-	format(string, sizeof(string), ""COL_GREEN"* You raped %s (%d). "COL_WHITE"+%d score%s.", PlayerInfo[targetid][pUserName], targetid, RAPE_SCORE, infected ? (" — you infected them") : (""));
+	format(string, sizeof(string), ""COL_GREEN"* You raped %s (%d). "COL_WHITE"+%d score%s.", PlayerInfo[targetid][pUserName], targetid, RAPE_SCORE, infected ? (" - you infected them") : (""));
 	SendClientMessage(playerid, COLOR_SERVER_INFO, string);
 	format(string, sizeof(string), ""COL_RED"* You were raped by %s (%d)."COL_WHITE, PlayerInfo[playerid][pUserName], playerid);
 	SendClientMessage(targetid, COLOR_ERROR, string);
@@ -315,7 +315,7 @@ CMD:rape(playerid, params[])
 alias:rape("ra")
 
 //==============================================================================
-//	/usecondom (/uc) — prime a carried condom for the next rape (design §4.2)
+//	/usecondom (/uc) - prime a carried condom for the next rape (design §4.2)
 //==============================================================================
 
 // Condoms reduce the infection chance at /rape time (they are consumed there,
@@ -325,7 +325,7 @@ CMD:usecondom(playerid, params[])
 {
 	#pragma unused params
 	if(PlayerInfo[playerid][pCondoms] <= 0)
-		return SendClientMessage(playerid, COLOR_ERROR, "You have no condoms — buy some at a 24/7, hospital or medic (coming with the shop system).");
+		return SendClientMessage(playerid, COLOR_ERROR, "You have no condoms - buy some at a 24/7, hospital or medic (coming with the shop system).");
 	new string[128];
 	format(string, sizeof(string), ""COL_GREEN"* You have %d condom(s) ready. "COL_WHITE"They cut your infection chance if you are raped.", PlayerInfo[playerid][pCondoms]);
 	SendClientMessage(playerid, COLOR_SERVER_INFO, string);
@@ -334,7 +334,7 @@ CMD:usecondom(playerid, params[])
 alias:usecondom("uc")
 
 //==============================================================================
-//	/takedrugs (/td) — consume the held drug stash (design §4.3)
+//	/takedrugs (/td) - consume the held drug stash (design §4.3)
 //==============================================================================
 
 // Buzz stages, healing, overdose (>60g) and bad-drug rolls all live in
@@ -344,7 +344,7 @@ alias:usecondom("uc")
 CMD:takedrugs(playerid, params[])
 {
 	// No jail/cop/DM-zone gate: taking drugs is not itself a wanted-raising crime,
-	// and drugs are deliberately usable in jail (§5 — the cell is a rape hotspot,
+	// and drugs are deliberately usable in jail (§5 - the cell is a rape hotspot,
 	// so inmates carry drugs to survive the STD drain).
 	if(PlayerInfo[playerid][pDrugs] <= 0)
 		return SendClientMessage(playerid, COLOR_ERROR, "You have no drugs on you. Buy or grow some first (dealer/shop system coming soon).");
@@ -352,7 +352,7 @@ CMD:takedrugs(playerid, params[])
 	new grams;
 	if(sscanf(params, "d", grams))
 	{
-		// No amount → take the whole stash (click-mode is an F-driven client
+		// No amount -> take the whole stash (click-mode is an F-driven client
 		// feature deferred to M6; the single-shot dose keeps /td useful today).
 		grams = PlayerInfo[playerid][pDrugs];
 		if(grams > DRUG_MAX_SINGLE) grams = DRUG_MAX_SINGLE;	// avoid an accidental overdose on a blank /td
@@ -368,7 +368,7 @@ CMD:takedrugs(playerid, params[])
 alias:takedrugs("td")
 
 //==============================================================================
-//	/jumpkick — melee a player directly in front (design §5 / jobs §7.1)
+//	/jumpkick - melee a player directly in front (design §5 / jobs §7.1)
 //==============================================================================
 
 CMD:jumpkick(playerid, params[])
@@ -379,7 +379,7 @@ CMD:jumpkick(playerid, params[])
 	if(gettime() < PlayerInfo[playerid][pJumpkickCooldown])
 	{
 		new err[96];
-		format(err, sizeof(err), "You cannot jump-kick again yet — wait %d seconds.", PlayerInfo[playerid][pJumpkickCooldown] - gettime());
+		format(err, sizeof(err), "You cannot jump-kick again yet - wait %d seconds.", PlayerInfo[playerid][pJumpkickCooldown] - gettime());
 		return SendClientMessage(playerid, COLOR_ERROR, err);
 	}
 	PlayerInfo[playerid][pJumpkickCooldown] = gettime() + JUMPKICK_CD;
@@ -389,7 +389,7 @@ CMD:jumpkick(playerid, params[])
 
 	// Find the nearest player within reach in front of us. We approximate "in
 	// front" with a short-range proximity check (a full facing-cone check is not
-	// worth the trig here — JUMPKICK_RANGE is 2m).
+	// worth the trig here - JUMPKICK_RANGE is 2m).
 	new Float:x, Float:y, Float:z, targetid = -1, Float:bestDist = JUMPKICK_RANGE + 1.0;
 	GetPlayerPos(playerid, x, y, z);
 	for(new i = 0; i < MAX_PLAYERS; i++)
@@ -403,7 +403,7 @@ CMD:jumpkick(playerid, params[])
 	}
 	if(targetid == -1)
 	{
-		SendClientMessage(playerid, COLOR_SERVER_INFO, "You jump-kick the air — nobody was in front of you.");
+		SendClientMessage(playerid, COLOR_SERVER_INFO, "You jump-kick the air - nobody was in front of you.");
 		return 1;
 	}
 

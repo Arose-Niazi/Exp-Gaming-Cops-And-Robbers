@@ -51,13 +51,13 @@ FUNCTION CheckPlayer(playerid, race_check)
 				return 1;
 			}
 		}
-	    format(string,sizeof(string),""COMMUNITY_NAME" Server\n\n"COL_SKYBLUE"Player Login\n\n"COL_WHITE"This Nick : "COL_SKYBLUE"%s,"COL_WHITE" is Registered.\nIf This is "COL_RED"Not "COL_WHITE"Your Account, Please "COL_RED"Quit"COL_WHITE" And Change Your "COL_SKYBLUE"Nick.\n\n "COL_WHITE"Please "COL_YELLOW"Enter Your Password"COL_WHITE" To Login:",PlayerInfo[playerid][pUserName]);
+	    format(string,sizeof(string),""COMMUNITY_NAME" Server\n\n"COL_SKYBLUE"Player Login\n\n"COL_WHITE"This Nick: "COL_SKYBLUE"%s,"COL_WHITE" is Registered.\nIf This is "COL_RED"Not "COL_WHITE"Your Account, Please "COL_RED"Quit"COL_WHITE" And Change Your "COL_SKYBLUE"Nick.\n\n "COL_WHITE"Please "COL_YELLOW"Enter Your Password"COL_WHITE" To Login:",PlayerInfo[playerid][pUserName]);
 	  	ShowPlayerDialog(playerid,LOGIN_DIALOG,DIALOG_STYLE_PASSWORD,""COMMUNITY_NAME" Login",string,"Login","");
 	}
 	else
 	{	
 		TogglePlayerSpectating(playerid,false);
-		format(string,sizeof(string),""COL_BLUE""COMMUNITY_NAME" Server\n \n"COL_SKYBLUE"New Registration\n"COL_WHITE"Nick : "COL_SKYBLUE"%s"COL_WHITE" \n\nDo "COL_RED"NOT "COL_WHITE"Use The Same Password That You Use Elsewhere\nMinimum "COL_RED"6 Chars"COL_WHITE" Maximum "COL_RED"32 Chars\n"COL_WHITE"Multi-accounting is "COL_RED"not allowed.\n\n"COL_WHITE"Please "COL_YELLOW"Enter A Password"COL_WHITE" For Your Account",PlayerInfo[playerid][pUserName]);
+		format(string,sizeof(string),""COL_BLUE""COMMUNITY_NAME" Server\n \n"COL_SKYBLUE"New Registration\n"COL_WHITE"Nick: "COL_SKYBLUE"%s"COL_WHITE" \n\nDo "COL_RED"NOT "COL_WHITE"Use The Same Password That You Use Elsewhere\nMinimum "COL_RED"6 Chars"COL_WHITE" Maximum "COL_RED"32 Chars\n"COL_WHITE"Multi-accounting is "COL_RED"not allowed.\n\n"COL_WHITE"Please "COL_YELLOW"Enter A Password"COL_WHITE" For Your Account",PlayerInfo[playerid][pUserName]);
     	ShowPlayerDialog(playerid,REGISTER_DIALOG_PASSWORD,DIALOG_STYLE_INPUT,""COMMUNITY_NAME" Registration",string,"Register","");
 		PlayerInfo[playerid][pRegistered]=false;
 	}
@@ -76,7 +76,7 @@ REG_LOG_OnDialogResponse(playerid,dialogid,response,inputtext[])
 				static RegisteryKick[MAX_PLAYERS];
 				if(RegisteryKick[playerid] < 3)
 				{
-					format(string,sizeof(string),""COL_BLUE""COMMUNITY_NAME" Server\n \n"COL_SKYBLUE"New Registration\n"COL_WHITE"Nick : "COL_SKYBLUE"%s"COL_WHITE" \n\nDo "COL_RED"NOT "COL_WHITE"Use The Same Password That You Use Elsewhere\nMinimum "COL_RED"6 Chars"COL_WHITE" Maximum "COL_RED"32 Chars.\n"COL_WHITE"Multi-accounting is "COL_RED"not allowed.\n\n"COL_WHITE"Please "COL_YELLOW"Enter A Password"COL_WHITE" For Your Account",PlayerInfo[playerid][pUserName]);
+					format(string,sizeof(string),""COL_BLUE""COMMUNITY_NAME" Server\n \n"COL_SKYBLUE"New Registration\n"COL_WHITE"Nick: "COL_SKYBLUE"%s"COL_WHITE" \n\nDo "COL_RED"NOT "COL_WHITE"Use The Same Password That You Use Elsewhere\nMinimum "COL_RED"6 Chars"COL_WHITE" Maximum "COL_RED"32 Chars.\n"COL_WHITE"Multi-accounting is "COL_RED"not allowed.\n\n"COL_WHITE"Please "COL_YELLOW"Enter A Password"COL_WHITE" For Your Account",PlayerInfo[playerid][pUserName]);
 					RegisteryKick[playerid]++;
 					ShowPlayerDialog(playerid,REGISTER_DIALOG_PASSWORD,DIALOG_STYLE_INPUT,""COMMUNITY_NAME" Registration",string,"Register","");
 				}
@@ -93,7 +93,7 @@ REG_LOG_OnDialogResponse(playerid,dialogid,response,inputtext[])
 	            if(strlen(inputtext) > 32)
 	            {
 	                SendClientMessage(playerid,COLOR_ERROR,"Your Password is Too Long, Enter a Shorter Password.");
-	                format(string,sizeof(string),""COL_BLUE""COMMUNITY_NAME"  Server\n\n"COL_SKYBLUE"New Registration\n"COL_WHITE"Nick : "COL_SKYBLUE"%s \n\n"COL_RED"INVALID PASSWORD!\n\n",PlayerInfo[playerid][pUserName]);
+	                format(string,sizeof(string),""COL_BLUE""COMMUNITY_NAME"  Server\n\n"COL_SKYBLUE"New Registration\n"COL_WHITE"Nick: "COL_SKYBLUE"%s \n\n"COL_RED"INVALID PASSWORD!\n\n",PlayerInfo[playerid][pUserName]);
 	                format(string,sizeof(string),"%s"COL_WHITE"Do "COL_RED"NOT "COL_WHITE"Register Multiple Accounts\nDo "COL_RED"NOT "COL_WHITE"Use The Same Password That You Use Elsewhere\nMinimum "COL_RED"6 Chars"COL_WHITE" Maximum "COL_RED"32 Chars.\n"COL_WHITE"Multi-accounting is "COL_RED"not allowed.\n\n"COL_WHITE"Please "COL_YELLOW"Enter A Password"COL_WHITE" For Your Account:",string);
 	                ShowPlayerDialog(playerid,REGISTER_DIALOG_PASSWORD,DIALOG_STYLE_INPUT,""COMMUNITY_NAME" Registration",string,"Register","");
 	                return 1;
@@ -101,14 +101,14 @@ REG_LOG_OnDialogResponse(playerid,dialogid,response,inputtext[])
 	            if(strlen(inputtext) < 6)
 	            {
 	                SendClientMessage(playerid,COLOR_ERROR,"Your Password is Too Short, Enter a Longer Password.");
-	                format(string,sizeof(string),""COL_BLUE""COMMUNITY_NAME" Server\n\n"COL_SKYBLUE"New Registration\n"COL_WHITE"Nick : "COL_SKYBLUE"%s \n\n"COL_RED"INVALID PASSWORD!\n\n",PlayerInfo[playerid][pUserName]);
+	                format(string,sizeof(string),""COL_BLUE""COMMUNITY_NAME" Server\n\n"COL_SKYBLUE"New Registration\n"COL_WHITE"Nick: "COL_SKYBLUE"%s \n\n"COL_RED"INVALID PASSWORD!\n\n",PlayerInfo[playerid][pUserName]);
 	                format(string,sizeof(string),"%s"COL_WHITE"Do "COL_RED"NOT "COL_WHITE"Register Multiple Accounts\nDo "COL_RED"NOT "COL_WHITE"Use The Same Password That You Use Elsewhere\nMinimum "COL_RED"6 Chars"COL_WHITE" Maximum "COL_RED"32 Chars.\n"COL_WHITE"Multi-accounting is "COL_RED"not allowed.\n\n"COL_WHITE"Please "COL_YELLOW"Enter A Password"COL_WHITE" For Your Account:",string);
 	                ShowPlayerDialog(playerid,REGISTER_DIALOG_PASSWORD,DIALOG_STYLE_INPUT,""COMMUNITY_NAME" Registration",string,"Register","");
 	                return 1;
 	            }
 	            WP_Hash(string,sizeof(string),inputtext);
 				format(PlayerInfo[playerid][pPassword],MAX_HASH_SIZE,"%s",string);
-	            format(string,sizeof(string),""COL_BLUE""COMMUNITY_NAME" Server\n \n"COL_SKYBLUE"New Registration\n"COL_WHITE"Nick : "COL_SKYBLUE"%s\n\n"COL_WHITE"Multi-accounting is "COL_RED"not allowed."COL_WHITE"\nMake Sure Your Email is "COL_GREEN"Correct\n\n"COL_WHITE"Please "COL_YELLOW"Enter A Email"COL_WHITE" For Your Account",PlayerInfo[playerid][pUserName]);
+	            format(string,sizeof(string),""COL_BLUE""COMMUNITY_NAME" Server\n \n"COL_SKYBLUE"New Registration\n"COL_WHITE"Nick: "COL_SKYBLUE"%s\n\n"COL_WHITE"Multi-accounting is "COL_RED"not allowed."COL_WHITE"\nMake Sure Your Email is "COL_GREEN"Correct\n\n"COL_WHITE"Please "COL_YELLOW"Enter A Email"COL_WHITE" For Your Account",PlayerInfo[playerid][pUserName]);
              	ShowPlayerDialog(playerid,REGISTER_DIALOG_EMAIL,DIALOG_STYLE_INPUT,""COMMUNITY_NAME" Registration",string,"Mail","");
 	            return 1;
 	        }
@@ -138,7 +138,7 @@ REG_LOG_OnDialogResponse(playerid,dialogid,response,inputtext[])
 				static LoginKick[MAX_PLAYERS];
 				if(LoginKick[playerid] < 3)
 				{
-					format(string,sizeof(string),""COMMUNITY_NAME" Server\n\n"COL_SKYBLUE"Player Login\n\n"COL_WHITE"This Nick : "COL_SKYBLUE"%s,"COL_WHITE" is Registered.\nIf This is "COL_RED"Not "COL_WHITE"Your Account, Please "COL_RED"Quit"COL_WHITE" And Change Your "COL_SKYBLUE"Nick\n\n "COL_WHITE"Please "COL_YELLOW"Enter Your Password"COL_WHITE" To Login:",PlayerInfo[playerid][pUserName]);
+					format(string,sizeof(string),""COMMUNITY_NAME" Server\n\n"COL_SKYBLUE"Player Login\n\n"COL_WHITE"This Nick: "COL_SKYBLUE"%s,"COL_WHITE" is Registered.\nIf This is "COL_RED"Not "COL_WHITE"Your Account, Please "COL_RED"Quit"COL_WHITE" And Change Your "COL_SKYBLUE"Nick\n\n "COL_WHITE"Please "COL_YELLOW"Enter Your Password"COL_WHITE" To Login:",PlayerInfo[playerid][pUserName]);
 					ShowPlayerDialog(playerid,LOGIN_DIALOG,DIALOG_STYLE_PASSWORD,""COMMUNITY_NAME" Login",string,"Login","");
 					LoginKick[playerid]++;
 				}
@@ -161,7 +161,7 @@ REG_LOG_OnDialogResponse(playerid,dialogid,response,inputtext[])
 					    KickPlayer(playerid,SERVER_BOT,"Failed to login!");
 					    return 1;
 					}
-	                format(string,sizeof(string),""COMMUNITY_NAME" Server\n\n"COL_SKYBLUE"Player Login\n\n"COL_RED"INCORRECT PASSWORD!\n\n"COL_WHITE"This Nick : "COL_SKYBLUE"%s,"COL_WHITE" is Registered.\nIf This is "COL_RED"Not "COL_WHITE"Your Account, Please "COL_RED"Quit"COL_WHITE" And Change Your "COL_SKYBLUE"Nick\n\n "COL_WHITE"Please "COL_YELLOW"Enter Your Password"COL_WHITE" To Login:",PlayerInfo[playerid][pUserName]);
+	                format(string,sizeof(string),""COMMUNITY_NAME" Server\n\n"COL_SKYBLUE"Player Login\n\n"COL_RED"INCORRECT PASSWORD!\n\n"COL_WHITE"This Nick: "COL_SKYBLUE"%s,"COL_WHITE" is Registered.\nIf This is "COL_RED"Not "COL_WHITE"Your Account, Please "COL_RED"Quit"COL_WHITE" And Change Your "COL_SKYBLUE"Nick\n\n "COL_WHITE"Please "COL_YELLOW"Enter Your Password"COL_WHITE" To Login:",PlayerInfo[playerid][pUserName]);
 	                ShowPlayerDialog(playerid,LOGIN_DIALOG,DIALOG_STYLE_INPUT,""COMMUNITY_NAME" Login",string,"Login","");
 	                PlayerInfo[playerid][pLoginAttempts]++;
 	                return 1;

@@ -2,7 +2,7 @@
 
 	Teleport commands (+ DM-zone flags) for Cops And Robbers script
 	Scripted by Arose Niazi.
-	Milestone 2 — design §11.4 / §5 / §7.6
+	Milestone 2 - design §11.4 / §5 / §7.6
 	Last Updated: -----
 
 	Credits:
@@ -13,11 +13,11 @@
 		ClearDMZone(playerid)              : leave a DM zone (called on death/spawn/other tp)
 
 	Commands:
-		/drylake (/d)         — Dry Lake (DM zone)
-		/sfairport (/sfa)     — SF Airport
-		/bayside (/bs)        — Bayside
-		/lossantosdm (/lsadm) — LS DM zone (DM zone, anti-parachute)
-		/palominocreek (/pc)  — Palomino Creek
+		/drylake (/d)         - Dry Lake (DM zone)
+		/sfairport (/sfa)     - SF Airport
+		/bayside (/bs)        - Bayside
+		/lossantosdm (/lsadm) - LS DM zone (DM zone, anti-parachute)
+		/palominocreek (/pc)  - Palomino Creek
 
 	Functions Being Called:
 
@@ -35,7 +35,7 @@ enum e_Teleport
 	tpName[32]
 };
 
-// Fixed teleport table — sensible real SA coordinates.
+// Fixed teleport table - sensible real SA coordinates.
 new const TeleportData[][e_Teleport] =
 {
 	// X            Y            Z          A       Int VW  DMzone  Name
@@ -76,7 +76,7 @@ DoTeleport(playerid, tpid)
 		return SendClientMessage(playerid, COLOR_ERROR, "You must be spawned to teleport.");
 	if(PlayerInfo[playerid][pAdminJailed])
 		return SendClientMessage(playerid, COLOR_ERROR, "You cannot teleport while admin-jailed.");
-	// Blocked while a cop holds visual contact (pursuit) — set by /visualcontact in M3.
+	// Blocked while a cop holds visual contact (pursuit) - set by /visualcontact in M3.
 	if(PlayerInfo[playerid][pVCFreezeUntil] != 0 && gettime() < PlayerInfo[playerid][pVCFreezeUntil])
 		return SendClientMessage(playerid, COLOR_ERROR, "You cannot teleport while a cop has visual contact on you.");
 
@@ -94,7 +94,7 @@ DoTeleport(playerid, tpid)
 	{
 		PlayerInfo[playerid][pInDMZone] = true;
 		StripParachute(playerid);
-		format(string, sizeof(string), "You teleported to %s. "COL_RED"(DM zone — no wanted/arrest, parachute disabled)", TeleportData[tpid][tpName]);
+		format(string, sizeof(string), "You teleported to %s. "COL_RED"(DM zone - no wanted/arrest, parachute disabled)", TeleportData[tpid][tpName]);
 	}
 	else format(string, sizeof(string), "You teleported to %s.", TeleportData[tpid][tpName]);
 	SendClientMessage(playerid, COLOR_SERVER_INFO, string);

@@ -2,10 +2,10 @@
 
 	Cop command suite for Cops And Robbers script
 	Scripted by Arose Niazi.
-	Milestone 3 (stage 2) — design §3.1 (minimal cop set) + §2.4 (ticket→warrant
+	Milestone 3 (stage 2) - design §3.1 (minimal cop set) + §2.4 (ticket->warrant
 	escalation, arrest clears wanted).
 
-	Cop-only verbs that drive the arrest→jail loop: /arrest, /ticket, /vc, /su,
+	Cop-only verbs that drive the arrest->jail loop: /arrest, /ticket, /vc, /su,
 	/backup, /report+/clr, /suspects+/warrants+/mostwanted, /jaillist, /parole,
 	/accept+/refuse (bribe resolution), /refill (PD) and /donut. Gates are IsCop
 	+ on-foot per the spec (cannot arrest in-vehicle; targets must be on foot).
@@ -81,7 +81,7 @@ static bool:Cop_OnFoot(playerid)
 	return (!IsPlayerInAnyVehicle(playerid));
 
 //==============================================================================
-//	/arrest (/ar) — design §3.1 / §4.2
+//	/arrest (/ar) - design §3.1 / §4.2
 //==============================================================================
 
 CMD:arrest(playerid, params[])
@@ -100,7 +100,7 @@ CMD:arrest(playerid, params[])
 		if(GetPlayerWanted(targetid) < WANTED_WARRANT_MIN)
 			return SendClientMessage(playerid, COLOR_ERROR, "You can only arrest a warranted suspect (WL6+). Use /ticket for lower levels.");
 		if(!Cop_OnFoot(targetid))
-			return SendClientMessage(playerid, COLOR_ERROR, "You cannot arrest someone in a vehicle — stop the car first.");
+			return SendClientMessage(playerid, COLOR_ERROR, "You cannot arrest someone in a vehicle - stop the car first.");
 		new Float:cx, Float:cy, Float:cz;
 		GetPlayerPos(playerid, cx, cy, cz);
 		if(!IsPlayerInRangeOfPoint(targetid, ARREST_RANGE, cx, cy, cz))
@@ -110,7 +110,7 @@ CMD:arrest(playerid, params[])
 	{
 		targetid = Cop_NearestSuspect(playerid, ARREST_RANGE, WANTED_WARRANT_MIN, MAX_WANTED);
 		if(targetid == -1) return SendClientMessage(playerid, COLOR_ERROR, "No warranted suspect (WL6+) on foot within range.");
-		if(!Cop_OnFoot(targetid)) return SendClientMessage(playerid, COLOR_ERROR, "The nearest suspect is in a vehicle — stop the car first.");
+		if(!Cop_OnFoot(targetid)) return SendClientMessage(playerid, COLOR_ERROR, "The nearest suspect is in a vehicle - stop the car first.");
 	}
 
 	new wl = GetPlayerWanted(targetid);
@@ -118,7 +118,7 @@ CMD:arrest(playerid, params[])
 
 	// Jail_SendToJail disarms, clears wanted (§2.4), teleports + arms the timer.
 	// It returns 0 without jailing if the target is admin-jailed (admin-jail wins)
-	// or no longer valid — in that case do NOT pay the cop or broadcast a false arrest.
+	// or no longer valid - in that case do NOT pay the cop or broadcast a false arrest.
 	if(!Jail_SendToJail(targetid, wl, "Arrested by police", serious))
 		return SendClientMessage(playerid, COLOR_ERROR, "That suspect cannot be arrested right now.");
 
@@ -127,7 +127,7 @@ CMD:arrest(playerid, params[])
 	PlayerInfo[playerid][pScore] += ARREST_SCORE;
 	PlayerInfo[playerid][pMoney] += bonus;
 	UpdateMoney(playerid);
-	// M7 — arrest cash feeds the GOVERNMENT stock pool (§10.2, factor 0.1).
+	// M7 - arrest cash feeds the GOVERNMENT stock pool (§10.2, factor 0.1).
 	StockMarket_UpdateEarnings(E_STOCK_GOVERNMENT, bonus, STOCK_FACTOR_GOV);
 	if(PlayerInfo[playerid][pCopRank] < 10) PlayerInfo[playerid][pCopRank]++;
 	if(PlayerInfo[playerid][pRefillPoints] < REFILL_POINTS_MAX) PlayerInfo[playerid][pRefillPoints]++;
@@ -143,7 +143,7 @@ CMD:arrest(playerid, params[])
 alias:arrest("ar")
 
 //==============================================================================
-//	/ticket (/tk) — design §3.1 / §4.3
+//	/ticket (/tk) - design §3.1 / §4.3
 //==============================================================================
 
 CMD:ticket(playerid, params[])
@@ -160,7 +160,7 @@ CMD:ticket(playerid, params[])
 			return SendClientMessage(playerid, COLOR_ERROR, "That is not a valid suspect.");
 		new wl = GetPlayerWanted(targetid);
 		if(wl < WANTED_SUSPECT_MIN) return SendClientMessage(playerid, COLOR_ERROR, "You cannot ticket an innocent (WL0) player.");
-		if(wl >= WANTED_WARRANT_MIN) return SendClientMessage(playerid, COLOR_ERROR, "That player is warranted (WL6+) — use /arrest, not /ticket.");
+		if(wl >= WANTED_WARRANT_MIN) return SendClientMessage(playerid, COLOR_ERROR, "That player is warranted (WL6+) - use /arrest, not /ticket.");
 		new Float:cx, Float:cy, Float:cz;
 		GetPlayerPos(playerid, cx, cy, cz);
 		if(!IsPlayerInRangeOfPoint(targetid, TICKET_RANGE, cx, cy, cz))
@@ -181,7 +181,7 @@ CMD:ticket(playerid, params[])
 	PlayerInfo[targetid][pTicketExpiry] = gettime() + TICKET_PAY_SECS;
 	PlayerInfo[playerid][pScore] += TICKET_SCORE;
 	PlayerInfo[playerid][pMoney] += TICKET_FINE;
-	// M7 — ticket fines feed the GOVERNMENT stock pool (§10.2, factor 0.1).
+	// M7 - ticket fines feed the GOVERNMENT stock pool (§10.2, factor 0.1).
 	StockMarket_UpdateEarnings(E_STOCK_GOVERNMENT, TICKET_FINE, STOCK_FACTOR_GOV);
 	UpdateMoney(playerid);
 	if(PlayerInfo[playerid][pRefillPoints] < REFILL_POINTS_MAX) PlayerInfo[playerid][pRefillPoints]++;
@@ -195,7 +195,7 @@ CMD:ticket(playerid, params[])
 }
 alias:ticket("tk")
 
-// /payticket — the ticketed suspect settles the fine (clears the escalation).
+// /payticket - the ticketed suspect settles the fine (clears the escalation).
 CMD:payticket(playerid, params[])
 {
 	#pragma unused params
@@ -218,7 +218,7 @@ CMD:payticket(playerid, params[])
 alias:payticket("pt")
 
 //==============================================================================
-//	/visualcontact (/vc) — pause a suspect's WL decay (design §2.4 / §3.1)
+//	/visualcontact (/vc) - pause a suspect's WL decay (design §2.4 / §3.1)
 //==============================================================================
 
 CMD:vc(playerid, params[])
@@ -244,17 +244,17 @@ CMD:vc(playerid, params[])
 		return SendClientMessage(playerid, COLOR_ERROR, "Could not lock visual contact on that player.");
 
 	new string[144];
-	format(string, sizeof(string), "You have visual contact on %s (%d) — their wanted decay is frozen.", PlayerInfo[targetid][pUserName], targetid);
+	format(string, sizeof(string), "You have visual contact on %s (%d) - their wanted decay is frozen.", PlayerInfo[targetid][pUserName], targetid);
 	SendClientMessage(playerid, COLOR_SERVER_INFO, string);
 	format(string, sizeof(string), ""COL_ORANGE"[PURSUIT] "COL_WHITE"%s (%d) has visual contact on %s (%d) (WL%d).", PlayerInfo[playerid][pUserName], playerid, PlayerInfo[targetid][pUserName], targetid, GetPlayerWanted(targetid));
 	Cop_Broadcast(COLOR_WANTED_ORANGE, string);
-	SendClientMessage(targetid, COLOR_ERROR, "A cop has visual contact on you — your wanted level will not decay while pursued.");
+	SendClientMessage(targetid, COLOR_ERROR, "A cop has visual contact on you - your wanted level will not decay while pursued.");
 	return 1;
 }
 alias:vc("visualcontact", "vcontact")
 
 //==============================================================================
-//	/su <id> <crime> — mark a suspect + raise their WL (design §3.1)
+//	/su <id> <crime> - mark a suspect + raise their WL (design §3.1)
 //==============================================================================
 
 CMD:su(playerid, params[])
@@ -281,7 +281,7 @@ CMD:su(playerid, params[])
 }
 
 //==============================================================================
-//	/report (/rp) + /clr — cop crime report + undo (design §2.4)
+//	/report (/rp) + /clr - cop crime report + undo (design §2.4)
 //==============================================================================
 
 static gLastReport[MAX_PLAYERS] = { -1, ... };	// last suspect a cop reported
@@ -310,7 +310,7 @@ CMD:report(playerid, params[])
 	GivePlayerWanted(targetid, 3, reason);	// serious report bump
 	new gained = GetPlayerWanted(targetid) - before;
 	if(gained <= 0)
-		return SendClientMessage(playerid, COLOR_ERROR, "That suspect is protected right now (safe zone / spawn protection) — no report filed.");
+		return SendClientMessage(playerid, COLOR_ERROR, "That suspect is protected right now (safe zone / spawn protection) - no report filed.");
 	PlayerInfo[targetid][pSeriousCrimes]++;
 	gLastReport[playerid] = targetid;
 	gLastReportAmt[playerid] = gained;
@@ -347,7 +347,7 @@ CMD:clr(playerid, params[])
 alias:clr("cancellastreport", "cancelreport")
 
 //==============================================================================
-//	/backup (/bk) — purple marker + broadcast (design §3.1 / §4.1)
+//	/backup (/bk) - purple marker + broadcast (design §3.1 / §4.1)
 //==============================================================================
 
 CMD:backup(playerid, params[])
@@ -366,9 +366,9 @@ CMD:backup(playerid, params[])
 	}
 
 	new string[176];
-	format(string, sizeof(string), ""COL_PURPLE"[BACKUP] "COL_WHITE"%s (%d) is requesting backup near %s%s%s.", PlayerInfo[playerid][pUserName], playerid, isNull(zoneName) ? ("their location") : (zoneName), isNull(params) ? ("") : (" — "), isNull(params) ? ("") : (params));
+	format(string, sizeof(string), ""COL_PURPLE"[BACKUP] "COL_WHITE"%s (%d) is requesting backup near %s%s%s.", PlayerInfo[playerid][pUserName], playerid, isNull(zoneName) ? ("their location") : (zoneName), isNull(params) ? ("") : (" - "), isNull(params) ? ("") : (params));
 	Cop_Broadcast(COLOR_BACKUP_PURPLE, string);
-	SendClientMessage(playerid, COLOR_SERVER_INFO, "Backup requested — nearby cops see your purple marker.");
+	SendClientMessage(playerid, COLOR_SERVER_INFO, "Backup requested - nearby cops see your purple marker.");
 	// Auto-clear the marker after the window so it doesn't linger.
 	SetTimerEx("Cop_ClearBackupMarker", BACKUP_MARKER_SECS * 1000, false, "d", playerid);
 	return 1;
@@ -384,7 +384,7 @@ FUNCTION Cop_ClearBackupMarker(playerid)
 }
 
 //==============================================================================
-//	/copmsg (/cm) — private cop channel (design §3.1 / §4.1)
+//	/copmsg (/cm) - private cop channel (design §3.1 / §4.1)
 //==============================================================================
 
 CMD:copmsg(playerid, params[])
@@ -471,7 +471,7 @@ CMD:jaillist(playerid)
 alias:jaillist("jl")
 
 //==============================================================================
-//	/parole (/pl) — free a served-minimum inmate (design §3.1 / §5)
+//	/parole (/pl) - free a served-minimum inmate (design §3.1 / §5)
 //==============================================================================
 
 CMD:parole(playerid, params[])
@@ -489,7 +489,7 @@ CMD:parole(playerid, params[])
 		return SendClientMessage(playerid, COLOR_ERROR, err);
 	}
 	new string[128];
-	format(string, sizeof(string), "%s (%d) paroled you — you are free to go.", PlayerInfo[playerid][pUserName], playerid);
+	format(string, sizeof(string), "%s (%d) paroled you - you are free to go.", PlayerInfo[playerid][pUserName], playerid);
 	SendClientMessage(targetid, COLOR_SERVER_INFO, string);
 	format(string, sizeof(string), "You paroled %s (%d).", PlayerInfo[targetid][pUserName], targetid);
 	SendClientMessage(playerid, COLOR_SERVER_INFO, string);
@@ -499,13 +499,13 @@ CMD:parole(playerid, params[])
 alias:parole("pl")
 
 //==============================================================================
-//	/accept (/ac) + /refuse (/ref) — resolve an offered bribe (design §3.2 / §5)
+//	/accept (/ac) + /refuse (/ref) - resolve an offered bribe (design §3.2 / §5)
 //==============================================================================
 
 CMD:accept(playerid, params[])
 {
 	#pragma unused params
-	// M6 (stage 3) — /accept doubles as the duel-challenge acceptor (§6.4). If a
+	// M6 (stage 3) - /accept doubles as the duel-challenge acceptor (§6.4). If a
 	// pending duel offer was resolved, stop here; else fall through to bribe accept.
 	// arenas.inc is included after this module, so it is reached via CallLocalFunction.
 	if(CallLocalFunction("Duel_TryAccept", "d", playerid)) return 1;
@@ -533,19 +533,19 @@ CMD:accept(playerid, params[])
 	else PlayerInfo[briber][pJailBail] = 0;
 
 	new string[144];
-	format(string, sizeof(string), "You accepted %s (%d)'s $%d bribe — their sentence was cut.", PlayerInfo[briber][pUserName], briber, amount);
+	format(string, sizeof(string), "You accepted %s (%d)'s $%d bribe - their sentence was cut.", PlayerInfo[briber][pUserName], briber, amount);
 	SendClientMessage(playerid, COLOR_SERVER_INFO, string);
 	PlayerInfo[briber][pBribeTo] = -1; PlayerInfo[briber][pBribeAmount] = 0; PlayerInfo[playerid][pBribeFrom] = -1;
 
 	if((PlayerInfo[briber][pJailUntil] - gettime()) <= 0)
 	{
-		SendClientMessage(briber, COLOR_SERVER_INFO, ""COL_GREEN"Your bribe was accepted — you walk free.");
+		SendClientMessage(briber, COLOR_SERVER_INFO, ""COL_GREEN"Your bribe was accepted - you walk free.");
 		Jail_Release(briber, "bribe accepted", true);
 	}
 	else
 	{
 		new left = PlayerInfo[briber][pJailUntil] - gettime();
-		format(string, sizeof(string), "Your bribe was accepted — %d:%02d shaved off your sentence.", BRIBE_CUT_SECS / 60, BRIBE_CUT_SECS % 60);
+		format(string, sizeof(string), "Your bribe was accepted - %d:%02d shaved off your sentence.", BRIBE_CUT_SECS / 60, BRIBE_CUT_SECS % 60);
 		SendClientMessage(briber, COLOR_SERVER_INFO, string);
 		#pragma unused left
 	}
@@ -569,7 +569,7 @@ CMD:refuse(playerid, params[])
 	if(PlayerInfo[briber][pScore] > 0) PlayerInfo[briber][pScore]--;
 
 	new string[144];
-	format(string, sizeof(string), "You refused %s (%d)'s bribe — their sentence was extended.", PlayerInfo[briber][pUserName], briber);
+	format(string, sizeof(string), "You refused %s (%d)'s bribe - their sentence was extended.", PlayerInfo[briber][pUserName], briber);
 	SendClientMessage(playerid, COLOR_SERVER_INFO, string);
 	format(string, sizeof(string), ""COL_RED"Your bribe was REFUSED."COL_WHITE" +%d:%02d to your sentence, -1 score (attempted bribery).", BRIBE_REFUSE_ADD_SECS / 60, BRIBE_REFUSE_ADD_SECS % 60);
 	SendClientMessage(briber, COLOR_ERROR, string);
@@ -579,7 +579,7 @@ CMD:refuse(playerid, params[])
 alias:refuse("ref")
 
 //==============================================================================
-//	/refill (/rf) — PD health/armour/weapons on points (design §3.1 / §4.3)
+//	/refill (/rf) - PD health/armour/weapons on points (design §3.1 / §4.3)
 //==============================================================================
 
 CMD:refill(playerid, params[])
@@ -587,17 +587,17 @@ CMD:refill(playerid, params[])
 	#pragma unused params
 	if(!IsCop(playerid)) return SendClientMessage(playerid, COLOR_ERROR, "Only law enforcement can refill.");
 	if(Jail_IsJailed(playerid)) return SendClientMessage(playerid, COLOR_ERROR, "You cannot do that right now.");
-	// Must be at a PD / police property (§3.1 — refill happens at the station).
+	// Must be at a PD / police property (§3.1 - refill happens at the station).
 	if(!PlayerInfo[playerid][pInPoliceProperty])
 		return SendClientMessage(playerid, COLOR_ERROR, "You must be at a police station to refill.");
 	if(gettime() < PlayerInfo[playerid][pRefillCooldown])
 	{
 		new err[96];
-		format(err, sizeof(err), "Refill on cooldown — try again in %d seconds.", PlayerInfo[playerid][pRefillCooldown] - gettime());
+		format(err, sizeof(err), "Refill on cooldown - try again in %d seconds.", PlayerInfo[playerid][pRefillCooldown] - gettime());
 		return SendClientMessage(playerid, COLOR_ERROR, err);
 	}
 	if(PlayerInfo[playerid][pRefillPoints] <= 0)
-		return SendClientMessage(playerid, COLOR_ERROR, "You have no Refill Points — earn them doing cop work (arrests/tickets).");
+		return SendClientMessage(playerid, COLOR_ERROR, "You have no Refill Points - earn them doing cop work (arrests/tickets).");
 
 	new caption[256], item[80];
 	format(item, sizeof(item), "Health (+full)\t%d pts\n", REFILL_HP_COST);
@@ -607,7 +607,7 @@ CMD:refill(playerid, params[])
 	format(item, sizeof(item), "Weapon package (rank-gated)\t%d pts\n", REFILL_WEAPON_COST);
 	strcat(caption, item);
 	new title[64];
-	format(title, sizeof(title), "Refill — %d point(s) available", PlayerInfo[playerid][pRefillPoints]);
+	format(title, sizeof(title), "Refill - %d point(s) available", PlayerInfo[playerid][pRefillPoints]);
 	ShowPlayerDialog(playerid, REFILL_DIALOG, DIALOG_STYLE_TABLIST, title, caption, "Buy", "Cancel");
 	return 1;
 }
@@ -657,7 +657,7 @@ FUNCTION Refill_OnDialogResponse(playerid, response, listitem)
 }
 
 //==============================================================================
-//	/donut — +50% HP, carry up to 6 (design §3.1 / §4.1)
+//	/donut - +50% HP, carry up to 6 (design §3.1 / §4.1)
 //==============================================================================
 
 CMD:donut(playerid, params[])
@@ -666,7 +666,7 @@ CMD:donut(playerid, params[])
 	if(!IsCop(playerid)) return SendClientMessage(playerid, COLOR_ERROR, "Only law enforcement can eat duty donuts.");
 	if(Jail_IsJailed(playerid)) return SendClientMessage(playerid, COLOR_ERROR, "You cannot do that right now.");
 	if(PlayerInfo[playerid][pDonutCarry] <= 0)
-		return SendClientMessage(playerid, COLOR_ERROR, "You have no donuts — pick some up at a donut shop.");
+		return SendClientMessage(playerid, COLOR_ERROR, "You have no donuts - pick some up at a donut shop.");
 	new Float:hp;
 	GetPlayerHealth(playerid, hp);
 	hp += DONUT_HEAL_PCT;
@@ -680,7 +680,7 @@ CMD:donut(playerid, params[])
 }
 
 //==============================================================================
-//	Ticket → warrant escalation (design §2.4) — hooked from GameModeClock()
+//	Ticket -> warrant escalation (design §2.4) - hooked from GameModeClock()
 //==============================================================================
 
 // A ticketed suspect who doesn't /payticket in TICKET_PAY_SECS jumps to WL6.
@@ -693,11 +693,11 @@ FUNCTION Cop_OnGameModeClockTick()
 		if(PlayerInfo[i][pTicketAmount] <= 0 || PlayerInfo[i][pTicketExpiry] == 0) continue;
 		if(gettime() < PlayerInfo[i][pTicketExpiry]) continue;
 
-		// Unpaid ticket lapsed → warrant.
+		// Unpaid ticket lapsed -> warrant.
 		PlayerInfo[i][pTicketAmount] = 0;
 		PlayerInfo[i][pTicketByCop] = -1;
 		PlayerInfo[i][pTicketExpiry] = 0;
-		if(GetPlayerWanted(i) < TICKET_ESCALATE_WL) SetPlayerWanted(i, TICKET_ESCALATE_WL, "Unpaid ticket → warrant");
+		if(GetPlayerWanted(i) < TICKET_ESCALATE_WL) SetPlayerWanted(i, TICKET_ESCALATE_WL, "Unpaid ticket -> warrant");
 		SendClientMessage(i, COLOR_ERROR, ""COL_RED"* Your unpaid ticket escalated to a WARRANT."COL_WHITE" Cops can now arrest you.");
 	}
 	return 1;

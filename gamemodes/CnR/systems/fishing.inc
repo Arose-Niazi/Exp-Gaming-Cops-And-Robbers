@@ -2,21 +2,21 @@
 
 	Fishing system for Cops And Robbers script
 	Scripted by Arose Niazi.
-	Milestone 6 (stage 2) — design §9.2 (fishing) + §10.2 (fish × FISH_MARKET) +
+	Milestone 6 (stage 2) - design §9.2 (fishing) + §10.2 (fish × FISH_MARKET) +
 	§11.2 (FishPermits + cooler cols) + docs/research/economy.md §8 + docs/research/
 	crazybobs-site-full §Fishing.
 
 	CB: "Fishing is one of the best ways to earn your money!" A player buys a fishing
 	rod, permits and a cooler at a BAIT SHOP, then /fish at a pier/water spot to reel
 	in a catch (species class × weight × rarity). Catches go into a compact COOLER
-	inventory (count + total pounds + accumulated base value — no per-fish table), then
+	inventory (count + total pounds + accumulated base value - no per-fish table), then
 	sold at a fish market via /fishsellall for Bank_GiveCash(baseValue × FISH_MARKET
 	mult). Selling feeds the Fish Market pool (supply pushes the price down, §10.2).
 
 	A rod reduces the reel-in time + nudges the rarity roll up; a Fisherman skill nudges
 	it further (§9.2). A fishing permit is consumed per catch (1 fish/permit) and avoids
 	a +1 wanted for fishing near a cop (§9.2). Bonus fish is announced at game-hour 05:00
-	(GameModeClock hook) — the first to catch it after that gets a big cash reward (§9.2).
+	(GameModeClock hook) - the first to catch it after that gets a big cash reward (§9.2).
 	Rare "baby seal" tier catches are the huge payouts (§8.2).
 
 	Persistence: FishPermits + rod/cooler/sales-permit flags + the cooler aggregate live
@@ -42,12 +42,12 @@
 		wanted:   GivePlayerWanted
 		jail:     Jail_IsJailed, Jail_SavePlayer (persists the fishing cols)
 		misc:     IsCop
-		skills:   pSkill (SKILL_* — a Fisherman-family skill nudges the rarity roll)
+		skills:   pSkill (SKILL_* - a Fisherman-family skill nudges the rarity roll)
 		economy:  StockMarket_UpdateEarnings, StockMarket_PriceMult (M7 stubs)
 */
 
 //==============================================================================
-//	Markers — Bait Shops, fishing spots (piers), fish markets (§9.2)
+//	Markers - Bait Shops, fishing spots (piers), fish markets (§9.2)
 //==============================================================================
 
 // Bait Shops (economy.md §2.3 / crazybobs-site-full §Bait Shops). Only LS-area
@@ -59,7 +59,7 @@ static const Float:g_BaitShops[][3] =
 	{ -2196.000, 2383.000,  4.900 }		// LV Tierra Robada bait shop (kept for later)
 };
 
-// Fishing spots — piers / jetties where /fish works (on foot at the water's edge).
+// Fishing spots - piers / jetties where /fish works (on foot at the water's edge).
 // Kept a curated list so /fish is location-gated (design §9.2 "pier/water proximity").
 static const Float:g_FishSpots[][3] =
 {
@@ -69,7 +69,7 @@ static const Float:g_FishSpots[][3] =
 	{ 645.200,   1709.800,  6.900 }		// Red County lake edge (LS)
 };
 
-// Fish markets — where the cooler is sold (24/7 / Bait Shop, economy.md §8.2).
+// Fish markets - where the cooler is sold (24/7 / Bait Shop, economy.md §8.2).
 static const Float:g_FishMarkets[][3] =
 {
 	{ 372.900,   -2045.000, 7.800 },	// Santa Maria Pier bait shop (also a market)
@@ -79,7 +79,7 @@ static const Float:g_FishMarkets[][3] =
 static STREAMER_TAG_MAP_ICON:g_BaitIcon[sizeof(g_BaitShops)];
 static STREAMER_TAG_MAP_ICON:g_FishSpotIcon[sizeof(g_FishSpots)];
 
-// Daily bonus fish (§9.2) — announced at 05:00; the first catch after that wins it.
+// Daily bonus fish (§9.2) - announced at 05:00; the first catch after that wins it.
 static bool:g_BonusFishActive = false;
 static g_BonusFishSpecies[24];
 
@@ -161,14 +161,14 @@ static Fishing_RarityMult(tier)
 {
 	switch(tier)
 	{
-		case FISH_RARITY_LEGENDARY: return 12;	// baby seal / killer fish — the big payout
+		case FISH_RARITY_LEGENDARY: return 12;	// baby seal / killer fish - the big payout
 		case FISH_RARITY_RARE:      return 5;	// turtle / marlin
 		case FISH_RARITY_UNCOMMON:  return 2;	// bass / catfish
 	}
-	return 1;								// common — trout / boot
+	return 1;								// common - trout / boot
 }
 
-// A random species name for a rarity tier (flavour only — the value is weight×rarity).
+// A random species name for a rarity tier (flavour only - the value is weight×rarity).
 static Fishing_SpeciesName(tier, out[], len)
 {
 	switch(tier)
@@ -208,7 +208,7 @@ static bool:Fishing_HasSkillBonus(playerid)
 static Fishing_RollRarity(playerid)
 {
 	new roll = random(100);
-	// Subtract bonuses from the roll so a lower effective roll → rarer tier bands.
+	// Subtract bonuses from the roll so a lower effective roll -> rarer tier bands.
 	if(PlayerInfo[playerid][pHasFishingRod]) roll -= FISH_ROD_RARITY_BONUS * 3;
 	if(Fishing_HasSkillBonus(playerid))      roll -= FISH_SKILL_RARITY_BONUS * 3;
 	if(roll < 0) roll = 0;
@@ -219,7 +219,7 @@ static Fishing_RollRarity(playerid)
 }
 
 //==============================================================================
-//	/fish — reel in a catch (§9.2)
+//	/fish - reel in a catch (§9.2)
 //==============================================================================
 
 CMD:fish(playerid, params[])
@@ -228,11 +228,11 @@ CMD:fish(playerid, params[])
 	if(!PlayerInfo[playerid][pLoggedIn]) return SendClientMessage(playerid, COLOR_ERROR, "You must be logged in.");
 	if(Jail_IsJailed(playerid)) return SendClientMessage(playerid, COLOR_ERROR, "You cannot fish while jailed.");
 	if(IsPlayerInAnyVehicle(playerid)) return SendClientMessage(playerid, COLOR_ERROR, "Get out of your vehicle and stand at the water's edge to fish.");
-	if(PlayerInfo[playerid][pFishing]) return SendClientMessage(playerid, COLOR_ERROR, "You are already reeling in a catch — wait.");
+	if(PlayerInfo[playerid][pFishing]) return SendClientMessage(playerid, COLOR_ERROR, "You are already reeling in a catch - wait.");
 	if(!Fishing_AtSpot(playerid))
-		return SendClientMessage(playerid, COLOR_ERROR, "You must stand at a fishing spot (a pier or the water's edge — look for the fish map icons).");
+		return SendClientMessage(playerid, COLOR_ERROR, "You must stand at a fishing spot (a pier or the water's edge - look for the fish map icons).");
 
-	// Cooler capacity check (§9.2 — a cooler holds more; bare-handed holds a couple).
+	// Cooler capacity check (§9.2 - a cooler holds more; bare-handed holds a couple).
 	if(PlayerInfo[playerid][pCoolerCount] >= Fishing_CoolerCap(playerid))
 	{
 		new err[144];
@@ -268,7 +268,7 @@ FUNCTION Fishing_ReelIn(playerid)
 
 	// Must still be at the spot (anti-walk-away).
 	if(!IsPlayerInRangeOfPoint(playerid, FISH_SPOT_RANGE, PlayerInfo[playerid][pFishX], PlayerInfo[playerid][pFishY], PlayerInfo[playerid][pFishZ]))
-		return SendClientMessage(playerid, COLOR_ERROR, "You moved away from the water — the fish got away.");
+		return SendClientMessage(playerid, COLOR_ERROR, "You moved away from the water - the fish got away.");
 
 	// No-permit wanted: fishing near a cop with no valid permit is a small crime (§9.2).
 	if(PlayerInfo[playerid][pFishPermits] <= 0 && Fishing_IsCopInSight(playerid))
@@ -293,13 +293,13 @@ FUNCTION Fishing_ReelIn(playerid)
 	PlayerInfo[playerid][pCoolerValue]  += value;
 
 	new msg[176];
-	format(msg, sizeof(msg), ""COL_GREEN"* You caught a %s"COL_WHITE" — %d lb (worth ~"COL_GREEN"$%d"COL_WHITE"). Cooler: %d/%d fish.",
+	format(msg, sizeof(msg), ""COL_GREEN"* You caught a %s"COL_WHITE" - %d lb (worth ~"COL_GREEN"$%d"COL_WHITE"). Cooler: %d/%d fish.",
 		species, weight, value, PlayerInfo[playerid][pCoolerCount], Fishing_CoolerCap(playerid));
 	SendClientMessage(playerid, COLOR_SERVER_INFO, msg);
 	if(tier == FISH_RARITY_LEGENDARY)
 		SendClientMessage(playerid, COLOR_SERVER_INFO, ""COL_YELLOW"A rare catch! That will fetch a fortune at the fish market.");
 
-	// Daily bonus fish (§9.2) — first catch after the 05:00 announce wins the reward.
+	// Daily bonus fish (§9.2) - first catch after the 05:00 announce wins the reward.
 	if(g_BonusFishActive)
 	{
 		g_BonusFishActive = false;
@@ -314,7 +314,7 @@ FUNCTION Fishing_ReelIn(playerid)
 }
 
 //==============================================================================
-//	/fishsellall — sell the whole cooler at a fish market (§9.2/§10.2)
+//	/fishsellall - sell the whole cooler at a fish market (§9.2/§10.2)
 //==============================================================================
 
 CMD:fishsellall(playerid, params[])
@@ -324,12 +324,12 @@ CMD:fishsellall(playerid, params[])
 	if(!Fishing_AtMarket(playerid))
 		return SendClientMessage(playerid, COLOR_ERROR, "You must be at a fish market (a Bait Shop / 24-7) to sell your fish.");
 	if(PlayerInfo[playerid][pCoolerCount] <= 0)
-		return SendClientMessage(playerid, COLOR_ERROR, "Your cooler is empty — catch some fish with /fish first.");
+		return SendClientMessage(playerid, COLOR_ERROR, "Your cooler is empty - catch some fish with /fish first.");
 
 	new count = PlayerInfo[playerid][pCoolerCount];
 	new weight = PlayerInfo[playerid][pCoolerWeight];
 	new base = PlayerInfo[playerid][pCoolerValue];
-	// Apply the Fish Market price multiplier (M7 stub returns 1.0 → FISH_MARKET base
+	// Apply the Fish Market price multiplier (M7 stub returns 1.0 -> FISH_MARKET base
 	// mult 1.0 today, design §10.2). floatround keeps it an integer payout.
 	new payout = floatround(float(base) * StockMarket_PriceMult(E_STOCK_FISH_MARKET));
 	if(payout < 1) payout = 1;
@@ -354,7 +354,7 @@ CMD:fishsellall(playerid, params[])
 alias:fishsellall("fsell")
 
 //==============================================================================
-//	/cooler — show the cooler contents (§9.2)
+//	/cooler - show the cooler contents (§9.2)
 //==============================================================================
 
 CMD:cooler(playerid, params[])
@@ -372,19 +372,19 @@ CMD:cooler(playerid, params[])
 }
 alias:cooler("fishinventory")
 
-// /rod — flavour toggle: put the rod in/out of hand (a rod must be owned).
+// /rod - flavour toggle: put the rod in/out of hand (a rod must be owned).
 CMD:rod(playerid, params[])
 {
 	#pragma unused params
 	if(!PlayerInfo[playerid][pLoggedIn]) return SendClientMessage(playerid, COLOR_ERROR, "You must be logged in.");
 	if(!PlayerInfo[playerid][pHasFishingRod])
-		return SendClientMessage(playerid, COLOR_ERROR, "You do not own a fishing rod — buy one at a Bait Shop ("COL_GREEN"/baitshop"COL_WHITE").");
+		return SendClientMessage(playerid, COLOR_ERROR, "You do not own a fishing rod - buy one at a Bait Shop ("COL_GREEN"/baitshop"COL_WHITE").");
 	SendClientMessage(playerid, COLOR_SERVER_INFO, ""COL_WHITE"You ready your fishing rod. Stand at the water's edge and use "COL_GREEN"/fish"COL_WHITE".");
 	return 1;
 }
 
 //==============================================================================
-//	/baitshop — buy rod / cooler / permits / seeds (§9.2/§9.3 Bait Shop)
+//	/baitshop - buy rod / cooler / permits / seeds (§9.2/§9.3 Bait Shop)
 //==============================================================================
 
 CMD:baitshop(playerid, params[])
@@ -433,32 +433,32 @@ FUNCTION Fishing_OnDialogResponse(playerid, dialogid, response, listitem)
 		case 0:	// Fishing Rod
 		{
 			if(PlayerInfo[playerid][pHasFishingRod]) return SendClientMessage(playerid, COLOR_ERROR, "You already own a fishing rod.");
-			price = StockMarket_BuyPrice(FISHING_ROD_PRICE, E_STOCK_SUPA_SAVE);	// M7 — 24/7 items × SUPA_SAVE (§10.2)
+			price = StockMarket_BuyPrice(FISHING_ROD_PRICE, E_STOCK_SUPA_SAVE);	// M7 - 24/7 items × SUPA_SAVE (§10.2)
 			if(!Bank_TakeCash(playerid, price)) return SendClientMessage(playerid, COLOR_ERROR, "You cannot afford a fishing rod.");
 			PlayerInfo[playerid][pHasFishingRod] = true;
-			format(msg, sizeof(msg), ""COL_GREEN"* Bought a fishing rod "COL_WHITE"($%d) — faster reel-in + higher catch chance.", price);
+			format(msg, sizeof(msg), ""COL_GREEN"* Bought a fishing rod "COL_WHITE"($%d) - faster reel-in + higher catch chance.", price);
 		}
 		case 1:	// Fish Cooler
 		{
 			if(PlayerInfo[playerid][pHasFishCooler]) return SendClientMessage(playerid, COLOR_ERROR, "You already own a fish cooler.");
-			price = StockMarket_BuyPrice(FISH_COOLER_PRICE, E_STOCK_SUPA_SAVE);	// M7 — 24/7 items × SUPA_SAVE (§10.2)
+			price = StockMarket_BuyPrice(FISH_COOLER_PRICE, E_STOCK_SUPA_SAVE);	// M7 - 24/7 items × SUPA_SAVE (§10.2)
 			if(!Bank_TakeCash(playerid, price)) return SendClientMessage(playerid, COLOR_ERROR, "You cannot afford a fish cooler.");
 			PlayerInfo[playerid][pHasFishCooler] = true;
-			format(msg, sizeof(msg), ""COL_GREEN"* Bought a fish cooler "COL_WHITE"($%d) — now holds %d fish.", price, FISH_COOLER_CAP);
+			format(msg, sizeof(msg), ""COL_GREEN"* Bought a fish cooler "COL_WHITE"($%d) - now holds %d fish.", price, FISH_COOLER_CAP);
 		}
 		case 2:	// Fish Sales Permit
 		{
 			if(PlayerInfo[playerid][pHasFishSalesPermit]) return SendClientMessage(playerid, COLOR_ERROR, "You already own a fish sales permit.");
-			price = StockMarket_BuyPrice(FISH_SALES_PERMIT_PRICE, E_STOCK_SUPA_SAVE);	// M7 — 24/7 items × SUPA_SAVE (§10.2)
+			price = StockMarket_BuyPrice(FISH_SALES_PERMIT_PRICE, E_STOCK_SUPA_SAVE);	// M7 - 24/7 items × SUPA_SAVE (§10.2)
 			if(!Bank_TakeCash(playerid, price)) return SendClientMessage(playerid, COLOR_ERROR, "You cannot afford a fish sales permit.");
 			PlayerInfo[playerid][pHasFishSalesPermit] = true;
-			format(msg, sizeof(msg), ""COL_GREEN"* Bought a fish sales permit "COL_WHITE"($%d) — you can sell fish to players.", price);
+			format(msg, sizeof(msg), ""COL_GREEN"* Bought a fish sales permit "COL_WHITE"($%d) - you can sell fish to players.", price);
 		}
 		case 3, 4, 5:	// Fishing permit bundles (5 / 10 / 25)
 		{
 			new add = (listitem == 3) ? 5 : (listitem == 4) ? 10 : 25;
 			price = (listitem == 3) ? FISH_PERMIT_BUNDLE_5 : (listitem == 4) ? FISH_PERMIT_BUNDLE_10 : FISH_PERMIT_BUNDLE_25;
-			price = StockMarket_BuyPrice(price, E_STOCK_SUPA_SAVE);	// M7 — 24/7 items × SUPA_SAVE (§10.2)
+			price = StockMarket_BuyPrice(price, E_STOCK_SUPA_SAVE);	// M7 - 24/7 items × SUPA_SAVE (§10.2)
 			if(PlayerInfo[playerid][pFishPermits] >= FISH_PERMIT_MAX) return SendClientMessage(playerid, COLOR_ERROR, "You already hold the maximum fishing permits (50).");
 			if(!Bank_TakeCash(playerid, price)) return SendClientMessage(playerid, COLOR_ERROR, "You cannot afford that permit bundle.");
 			PlayerInfo[playerid][pFishPermits] += add;
@@ -469,7 +469,7 @@ FUNCTION Fishing_OnDialogResponse(playerid, dialogid, response, listitem)
 		{
 			new add = (listitem == 6) ? 5 : 10;
 			price = (listitem == 6) ? HUNT_PERMIT_BUNDLE_5 : HUNT_PERMIT_BUNDLE_10;
-			price = StockMarket_BuyPrice(price, E_STOCK_SUPA_SAVE);	// M7 — 24/7 items × SUPA_SAVE (§10.2)
+			price = StockMarket_BuyPrice(price, E_STOCK_SUPA_SAVE);	// M7 - 24/7 items × SUPA_SAVE (§10.2)
 			if(PlayerInfo[playerid][pHuntPermits] >= HUNT_PERMIT_MAX) return SendClientMessage(playerid, COLOR_ERROR, "You already hold the maximum hunting permits (20).");
 			if(!Bank_TakeCash(playerid, price)) return SendClientMessage(playerid, COLOR_ERROR, "You cannot afford that permit bundle.");
 			PlayerInfo[playerid][pHuntPermits] += add;
@@ -478,7 +478,7 @@ FUNCTION Fishing_OnDialogResponse(playerid, dialogid, response, listitem)
 		}
 		case 8:	// Drug Seeds x5
 		{
-			price = StockMarket_BuyPrice(DRUG_SEED_BUNDLE_5, E_STOCK_SUPA_SAVE);	// M7 — 24/7 items × SUPA_SAVE (§10.2)
+			price = StockMarket_BuyPrice(DRUG_SEED_BUNDLE_5, E_STOCK_SUPA_SAVE);	// M7 - 24/7 items × SUPA_SAVE (§10.2)
 			if(PlayerInfo[playerid][pDrugSeeds] >= DRUG_SEED_MAX) return SendClientMessage(playerid, COLOR_ERROR, "You already hold the maximum drug seeds (10).");
 			if(!Bank_TakeCash(playerid, price)) return SendClientMessage(playerid, COLOR_ERROR, "You cannot afford that.");
 			PlayerInfo[playerid][pDrugSeeds] += 5;
@@ -487,7 +487,7 @@ FUNCTION Fishing_OnDialogResponse(playerid, dialogid, response, listitem)
 		}
 		default: return 1;
 	}
-	// M7 — buying at the shop feeds the SUPA_SAVE (24/7) pool (demand pushes the
+	// M7 - buying at the shop feeds the SUPA_SAVE (24/7) pool (demand pushes the
 	// price up, §10.2). `price` here is the actual (market-scaled) amount charged.
 	StockMarket_UpdateEarnings(E_STOCK_SUPA_SAVE, price, STOCK_FACTOR_SHOP);
 	Jail_SavePlayer(playerid);	// persist the purchase
@@ -512,7 +512,7 @@ FUNCTION Fishing_OnBonusHour()
 	return 1;
 }
 
-// Abort an in-progress catch on death (§9.2 — a fresh spawn has no line cast).
+// Abort an in-progress catch on death (§9.2 - a fresh spawn has no line cast).
 FUNCTION Fishing_OnPlayerDeath(playerid)
 {
 	if(PlayerInfo[playerid][pFishTimer] != -1) { KillTimer(PlayerInfo[playerid][pFishTimer]); PlayerInfo[playerid][pFishTimer] = -1; }

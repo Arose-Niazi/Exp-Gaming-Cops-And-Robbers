@@ -2,13 +2,13 @@
 
 	Skills system for Cops And Robbers script
 	Scripted by Arose Niazi.
-	Milestone 6 (stage 1) — design §9.8 (skills & fighting styles) + jobs-progression
-	§1.2/§1.3 (the CB skin->skill model — any civilian skin can pick any civilian
+	Milestone 6 (stage 1) - design §9.8 (skills & fighting styles) + jobs-progression
+	§1.2/§1.3 (the CB skin->skill model - any civilian skin can pick any civilian
 	skill at City Hall) + crazybobs-site-full §Skills.
 
 	The CIVILIAN SKILL is a separate field from the skin (pSkill / LSplayers.Skill).
 	Chosen at CITY HALL via /skill (/skills). The skill's EFFECT is already coded in
-	the M3-M5 crime systems — this module is the data change that lets a player set
+	the M3-M5 crime systems - this module is the data change that lets a player set
 	pSkill so those effects light up:
 
 	  - SKILL_PICKPOCKET / SKILL_CONARTIST  -> /rob cash cap + success  (cmds/crime.inc Crime_RobCapFor/Crime_RobSuccessFor)
@@ -16,10 +16,10 @@
 	  - SKILL_DRUGDEALER                    -> drug carry cap (2500g, 5000g w/ bag)  (systems/drugs.inc DrugCarryCap)
 	  - SKILL_KIDNAPPER                     -> ransom scaling + grab bonus  (systems/kidnap.inc Kidnap_RansomMaxFor)
 	  - SKILL_CARJACKER                     -> defeats vehicle locks  (systems/vehicle_own.inc Veh_RefreshLockForPlayer/Veh_OnPlayerStateChange)
-	  - SKILL_HITMAN/ARMSDEALER/STREETVENDOR/PROSTITUTE/FOODDELIVERY — choosable now;
+	  - SKILL_HITMAN/ARMSDEALER/STREETVENDOR/PROSTITUTE/FOODDELIVERY - choosable now;
 	    their vendor/contract systems land in M7 (choice persists so it is ready).
 
-	Weapon skills (§9.8 resolved decision — CLASSIC FEEL): every weapon skill is set
+	Weapon skills (§9.8 resolved decision - CLASSIC FEEL): every weapon skill is set
 	to WEAPON_SKILL_LEVEL (999, Hitman tier) on spawn (Skills_ApplyOnSpawn), so gunplay
 	feels like classic CB regardless of the chosen civilian skill (jobs §2.1 [DESIGN]).
 
@@ -43,11 +43,11 @@
 */
 
 //==============================================================================
-//	Skill table (the choosable CIVILIAN skills — City Hall menu, jobs §1.2)
+//	Skill table (the choosable CIVILIAN skills - City Hall menu, jobs §1.2)
 //==============================================================================
 
 // A choosable civilian skill: its pSkill id + display name + one-line perk blurb.
-// Cop-family skills are NOT here — they follow the team/agency (jobs §1.3). Order
+// Cop-family skills are NOT here - they follow the team/agency (jobs §1.3). Order
 // matches the /skill dialog rows; the id is the value written to pSkill.
 enum e_SkillDef
 {
@@ -110,7 +110,7 @@ static Skills_AtCityHall(playerid)
 		if(IsPlayerInRangeOfPoint(playerid, SKILL_ACTOR_RANGE, ActorInfo[i][ActorSpawnX], ActorInfo[i][ActorSpawnY], ActorInfo[i][ActorSpawnZ]))
 			return 1;
 	}
-	return anyCityHall ? 0 : -1;	// -1 = no City Hall actor placed → allow anywhere (note)
+	return anyCityHall ? 0 : -1;	// -1 = no City Hall actor placed -> allow anywhere (note)
 }
 
 // Commit a skill choice: set pSkill, persist (via the crime/drug UPDATE which owns
@@ -138,7 +138,7 @@ static Skills_Set(playerid, skill, bool:charged)
 }
 
 //==============================================================================
-//	Weapon skills — classic feel (§9.8 resolved / §2.1)
+//	Weapon skills - classic feel (§9.8 resolved / §2.1)
 //==============================================================================
 
 // Max out every weapon skill on spawn so gunplay feels classic (Hitman tier),
@@ -153,16 +153,16 @@ FUNCTION Skills_ApplyOnSpawn(playerid)
 }
 
 //==============================================================================
-//	Command — /skill (/skills /skl) — choose / change the civilian skill (§9.8)
+//	Command - /skill (/skills /skl) - choose / change the civilian skill (§9.8)
 //==============================================================================
 
 CMD:skill(playerid, params[])
 {
 	#pragma unused params
 	if(!PlayerInfo[playerid][pLoggedIn]) return SendClientMessage(playerid, COLOR_ERROR, "You must be logged in.");
-	// Skills are the CIVILIAN specialisation family (jobs §1.3) — cops follow their
+	// Skills are the CIVILIAN specialisation family (jobs §1.3) - cops follow their
 	// agency and cannot pick a civilian crime skill.
-	if(IsCop(playerid)) return SendClientMessage(playerid, COLOR_ERROR, "Law enforcement skills follow your agency — civilian skills are not selectable.");
+	if(IsCop(playerid)) return SendClientMessage(playerid, COLOR_ERROR, "Law enforcement skills follow your agency - civilian skills are not selectable.");
 	if(!IsCivilian(playerid)) return SendClientMessage(playerid, COLOR_ERROR, "Only civilians can choose a skill.");
 	if(IsPlayerInAnyVehicle(playerid)) return SendClientMessage(playerid, COLOR_ERROR, "Get out of your vehicle to talk to the City Manager.");
 
@@ -171,13 +171,13 @@ CMD:skill(playerid, params[])
 	new atHall = Skills_AtCityHall(playerid);
 	if(atHall == 0)
 		return SendClientMessage(playerid, COLOR_ERROR, "You must be at City Hall (talk to the City Manager) to change your skill.");
-	// atHall == 1 (at a hall) or == -1 (no hall placed → allowed anywhere, noted) both proceed.
+	// atHall == 1 (at a hall) or == -1 (no hall placed -> allowed anywhere, noted) both proceed.
 
-	// Re-pick cooldown (§9.8) — only bites once a skill is already chosen.
+	// Re-pick cooldown (§9.8) - only bites once a skill is already chosen.
 	if(PlayerInfo[playerid][pSkill] != SKILL_NONE && gettime() < PlayerInfo[playerid][pSkillChangeCd])
 	{
 		new err[128];
-		format(err, sizeof(err), "You changed your skill recently — wait %d seconds before changing it again.", PlayerInfo[playerid][pSkillChangeCd] - gettime());
+		format(err, sizeof(err), "You changed your skill recently - wait %d seconds before changing it again.", PlayerInfo[playerid][pSkillChangeCd] - gettime());
 		return SendClientMessage(playerid, COLOR_ERROR, err);
 	}
 
@@ -225,7 +225,7 @@ FUNCTION Skills_OnDialogResponse(playerid, dialogid, response, listitem)
 	if(PlayerInfo[playerid][pMoney] < SKILL_CHANGE_COST)
 	{
 		new err[128];
-		format(err, sizeof(err), "Changing your skill costs "COL_GREEN"$%d"COL_WHITE" cash — you cannot afford it.", SKILL_CHANGE_COST);
+		format(err, sizeof(err), "Changing your skill costs "COL_GREEN"$%d"COL_WHITE" cash - you cannot afford it.", SKILL_CHANGE_COST);
 		return SendClientMessage(playerid, COLOR_ERROR, err);
 	}
 	if(!Bank_TakeCash(playerid, SKILL_CHANGE_COST)) return SendClientMessage(playerid, COLOR_ERROR, "Payment failed.");

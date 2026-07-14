@@ -2,12 +2,12 @@
 
 	DM / sniper / duel arenas for Cops And Robbers script
 	Scripted by Arose Niazi.
-	Milestone 6 (stage 3) — design §9.6 (DM systems: DMS/sniper/duel + anti-parachute)
+	Milestone 6 (stage 3) - design §9.6 (DM systems: DMS/sniper/duel + anti-parachute)
 	+ §2.5 (safe/no-crime zones, §9.10) + docs/research/jobs-progression.md §6
 	(events & arenas) + docs/research/crazybobs-site-full.md §DM Stadium.
 
 	All three arenas share the DM-zone contract: while inside, the player is flagged
-	pInDMZone (wanted gain suppressed, cops cannot arrest — reuses the M2 teleport
+	pInDMZone (wanted gain suppressed, cops cannot arrest - reuses the M2 teleport
 	DM-zone infra), the parachute (weapon 46) is stripped, PvP is open, and dying
 	respawns them INSIDE the arena (CnR.pwn OnPlayerDeath routes here) until /leave.
 	Entering saves the player's prior position / interior / VW / health / armour /
@@ -19,7 +19,7 @@
 	  death costs $1,000; no life / life-insurance loss. /leave (alias /exit) restores.
 	- Sniper arena `/sniper`: sniper-rifle-only kit, same entry economics + DM-zone.
 	- Duel `/duel <id> [stake]`: challenge a player; they /accept or /deny. Both ante
-	  the stake via Bank_TakeCash (escrow — NO mint), teleport to a private duel VW,
+	  the stake via Bank_TakeCash (escrow - NO mint), teleport to a private duel VW,
 	  3-2-1 countdown, first-blood decides it; the WINNER is credited the pot (sum of
 	  both antes) via Bank_GiveCash. Quitting / leaving / dying mid-duel = forfeit,
 	  the pot goes to the opponent. /duel cancel withdraws a pending challenge.
@@ -30,10 +30,10 @@
 	Public API (called by CnR.pwn):
 		Arena_OnPlayerDeath(playerid, killerid)  : arena respawn + death fee + duel result
 		Arena_OnDisconnect(playerid)             : forfeit a live duel, drop a pending offer
-		Arena_OnDialogResponse(...)              : (none — arenas are command-driven)
+		Arena_OnDialogResponse(...)              : (none - arenas are command-driven)
 		Arena_IsInArena(playerid)                : bool gate other systems can read
 		Arena_UpdateSafeZone(playerid)           : refresh pInSafeZone from the safe-zone table
-		Arena_IsSafeZone(Float:x,Float:y,Float:z): bool — is a point inside a no-crime zone
+		Arena_IsSafeZone(Float:x,Float:y,Float:z): bool - is a point inside a no-crime zone
 
 	Functions Being Called:
 		bank:     Bank_GiveCash, Bank_TakeCash, Bank_GetCash
@@ -45,11 +45,11 @@
 */
 
 //==============================================================================
-//	Fixed weapon kits (design §9.6 / jobs §6.1) — { weaponid, ammo } pairs
+//	Fixed weapon kits (design §9.6 / jobs §6.1) - { weaponid, ammo } pairs
 //==============================================================================
 
 // DM Stadium free-for-all kit (Score Guide "shredding people with your sawnoffs"
-// → sawn-off + a spread). Raw weapon ids (matches cop /refill style). Ammo is the
+// -> sawn-off + a spread). Raw weapon ids (matches cop /refill style). Ammo is the
 // per-life ARENA_LIFE_AMMO (2500) count.
 static const g_DMSKit[][2] =
 {
@@ -60,7 +60,7 @@ static const g_DMSKit[][2] =
 	{ 16, ARENA_LIFE_AMMO }		// grenades
 };
 
-// Sniper-only kit (§6.5) — sniper rifle + a sidearm so a missed shot is not a
+// Sniper-only kit (§6.5) - sniper rifle + a sidearm so a missed shot is not a
 // total dead-end.
 static const g_SniperKit[][2] =
 {
@@ -68,7 +68,7 @@ static const g_SniperKit[][2] =
 	{ 24, ARENA_LIFE_AMMO }		// desert eagle sidearm
 };
 
-// Standard duel kit (§6.4) — a fair balanced spread both sides get.
+// Standard duel kit (§6.4) - a fair balanced spread both sides get.
 static const g_DuelKit[][2] =
 {
 	{ 24, ARENA_LIFE_AMMO },	// desert eagle
@@ -77,7 +77,7 @@ static const g_DuelKit[][2] =
 };
 
 //==============================================================================
-//	Safe / no-crime zones (design §2.5 / §9.10) — hospital & RPC bar locations
+//	Safe / no-crime zones (design §2.5 / §9.10) - hospital & RPC bar locations
 //==============================================================================
 // Extends the police-property no-crime rule to a general safe-zone set. A point
 // within SAFE_ZONE_RADIUS of one of these is a no-crime zone (wanted suppressed).
@@ -86,7 +86,7 @@ static const Float:g_SafeZones[][3] =
 {
 	{ 1172.2,  -1323.6, 15.4 },	// LS All Saints General Hospital (§9.10 hospital)
 	{ 2034.0,  -1403.0, 17.2 },	// LS East LS hospital
-	{ 246.0,   -40.0,   1.6 }	// RPC exterior (Rodeo, LS — no-crime, §RPC)
+	{ 246.0,   -40.0,   1.6 }	// RPC exterior (Rodeo, LS - no-crime, §RPC)
 };
 
 //==============================================================================
@@ -114,7 +114,7 @@ FUNCTION Arena_IsSafeZone(Float:x, Float:y, Float:z)
 	return 0;
 }
 
-// Refresh pInSafeZone from the player's current position — called on zone
+// Refresh pInSafeZone from the player's current position - called on zone
 // enter/leave (server/zones.inc). Cheap: a handful of distance checks.
 FUNCTION Arena_UpdateSafeZone(playerid)
 {
@@ -188,7 +188,7 @@ static Arena_ApplySnapshot(playerid)
 // Exit an arena and restore the pre-arena state. Clears the arena/DM-zone flags.
 // If the player is ALIVE (a clean /leave or duel-win) we restore in place. If they
 // are DEAD (died out / duel loss), we set the spawn point to the saved position and
-// let Arena_OnPlayerSpawn re-apply the snapshot on the (deferred) respawn — a dead
+// let Arena_OnPlayerSpawn re-apply the snapshot on the (deferred) respawn - a dead
 // player cannot be SetPlayerPos'd reliably.
 static Arena_ExitRestore(playerid)
 {
@@ -221,7 +221,7 @@ static Arena_SpawnPoint(kind, &Float:sx, &Float:sy, &Float:sz, &Float:sa, &vw)
 }
 
 // Give the fixed kit for `kind` at full per-life ammo, full HP/armour, strip the
-// parachute (anti-parachute) — assumes the player is already positioned in the VW.
+// parachute (anti-parachute) - assumes the player is already positioned in the VW.
 static Arena_GiveKit(playerid, kind)
 {
 	ResetPlayerWeapons(playerid);
@@ -260,7 +260,7 @@ static Arena_PlaceNow(playerid, kind)
 }
 
 //==============================================================================
-//	DM Stadium (DMS) — /dms (alias /enter) + /leave (alias /exit) (§6.1)
+//	DM Stadium (DMS) - /dms (alias /enter) + /leave (alias /exit) (§6.1)
 //==============================================================================
 
 CMD:dms(playerid, params[])
@@ -271,7 +271,7 @@ CMD:dms(playerid, params[])
 	if(Bank_GetCash(playerid) < ARENA_ENTRY_FEE)
 	{
 		new err[96];
-		format(err, sizeof(err), "The DM Stadium entry fee is "COL_GREEN"$%d"COL_WHITE" — you cannot afford it.", ARENA_ENTRY_FEE);
+		format(err, sizeof(err), "The DM Stadium entry fee is "COL_GREEN"$%d"COL_WHITE" - you cannot afford it.", ARENA_ENTRY_FEE);
 		return SendClientMessage(playerid, COLOR_ERROR, err);
 	}
 	Bank_TakeCash(playerid, ARENA_ENTRY_FEE);
@@ -283,7 +283,7 @@ CMD:dms(playerid, params[])
 	Arena_PlaceNow(playerid, ARENA_DMS);
 
 	new string[160];
-	format(string, sizeof(string), ""COL_GREEN"* DM STADIUM: "COL_WHITE"free-for-all — %d ammo/weapon per life. "COL_RED"Each death costs $%d."COL_WHITE" Type "COL_GREEN"/leave"COL_WHITE" to exit (your lives are safe).", ARENA_LIFE_AMMO, ARENA_DEATH_COST);
+	format(string, sizeof(string), ""COL_GREEN"* DM STADIUM: "COL_WHITE"free-for-all - %d ammo/weapon per life. "COL_RED"Each death costs $%d."COL_WHITE" Type "COL_GREEN"/leave"COL_WHITE" to exit (your lives are safe).", ARENA_LIFE_AMMO, ARENA_DEATH_COST);
 	SendClientMessage(playerid, COLOR_SERVER_INFO, string);
 	return 1;
 }
@@ -296,7 +296,7 @@ CMD:sniper(playerid, params[])
 	if(Bank_GetCash(playerid) < ARENA_ENTRY_FEE)
 	{
 		new err[96];
-		format(err, sizeof(err), "The sniper arena entry fee is "COL_GREEN"$%d"COL_WHITE" — you cannot afford it.", ARENA_ENTRY_FEE);
+		format(err, sizeof(err), "The sniper arena entry fee is "COL_GREEN"$%d"COL_WHITE" - you cannot afford it.", ARENA_ENTRY_FEE);
 		return SendClientMessage(playerid, COLOR_ERROR, err);
 	}
 	Bank_TakeCash(playerid, ARENA_ENTRY_FEE);
@@ -307,7 +307,7 @@ CMD:sniper(playerid, params[])
 	ClearPlayerWanted(playerid, "");
 	Arena_PlaceNow(playerid, ARENA_SNIPER);
 
-	SendClientMessage(playerid, COLOR_SERVER_INFO, ""COL_GREEN"* SNIPER ARENA: "COL_WHITE"sniper-only. Take your shots — type "COL_GREEN"/leave"COL_WHITE" to exit.");
+	SendClientMessage(playerid, COLOR_SERVER_INFO, ""COL_GREEN"* SNIPER ARENA: "COL_WHITE"sniper-only. Take your shots - type "COL_GREEN"/leave"COL_WHITE" to exit.");
 	return 1;
 }
 
@@ -318,7 +318,7 @@ CMD:leave(playerid, params[])
 	if(!PlayerInfo[playerid][pLoggedIn]) return SendClientMessage(playerid, COLOR_ERROR, "You must be logged in.");
 	if(!Arena_IsInArena(playerid)) return SendClientMessage(playerid, COLOR_ERROR, "You are not inside an arena.");
 
-	// Leaving a live duel is a forfeit — the pot goes to the opponent.
+	// Leaving a live duel is a forfeit - the pot goes to the opponent.
 	if(PlayerInfo[playerid][pArena] == ARENA_DUEL && PlayerInfo[playerid][pInDuel])
 	{
 		Duel_Finish(PlayerInfo[playerid][pDuelOpponent], playerid, true);	// opponent wins by forfeit
@@ -332,7 +332,7 @@ CMD:leave(playerid, params[])
 }
 
 //==============================================================================
-//	Duel — /duel <id> [stake] | /duel cancel + /accept + /deny (§6.4)
+//	Duel - /duel <id> [stake] | /duel cancel + /accept + /deny (§6.4)
 //==============================================================================
 
 // Escrow both antes (already validated affordable) into a private duel VW and
@@ -341,7 +341,7 @@ static Duel_Begin(a, b, stake, owner)
 {
 	new vw = ARENA_VW_DUEL_BASE + owner;
 
-	// Both ante via Bank_TakeCash — NO mint; the pot is exactly the sum of antes.
+	// Both ante via Bank_TakeCash - NO mint; the pot is exactly the sum of antes.
 	Bank_TakeCash(a, stake);
 	Bank_TakeCash(b, stake);
 
@@ -349,7 +349,7 @@ static Duel_Begin(a, b, stake, owner)
 	Duel_PlaceSide(b, a, stake, owner, vw, 1);
 
 	new string[144];
-	format(string, sizeof(string), ""COL_GREEN"* DUEL: "COL_WHITE"%s"COL_GREEN" vs "COL_WHITE"%s"COL_GREEN" for "COL_WHITE"$%d"COL_GREEN" — first blood wins. Get ready...", PlayerInfo[a][pUserName], PlayerInfo[b][pUserName], stake * 2);
+	format(string, sizeof(string), ""COL_GREEN"* DUEL: "COL_WHITE"%s"COL_GREEN" vs "COL_WHITE"%s"COL_GREEN" for "COL_WHITE"$%d"COL_GREEN" - first blood wins. Get ready...", PlayerInfo[a][pUserName], PlayerInfo[b][pUserName], stake * 2);
 	SendClientMessage(a, COLOR_SERVER_INFO, string);
 	SendClientMessage(b, COLOR_SERVER_INFO, string);
 
@@ -389,7 +389,7 @@ static Duel_PlaceSide(self, opp, stake, owner, vw, side)
 	return 1;
 }
 
-// Countdown fired — go live (unfreeze both if still in the duel).
+// Countdown fired - go live (unfreeze both if still in the duel).
 FUNCTION Duel_GoLive(a, b)
 {
 	if(IsPlayerConnected(a) && PlayerInfo[a][pInDuel]) { TogglePlayerControllable(a, true); SendClientMessage(a, COLOR_SERVER_INFO, ""COL_RED"* FIGHT!"); }
@@ -402,7 +402,7 @@ FUNCTION Duel_GoLive(a, b)
 // announce text (leaver/disconnect vs a clean kill).
 FUNCTION Duel_Finish(winner, loser, forfeit)
 {
-	// Pot = both antes (no house cut, no mint — money simply moves loser->winner).
+	// Pot = both antes (no house cut, no mint - money simply moves loser->winner).
 	new stake = 0;
 	if(IsPlayerConnected(winner) && PlayerInfo[winner][pInDuel]) stake = PlayerInfo[winner][pDuelStake];
 	else if(IsPlayerConnected(loser) && PlayerInfo[loser][pInDuel]) stake = PlayerInfo[loser][pDuelStake];
@@ -433,7 +433,7 @@ FUNCTION Duel_Finish(winner, loser, forfeit)
 	}
 
 	new string[176];
-	if(forfeit) format(string, sizeof(string), ""COL_GREEN"* DUEL: "COL_WHITE"%s"COL_GREEN" won the $%d pot — "COL_WHITE"%s"COL_GREEN" forfeited.", wname, pot, lname);
+	if(forfeit) format(string, sizeof(string), ""COL_GREEN"* DUEL: "COL_WHITE"%s"COL_GREEN" won the $%d pot - "COL_WHITE"%s"COL_GREEN" forfeited.", wname, pot, lname);
 	else        format(string, sizeof(string), ""COL_GREEN"* DUEL: "COL_WHITE"%s"COL_GREEN" defeated "COL_WHITE"%s"COL_GREEN" and won the "COL_WHITE"$%d"COL_GREEN" pot!", wname, lname, pot);
 	if(IsPlayerConnected(winner)) SendClientMessage(winner, COLOR_SERVER_INFO, string);
 	if(IsPlayerConnected(loser))  SendClientMessage(loser, COLOR_SERVER_INFO, string);
@@ -454,7 +454,7 @@ CMD:duel(playerid, params[])
 {
 	if(!PlayerInfo[playerid][pLoggedIn]) return SendClientMessage(playerid, COLOR_ERROR, "You must be logged in.");
 
-	// /duel cancel — withdraw a pending challenge.
+	// /duel cancel - withdraw a pending challenge.
 	if(!strcmp(params, "cancel", true))
 	{
 		new t = PlayerInfo[playerid][pDuelOfferTo];
@@ -511,7 +511,7 @@ CMD:duel(playerid, params[])
 FUNCTION Duel_TryAccept(playerid)
 {
 	new from = PlayerInfo[playerid][pDuelOfferFrom];
-	if(from == -1) return 0;	// no pending duel — let the caller handle /accept
+	if(from == -1) return 0;	// no pending duel - let the caller handle /accept
 	if(gettime() >= PlayerInfo[playerid][pDuelOfferExpiry])
 	{
 		PlayerInfo[playerid][pDuelOfferFrom] = -1;
@@ -557,16 +557,16 @@ CMD:deny(playerid, params[])
 }
 
 //==============================================================================
-//	Hooks — death (arena respawn + fee + duel result), disconnect, tick
+//	Hooks - death (arena respawn + fee + duel result), disconnect, tick
 //==============================================================================
 
 // OnPlayerDeath while inside an arena (CnR.pwn routes here BEFORE the normal city
-// respawn, and returns early if this handled the death — returns 1 if it did).
+// respawn, and returns early if this handled the death - returns 1 if it did).
 FUNCTION Arena_OnPlayerDeath(playerid, killerid)
 {
 	if(!Arena_IsInArena(playerid)) return 0;
 
-	// Duel: first blood ends it — the OTHER player wins (killer if valid, else the
+	// Duel: first blood ends it - the OTHER player wins (killer if valid, else the
 	// stored opponent so a self-inflicted death still resolves).
 	if(PlayerInfo[playerid][pArena] == ARENA_DUEL && PlayerInfo[playerid][pInDuel])
 	{
@@ -576,7 +576,7 @@ FUNCTION Arena_OnPlayerDeath(playerid, killerid)
 		return 1;
 	}
 
-	// DMS / sniper: $1,000 death fee (best-effort — skip if broke). No life /
+	// DMS / sniper: $1,000 death fee (best-effort - skip if broke). No life /
 	// life-insurance loss (legal DM, §6.1). The respawn stays INSIDE the arena:
 	// point the spawn at the arena spot; Arena_OnPlayerSpawn re-kits on the respawn.
 	if(Bank_GetCash(playerid) >= ARENA_DEATH_COST) Bank_TakeCash(playerid, ARENA_DEATH_COST);
@@ -584,7 +584,7 @@ FUNCTION Arena_OnPlayerDeath(playerid, killerid)
 	Arena_SpawnPoint(PlayerInfo[playerid][pArena], sx, sy, sz, sa, vw);
 	SetSpawnInfo(playerid, NO_TEAM, GetPlayerSkin(playerid), sx, sy, sz, sa, 0, 0, 0, 0, 0, 0);
 	new string[96];
-	format(string, sizeof(string), ""COL_RED"* You died in the arena "COL_WHITE"(-$%d)"COL_RED". Respawning inside — /leave to exit.", ARENA_DEATH_COST);
+	format(string, sizeof(string), ""COL_RED"* You died in the arena "COL_WHITE"(-$%d)"COL_RED". Respawning inside - /leave to exit.", ARENA_DEATH_COST);
 	SendClientMessage(playerid, COLOR_SERVER_INFO, string);
 	return 1;
 }
@@ -597,7 +597,7 @@ FUNCTION Arena_OnPlayerSpawn(playerid)
 {
 	if(IsPlayerNPC(playerid)) return 0;
 
-	// Still inside a DMS/sniper arena — respawn inside with a fresh life.
+	// Still inside a DMS/sniper arena - respawn inside with a fresh life.
 	if(PlayerInfo[playerid][pArena] == ARENA_DMS || PlayerInfo[playerid][pArena] == ARENA_SNIPER)
 	{
 		new Float:sx, Float:sy, Float:sz, Float:sa, vw;
@@ -612,7 +612,7 @@ FUNCTION Arena_OnPlayerSpawn(playerid)
 		return 1;
 	}
 
-	// Left the arena while dead (duel loss / died-out) — apply the deferred restore.
+	// Left the arena while dead (duel loss / died-out) - apply the deferred restore.
 	if(PlayerInfo[playerid][pArena] == ARENA_NONE && PlayerInfo[playerid][pArenaSaved])
 	{
 		Arena_ApplySnapshot(playerid);
@@ -626,7 +626,7 @@ FUNCTION Arena_OnPlayerSpawn(playerid)
 // dropped both ways; DMS/sniper state just falls away (session-only).
 FUNCTION Arena_OnDisconnect(playerid)
 {
-	// Live duel — forfeit to the opponent.
+	// Live duel - forfeit to the opponent.
 	if(PlayerInfo[playerid][pArena] == ARENA_DUEL && PlayerInfo[playerid][pInDuel])
 	{
 		new opp = PlayerInfo[playerid][pDuelOpponent];
@@ -650,7 +650,7 @@ FUNCTION Arena_OnDisconnect(playerid)
 	return 1;
 }
 
-// GameModeClock 1s hook — expire stale pending duel offers (no new timer).
+// GameModeClock 1s hook - expire stale pending duel offers (no new timer).
 FUNCTION Arena_OnGameModeClockTick()
 {
 	for(new i = 0; i < MAX_PLAYERS; i++)
@@ -658,7 +658,7 @@ FUNCTION Arena_OnGameModeClockTick()
 		if(!IsPlayerConnected(i) || IsPlayerNPC(i)) continue;
 		if(PlayerInfo[i][pDuelOfferTo] == -1) continue;
 		if(gettime() < PlayerInfo[i][pDuelOfferExpiry]) continue;
-		// Offer lapsed — clear both sides.
+		// Offer lapsed - clear both sides.
 		new t = PlayerInfo[i][pDuelOfferTo];
 		if(IsPlayerConnected(t) && PlayerInfo[t][pDuelOfferFrom] == i)
 		{

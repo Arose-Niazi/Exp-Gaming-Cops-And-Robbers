@@ -2,7 +2,7 @@
 
 	Money bag (hidden "lost Mafia money") for Cops And Robbers script
 	Scripted by Arose Niazi.
-	Milestone 4 (stage 2) — design §7 (/moneybag) + economy.md §5 (money bag =
+	Milestone 4 (stage 2) - design §7 (/moneybag) + economy.md §5 (money bag =
 	hidden lost Mafia money the first finder keeps).
 
 	One hidden money bag exists at a time. It sits at a random spawn point; the
@@ -11,8 +11,8 @@
 	the server is told, and the bag relocates. If nobody finds it for
 	MONEYBAG_TIMEOUT_SECS the bag relocates on its own (no reward).
 
-	/moneybag: not carrying (you never "carry" it in this model) → a COARSE zone
-	hint — warmer/colder by distance — so players hunt it down. The pickup itself
+	/moneybag: not carrying (you never "carry" it in this model) -> a COARSE zone
+	hint - warmer/colder by distance - so players hunt it down. The pickup itself
 	is the grab; /moneybag is the compass. /addmoneybag (scripter) forces a bag
 	at a chosen/random location with a set/random reward for testing/events.
 
@@ -25,9 +25,9 @@
 	Public API:
 		Moneybag_Spawn(Float:x, Float:y, Float:z, reward)  : place a bag (reward<=0 => random)
 		Moneybag_SpawnRandom()                             : place a bag at a random spot, random reward
-		Moneybag_Exists()                                  : bool — is a bag active
+		Moneybag_Exists()                                  : bool - is a bag active
 		Moneybag_OnPickup(playerid, pickupid)              : hook from OnPlayerPickUpDynamicPickup
-		Moneybag_OnTick()                                  : hook from GameModeClock() (1s) — timeout
+		Moneybag_OnTick()                                  : hook from GameModeClock() (1s) - timeout
 		Moneybag_Cleanup()                                 : destroy the pickup (OnGameModeExit)
 
 	Commands:
@@ -127,7 +127,7 @@ static Moneybag_Claim(playerid)
 }
 
 //==============================================================================
-//	Pickup grab — hooked from OnPlayerPickUpDynamicPickup (design §7)
+//	Pickup grab - hooked from OnPlayerPickUpDynamicPickup (design §7)
 //==============================================================================
 
 FUNCTION Moneybag_OnPickup(playerid, pickupid)
@@ -139,28 +139,28 @@ FUNCTION Moneybag_OnPickup(playerid, pickupid)
 }
 
 //==============================================================================
-//	Timeout tick — hooked from GameModeClock() (1s, no new timer, design §7)
+//	Timeout tick - hooked from GameModeClock() (1s, no new timer, design §7)
 //==============================================================================
 
 FUNCTION Moneybag_OnTick()
 {
 	if(gMoneybagPickup == -1) return 0;
 	if((gettime() - gMoneybagSpawnTime) < MONEYBAG_TIMEOUT_SECS) return 0;
-	// Unclaimed too long — quietly relocate (no reward).
+	// Unclaimed too long - quietly relocate (no reward).
 	Moneybag_SpawnRandom();
 	SendClientMessageToAll(COLOR_SERVER_INFO, ""COL_YELLOW"[MONEY BAG] "COL_WHITE"The hidden money bag moved to a new location. Use "COL_GREEN"/moneybag"COL_WHITE" to hunt it.");
 	return 1;
 }
 
 //==============================================================================
-//	Cleanup — OnGameModeExit
+//	Cleanup - OnGameModeExit
 //==============================================================================
 
 FUNCTION Moneybag_Cleanup()
 	return Moneybag_Clear();
 
 //==============================================================================
-//	Command — /moneybag (/mb) : coarse zone hint (warmer/colder) (design §7)
+//	Command - /moneybag (/mb) : coarse zone hint (warmer/colder) (design §7)
 //==============================================================================
 
 CMD:moneybag(playerid, params[])
@@ -173,8 +173,8 @@ CMD:moneybag(playerid, params[])
 	// Distance to the bag (same coarse hint whether on foot or in a vehicle).
 	new Float:d = GetPlayerDistanceFromPoint(playerid, gMoneybagX, gMoneybagY, gMoneybagZ);
 
-	// Standing on it → claim it (covers players who walk over without the pickup
-	// streaming in, e.g. different interior/VW edge — keep it forgiving).
+	// Standing on it -> claim it (covers players who walk over without the pickup
+	// streaming in, e.g. different interior/VW edge - keep it forgiving).
 	if(d <= MONEYBAG_PICKUP_RANGE)
 	{
 		Moneybag_Claim(playerid);
@@ -183,20 +183,20 @@ CMD:moneybag(playerid, params[])
 
 	new string[144];
 	if(d <= MONEYBAG_HINT_WARM)
-		format(string, sizeof(string), ""COL_GREEN"* You are VERY WARM "COL_WHITE"— the money bag is almost under your feet. Keep looking!");
+		format(string, sizeof(string), ""COL_GREEN"* You are VERY WARM "COL_WHITE"- the money bag is almost under your feet. Keep looking!");
 	else if(d <= MONEYBAG_HINT_HOT)
-		format(string, sizeof(string), ""COL_GREEN"* You are WARM "COL_WHITE"— the money bag is close by.");
+		format(string, sizeof(string), ""COL_GREEN"* You are WARM "COL_WHITE"- the money bag is close by.");
 	else if(d <= MONEYBAG_HINT_MILD)
-		format(string, sizeof(string), ""COL_YELLOW"* You are COLD "COL_WHITE"— the money bag is somewhere in this part of the city.");
+		format(string, sizeof(string), ""COL_YELLOW"* You are COLD "COL_WHITE"- the money bag is somewhere in this part of the city.");
 	else
-		format(string, sizeof(string), ""COL_RED"* You are FREEZING "COL_WHITE"— the money bag is far from here. Head across the city.");
+		format(string, sizeof(string), ""COL_RED"* You are FREEZING "COL_WHITE"- the money bag is far from here. Head across the city.");
 	SendClientMessage(playerid, COLOR_SERVER_INFO, string);
 	return 1;
 }
 alias:moneybag("mb")
 
 //==============================================================================
-//	Command — /addmoneybag (scripter) : spawn a bag (chosen/random) (design §8.3)
+//	Command - /addmoneybag (scripter) : spawn a bag (chosen/random) (design §8.3)
 //==============================================================================
 
 CMD:addmoneybag(playerid, params[])

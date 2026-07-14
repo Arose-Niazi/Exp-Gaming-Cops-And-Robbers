@@ -2,7 +2,7 @@
 
 	Farming system for Cops And Robbers script
 	Scripted by Arose Niazi.
-	Milestone 6 (stage 2) — design §9.3 (farming / drug growing) + §10.2 (crops/
+	Milestone 6 (stage 2) - design §9.3 (farming / drug growing) + §10.2 (crops/
 	drugs × DRUG) + §11.2 (DrugSeeds/HuntPermits cols) + §11.3 (plants table) +
 	docs/research/economy.md §9 + docs/research/crazybobs-site-full §Drug Planting
 	and Hunting / §CrazyBob's Farm.
@@ -13,8 +13,8 @@
 	   (systems/fishing.inc Bait Shop menu + /buyseeds here), /plant a drug plant at
 	   your location (up to MAX_PLANTS_PER_PLAYER=5, not on top of water/other plants),
 	   plants grow over ~20 minutes of ONLINE time toward 200g (they do NOT grow while
-	   the owner is offline, §9.3), /harvest → Drug_GiveGrams(pDrugs). /fertilize speeds
-	   growth (attracts deer — noted, hunting tie-in). Planting/harvesting is illegal:
+	   the owner is offline, §9.3), /harvest -> Drug_GiveGrams(pDrugs). /fertilize speeds
+	   growth (attracts deer - noted, hunting tie-in). Planting/harvesting is illegal:
 	   if a cop is in sight you gain wanted, and cops (or anyone) can /destroyplant a
 	   found plant. Grown drugs are sold ONLY at Drug Refill Points via /drugsell, which
 	   feeds the DRUG stock (dumping lowers the price, §10.2). Plants persist in the
@@ -22,32 +22,32 @@
 
 	2. LEGAL crop job at CrazyBob's Farm (Flint County, §9.3): /farmjob runs a plow/
 	   harvest route of FARM_JOB_FIELDS field checkpoints for legit low-yield cash
-	   ($500-$2,000/field + a completion bonus) — a safe income floor. This is the FARM
+	   ($500-$2,000/field + a completion bonus) - a safe income floor. This is the FARM
 	   crop SYSTEM; the Tractor MISSION (stage 4) will wrap it. Feeds no illegal stock.
 
-	Hunting (§9.3) is implemented MINIMALLY: /hunt "shoots a deer" in front of you —
+	Hunting (§9.3) is implemented MINIMALLY: /hunt "shoots a deer" in front of you -
 	killing a deer without a hunting permit gives +6 wanted (§9.3 VERIFIED); with a
 	permit it heals + pays a small bonus. Full deer AI / deer-eat-plants / deer traps
-	are DEFERRED (heavy, needs a ped/actor deer spawner) — noted in the report.
+	are DEFERRED (heavy, needs a ped/actor deer spawner) - noted in the report.
 
 	Public API (called by CnR.pwn / loading_data.inc):
 		Farm_Init()                         : load the plants table (async) + build the farm-job route markers
 		Farm_Cleanup()                      : destroy plant checkpoints/objects + farm markers
 		Farm_OnPlayerLogin(playerid)        : tally this player's active plant count on login
-		Farm_OnGameModeClockTick()          : grow online players' plants (1s) — accrue grow-seconds
+		Farm_OnGameModeClockTick()          : grow online players' plants (1s) - accrue grow-seconds
 		Farm_OnDisconnect(playerid)         : end an active farm job (session)
 		Farm_OnPlayerDeath(playerid)        : abort a farm job on death
 		Farm_OnPlayerEnterCP(playerid, cpid): farm-job field checkpoint reached
 
 	Commands:
 		/plant                      plant a drug seed at your location (illegal)
-		/harvest (/harv)            harvest the nearest ripe plant → drugs
+		/harvest (/harv)            harvest the nearest ripe plant -> drugs
 		/fertilize (/fert)          fertilize the nearest plant (faster, attracts deer)
 		/destroyplant              destroy the nearest plant (cops find/destroy crops)
 		/plantgps (/pgps)           list your plants + their growth
 		/drugsell (/ds)             sell grown drugs at a Drug Refill Point
 		/buyseeds                   buy drug seeds at a Drug Refill Point
-		/hunt                       hunt a deer (minimal — permit gate)
+		/hunt                       hunt a deer (minimal - permit gate)
 		/farmjob                    start the legal crop job at CrazyBob's Farm
 
 	Functions Being Called:
@@ -80,7 +80,7 @@ enum e_Plant
 static PlantInfo[MAX_PLANTS][e_Plant];
 static gPlantCount = 0;
 
-// Drug Refill Points (crazybobs-site-full §Drug Refill Points) — where grown drugs
+// Drug Refill Points (crazybobs-site-full §Drug Refill Points) - where grown drugs
 // are sold (/drugsell) and seeds are bought (/buyseeds). LS-area coords reachable now.
 static const Float:g_RefillPoints[][3] =
 {
@@ -92,10 +92,10 @@ static const Float:g_RefillPoints[][3] =
 static STREAMER_TAG_MAP_ICON:g_RefillIcon[sizeof(g_RefillPoints)];
 
 //==============================================================================
-//	Legal crop job — CrazyBob's Farm (Flint County, §9.3)
+//	Legal crop job - CrazyBob's Farm (Flint County, §9.3)
 //==============================================================================
 
-// Candidate field checkpoints around CrazyBob's Farm — the launcher picks a route.
+// Candidate field checkpoints around CrazyBob's Farm - the launcher picks a route.
 static const Float:g_FarmFields[][3] =
 {
 	{ -315.0,  -1420.0, 25.7 },
@@ -109,7 +109,7 @@ static const Float:g_FarmFields[][3] =
 
 static STREAMER_TAG_MAP_ICON:g_FarmIcon;
 
-// Per-player active farm-job state (session only — a legit checkpoint loop).
+// Per-player active farm-job state (session only - a legit checkpoint loop).
 static bool:gFarmJobActive[MAX_PLAYERS];
 static gFarmJobField[MAX_PLAYERS];			// current field index reached (0..FARM_JOB_FIELDS)
 static gFarmJobEarned[MAX_PLAYERS];			// running earnings this run
@@ -140,7 +140,7 @@ FUNCTION Farm_Init()
 		gFarmJobField[i] = gFarmJobEarned[i] = 0;
 		gFarmJobCP[i] = STREAMER_TAG_CP:INVALID_STREAMER_ID;
 	}
-	// Load the plants table (async) → build each plant's checkpoint + object.
+	// Load the plants table (async) -> build each plant's checkpoint + object.
 	mysql_pquery(g_SQL, "SELECT * FROM `plants` ORDER BY ID ASC", "Farm_OnPlantsLoad", "");
 	return 1;
 }
@@ -156,7 +156,7 @@ FUNCTION Farm_Cleanup()
 	return 1;
 }
 
-// Async result handler for Farm_Init — read the plant rows into PlantInfo[] and
+// Async result handler for Farm_Init - read the plant rows into PlantInfo[] and
 // build the streamer objects/checkpoints.
 FUNCTION Farm_OnPlantsLoad()
 {
@@ -228,7 +228,7 @@ static Farm_ComputeGrams(growSecs)
 	return (growSecs * DRUG_PLANT_MAX_GRAMS) / DRUG_PLANT_GROW_SECS;
 }
 
-// Nearest plant to a player within range → index, or -1.
+// Nearest plant to a player within range -> index, or -1.
 static Farm_NearestPlant(playerid, Float:range)
 {
 	new Float:x, Float:y, Float:z, best = -1, Float:bestD = range;
@@ -274,7 +274,7 @@ static Farm_IsCopInSight(playerid)
 }
 
 //==============================================================================
-//	/plant — plant a drug seed (§9.3)
+//	/plant - plant a drug seed (§9.3)
 //==============================================================================
 
 CMD:plant(playerid, params[])
@@ -292,13 +292,13 @@ CMD:plant(playerid, params[])
 		format(err, sizeof(err), "You already have the maximum %d plants. Harvest one first ("COL_GREEN"/harvest"COL_WHITE").", MAX_PLANTS_PER_PLAYER);
 		return SendClientMessage(playerid, COLOR_ERROR, err);
 	}
-	if(gPlantCount >= MAX_PLANTS) return SendClientMessage(playerid, COLOR_ERROR, "The world is saturated with plants right now — try again later.");
+	if(gPlantCount >= MAX_PLANTS) return SendClientMessage(playerid, COLOR_ERROR, "The world is saturated with plants right now - try again later.");
 
 	new Float:x, Float:y, Float:z;
 	GetPlayerPos(playerid, x, y, z);
 	// Not near an existing plant (§9.3 "not near other plants / water / checkpoints").
 	if(Farm_NearestPlant(playerid, DRUG_PLANT_SPACING) != -1)
-		return SendClientMessage(playerid, COLOR_ERROR, "There is already a plant too close — spread your crops out.");
+		return SendClientMessage(playerid, COLOR_ERROR, "There is already a plant too close - spread your crops out.");
 	if(z < 1.0) return SendClientMessage(playerid, COLOR_ERROR, "You cannot plant in the water. Find dry, remote ground.");
 
 	// Consume a seed and INSERT the plant (async), keeping a local optimistic slot.
@@ -318,7 +318,7 @@ CMD:plant(playerid, params[])
 	return 1;
 }
 
-// Async handler for /plant — register the new row locally with its streamer objects.
+// Async handler for /plant - register the new row locally with its streamer objects.
 FUNCTION Farm_OnPlanted(playerid, race_check)
 {
 	new id = cache_insert_id();
@@ -336,7 +336,7 @@ FUNCTION Farm_OnPlanted(playerid, race_check)
 	}
 	else
 	{
-		// Owner left before the INSERT resolved — resolve the owner AID from the row
+		// Owner left before the INSERT resolved - resolve the owner AID from the row
 		// so the plant is still owned correctly; position is re-read on the next load.
 		PlantInfo[idx][plOwnerAID] = 0;
 		PlantInfo[idx][plX] = PlantInfo[idx][plY] = PlantInfo[idx][plZ] = 0.0;
@@ -346,7 +346,7 @@ FUNCTION Farm_OnPlanted(playerid, race_check)
 }
 
 //==============================================================================
-//	/harvest (/harv) — harvest the nearest ripe plant → drugs (§9.3)
+//	/harvest (/harv) - harvest the nearest ripe plant -> drugs (§9.3)
 //==============================================================================
 
 CMD:harvest(playerid, params[])
@@ -364,7 +364,7 @@ CMD:harvest(playerid, params[])
 	if(PlantInfo[idx][plGrams] < DRUG_PLANT_HARVEST_MIN)
 	{
 		new err[128];
-		format(err, sizeof(err), "This plant is not ready — it has only %dg (need %dg). Let it grow.", PlantInfo[idx][plGrams], DRUG_PLANT_HARVEST_MIN);
+		format(err, sizeof(err), "This plant is not ready - it has only %dg (need %dg). Let it grow.", PlantInfo[idx][plGrams], DRUG_PLANT_HARVEST_MIN);
 		return SendClientMessage(playerid, COLOR_ERROR, err);
 	}
 
@@ -372,7 +372,7 @@ CMD:harvest(playerid, params[])
 	new given = Drug_GiveGrams(playerid, PlantInfo[idx][plGrams]);
 	new grown = PlantInfo[idx][plGrams];
 
-	// You can harvest another player's plant (§9.3 "Can harvest others' plants") — the
+	// You can harvest another player's plant (§9.3 "Can harvest others' plants") - the
 	// score/point still goes to the harvester (>50g gave +1 already checked above).
 	PlayerInfo[playerid][pScore]++;
 
@@ -380,7 +380,7 @@ CMD:harvest(playerid, params[])
 	if(Farm_IsCopInSight(playerid))
 		GivePlayerWanted(playerid, DRUG_PLANT_WANTED, "Harvesting drugs");
 
-	Farm_RemovePlant(idx);	// the plant is spent — delete the row + streamer
+	Farm_RemovePlant(idx);	// the plant is spent - delete the row + streamer
 	Jail_SavePlayer(playerid);	// persist the added drugs + score
 
 	new msg[176];
@@ -394,7 +394,7 @@ CMD:harvest(playerid, params[])
 alias:harvest("harv")
 
 //==============================================================================
-//	/fertilize (/fert) — speed the nearest plant (attracts deer, §9.3)
+//	/fertilize (/fert) - speed the nearest plant (attracts deer, §9.3)
 //==============================================================================
 
 CMD:fertilize(playerid, params[])
@@ -408,13 +408,13 @@ CMD:fertilize(playerid, params[])
 	new query[96];
 	mysql_format(g_SQL, query, sizeof(query), "UPDATE `plants` SET Fertilized=1 WHERE ID=%d LIMIT 1", PlantInfo[idx][plID]);
 	mysql_pquery(g_SQL, query);
-	SendClientMessage(playerid, COLOR_SERVER_INFO, ""COL_GREEN"* You fertilized the plant"COL_WHITE" — it now grows faster, but the smell "COL_YELLOW"attracts deer"COL_WHITE" that may eat it.");
+	SendClientMessage(playerid, COLOR_SERVER_INFO, ""COL_GREEN"* You fertilized the plant"COL_WHITE" - it now grows faster, but the smell "COL_YELLOW"attracts deer"COL_WHITE" that may eat it.");
 	return 1;
 }
 alias:fertilize("fert")
 
 //==============================================================================
-//	/destroyplant — destroy the nearest plant (cops find/destroy crops, §9.3)
+//	/destroyplant - destroy the nearest plant (cops find/destroy crops, §9.3)
 //==============================================================================
 
 CMD:destroyplant(playerid, params[])
@@ -439,7 +439,7 @@ CMD:destroyplant(playerid, params[])
 }
 
 //==============================================================================
-//	/plantgps (/pgps) — list your plants + growth (§9.3)
+//	/plantgps (/pgps) - list your plants + growth (§9.3)
 //==============================================================================
 
 CMD:plantgps(playerid, params[])
@@ -463,7 +463,7 @@ CMD:plantgps(playerid, params[])
 alias:plantgps("pgps")
 
 //==============================================================================
-//	/drugsell (/ds) — sell grown drugs at a Drug Refill Point (§9.3/§10.2)
+//	/drugsell (/ds) - sell grown drugs at a Drug Refill Point (§9.3/§10.2)
 //==============================================================================
 
 static Farm_AtRefillPoint(playerid)
@@ -480,7 +480,7 @@ CMD:drugsell(playerid, params[])
 	if(!Farm_AtRefillPoint(playerid))
 		return SendClientMessage(playerid, COLOR_ERROR, "You can only sell grown drugs at a Drug Refill Point (look for the map icons).");
 	if(PlayerInfo[playerid][pDrugs] <= 0)
-		return SendClientMessage(playerid, COLOR_ERROR, "You have no drugs to sell. Grow some ("COL_GREEN"/plant"COL_WHITE" → "COL_GREEN"/harvest"COL_WHITE").");
+		return SendClientMessage(playerid, COLOR_ERROR, "You have no drugs to sell. Grow some ("COL_GREEN"/plant"COL_WHITE" -> "COL_GREEN"/harvest"COL_WHITE").");
 
 	new amount;
 	if(sscanf(params, "d", amount) || amount <= 0) amount = PlayerInfo[playerid][pDrugs];	// blank = sell all
@@ -508,7 +508,7 @@ CMD:drugsell(playerid, params[])
 }
 alias:drugsell("ds")
 
-// /buyseeds — buy a 5-pack of drug seeds at a Drug Refill Point (§9.3).
+// /buyseeds - buy a 5-pack of drug seeds at a Drug Refill Point (§9.3).
 CMD:buyseeds(playerid, params[])
 {
 	#pragma unused params
@@ -517,7 +517,7 @@ CMD:buyseeds(playerid, params[])
 		return SendClientMessage(playerid, COLOR_ERROR, "Buy seeds at a Drug Refill Point or a Bait Shop ("COL_GREEN"/baitshop"COL_WHITE").");
 	if(PlayerInfo[playerid][pDrugSeeds] >= DRUG_SEED_MAX)
 		return SendClientMessage(playerid, COLOR_ERROR, "You already hold the maximum drug seeds (10).");
-	// M7 — seeds are a 24/7 shop item, so the price is SUPA_SAVE-scaled (§10.2).
+	// M7 - seeds are a 24/7 shop item, so the price is SUPA_SAVE-scaled (§10.2).
 	new price = StockMarket_BuyPrice(DRUG_SEED_BUNDLE_5, E_STOCK_SUPA_SAVE);
 	if(!Bank_TakeCash(playerid, price))
 		return SendClientMessage(playerid, COLOR_ERROR, "You cannot afford a 5-pack of seeds.");
@@ -532,7 +532,7 @@ CMD:buyseeds(playerid, params[])
 }
 
 //==============================================================================
-//	/hunt — minimal deer hunting (§9.3 — permit gate)
+//	/hunt - minimal deer hunting (§9.3 - permit gate)
 //==============================================================================
 
 CMD:hunt(playerid, params[])
@@ -541,10 +541,10 @@ CMD:hunt(playerid, params[])
 	if(!PlayerInfo[playerid][pLoggedIn]) return SendClientMessage(playerid, COLOR_ERROR, "You must be logged in.");
 	if(Jail_IsJailed(playerid)) return SendClientMessage(playerid, COLOR_ERROR, "You cannot hunt while jailed.");
 	if(gettime() < PlayerInfo[playerid][pHuntCooldown])
-		return SendClientMessage(playerid, COLOR_ERROR, "No deer nearby right now — wait a little.");
+		return SendClientMessage(playerid, COLOR_ERROR, "No deer nearby right now - wait a little.");
 
 	// Minimal model: a deer is "found" in the wild (a rural, low-Z, out-of-city spot).
-	// Full deer AI (deer eat plants, traps, herds) is deferred — this gates the permit
+	// Full deer AI (deer eat plants, traps, herds) is deferred - this gates the permit
 	// mechanic (§9.3): kill without a permit = +6 wanted; with one = heal + bonus.
 	new Float:x, Float:y, Float:z;
 	GetPlayerPos(playerid, x, y, z);
@@ -562,12 +562,12 @@ CMD:hunt(playerid, params[])
 		Bank_GiveCash(playerid, cash);
 		Jail_SavePlayer(playerid);	// persist the permit decrement + cash
 		new msg[160];
-		format(msg, sizeof(msg), ""COL_GREEN"* You hunted a deer with a permit"COL_WHITE" — +%.0f HP and "COL_GREEN"$%d"COL_WHITE". Permits left: %d.", HUNT_HEAL, cash, PlayerInfo[playerid][pHuntPermits]);
+		format(msg, sizeof(msg), ""COL_GREEN"* You hunted a deer with a permit"COL_WHITE" - +%.0f HP and "COL_GREEN"$%d"COL_WHITE". Permits left: %d.", HUNT_HEAL, cash, PlayerInfo[playerid][pHuntPermits]);
 		SendClientMessage(playerid, COLOR_SERVER_INFO, msg);
 	}
 	else
 	{
-		// No permit → illegal poaching (§9.3 VERIFIED +6 wanted).
+		// No permit -> illegal poaching (§9.3 VERIFIED +6 wanted).
 		GivePlayerWanted(playerid, HUNT_NOPERMIT_WANTED, "Killing a deer without a hunting permit");
 		SendClientMessage(playerid, COLOR_SERVER_INFO, ""COL_RED"* You poached a deer with no hunting permit!"COL_WHITE" Police have been alerted (+6 wanted). Buy a permit at a Bait Shop.");
 	}
@@ -575,7 +575,7 @@ CMD:hunt(playerid, params[])
 }
 
 //==============================================================================
-//	/farmjob — legal crop job at CrazyBob's Farm (Flint County, §9.3)
+//	/farmjob - legal crop job at CrazyBob's Farm (Flint County, §9.3)
 //==============================================================================
 
 static Farm_AtFarm(playerid)
@@ -624,7 +624,7 @@ static Farm_JobBegin(playerid)
 	return 1;
 }
 
-// M6 (stage 4) Tractor Mission hand-off (§6.16) — the mission launcher (missions.inc)
+// M6 (stage 4) Tractor Mission hand-off (§6.16) - the mission launcher (missions.inc)
 // already validated the tractor + cooldown, so start the crop route directly.
 FUNCTION Farm_StartTractorJob(playerid)
 {
@@ -641,7 +641,7 @@ CMD:farmjob(playerid, params[])
 	if(gettime() < PlayerInfo[playerid][pFarmJobCooldown])
 	{
 		new err[96];
-		format(err, sizeof(err), "The farmer needs a break — wait %d seconds.", PlayerInfo[playerid][pFarmJobCooldown] - gettime());
+		format(err, sizeof(err), "The farmer needs a break - wait %d seconds.", PlayerInfo[playerid][pFarmJobCooldown] - gettime());
 		return SendClientMessage(playerid, COLOR_ERROR, err);
 	}
 	if(!Farm_AtFarm(playerid))
@@ -689,7 +689,7 @@ FUNCTION Farm_OnPlayerEnterCP(playerid, STREAMER_TAG_CP:cpid)
 	{
 		Farm_JobSetCheckpoint(playerid);
 		new msg[144];
-		format(msg, sizeof(msg), ""COL_GREEN"* Field done "COL_WHITE"(+$%d). %d of %d — next field marked.", pay, gFarmJobField[playerid], FARM_JOB_FIELDS);
+		format(msg, sizeof(msg), ""COL_GREEN"* Field done "COL_WHITE"(+$%d). %d of %d - next field marked.", pay, gFarmJobField[playerid], FARM_JOB_FIELDS);
 		SendClientMessage(playerid, COLOR_SERVER_INFO, msg);
 	}
 	return 1;
@@ -699,7 +699,7 @@ FUNCTION Farm_OnPlayerEnterCP(playerid, STREAMER_TAG_CP:cpid)
 //	Clock / lifecycle hooks
 //==============================================================================
 
-// Grow online players' plants (1-second GameModeClock tick, §9.3 — plants do NOT
+// Grow online players' plants (1-second GameModeClock tick, §9.3 - plants do NOT
 // grow while the owner is offline). Each tick accrues grow-seconds for every plant
 // whose owner is currently connected; fertilizer + Drug Dealer skill add extra.
 FUNCTION Farm_OnGameModeClockTick()
@@ -715,7 +715,7 @@ FUNCTION Farm_OnGameModeClockTick()
 			if(!PlayerInfo[pid][pLoggedIn]) continue;
 			if(PlayerInfo[pid][pID] == PlantInfo[i][plOwnerAID]) { owner = pid; break; }
 		}
-		if(owner == -1) continue;	// owner offline → no growth
+		if(owner == -1) continue;	// owner offline -> no growth
 
 		new before = PlantInfo[i][plGrowSecs];
 		new add = 1;
@@ -738,7 +738,7 @@ FUNCTION Farm_OnGameModeClockTick()
 	return 1;
 }
 
-// End an active farm job on disconnect (session state — plants persist via the DB).
+// End an active farm job on disconnect (session state - plants persist via the DB).
 FUNCTION Farm_OnDisconnect(playerid)
 {
 	if(gFarmJobActive[playerid]) Farm_JobEnd(playerid, false);
@@ -753,7 +753,7 @@ FUNCTION Farm_OnDisconnect(playerid)
 	return 1;
 }
 
-// Abort a farm job on death (§9.3 — the harvester run ends).
+// Abort a farm job on death (§9.3 - the harvester run ends).
 FUNCTION Farm_OnPlayerDeath(playerid)
 {
 	if(gFarmJobActive[playerid])

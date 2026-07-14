@@ -2,13 +2,13 @@
 
 	Vehicle ownership (CB-simple model) for Cops And Robbers script
 	Scripted by Arose Niazi.
-	Milestone 5 (stage 1) — design §9.12 (Vehicle ownership — CB-simple model).
+	Milestone 5 (stage 1) - design §9.12 (Vehicle ownership - CB-simple model).
 
-	Deliberately minimal, exactly as CB:CNR did it — transient, per-vehicle runtime
+	Deliberately minimal, exactly as CB:CNR did it - transient, per-vehicle runtime
 	state, NO database persistence. Supersedes the M3 /lock stub that used to live
 	in cmds/crime.inc (gVehicleLocked + CMD:lock/CMD:unlock were deleted there).
 
-	Model — "your last-driven vehicle":
+	Model - "your last-driven vehicle":
 		- Every vehicle remembers its last driver (gVehLastDriver) and a lock flag
 		  (gVehLocked); every player remembers the vehicle they last drove as driver
 		  (pLastVehicle). Ownership follows the wheel: whoever takes the driver seat
@@ -23,25 +23,25 @@
 		  not you (and you are outside the re-steal grace) is grand theft auto:
 		  GivePlayerWanted(WANTED_GTA, "Grand Theft Auto").
 		- Pristine exception: a vehicle nobody has ever driven (last driver INVALID)
-		  is free to take — you just become its owner, no crime.
+		  is free to take - you just become its owner, no crime.
 		- Re-steal grace: retaking your own last-driven vehicle (or one you drove
 		  within VEH_RESTEAL_GRACE) is not a crime.
 		- Cops commandeering vehicles raise no GTA wanted.
 		- This GTA path is for UNOCCUPIED (parked/owned) vehicles only. Jacking an
 		  OCCUPIED vehicle out from under another player is the M3 car-jack path
-		  (Wanted_OnPlayerStateChange, WANTED_CARJACK +3) — the two are mutually
+		  (Wanted_OnPlayerStateChange, WANTED_CARJACK +3) - the two are mutually
 		  exclusive (see Veh_IsTheft) so a single act never double-punishes.
 
 	Reset: OnVehicleSpawn / OnVehicleDeath clear a vehicle's last driver + lock (a
 	respawned car is pristine again); OnPlayerDisconnect clears the leaver's
-	ownership marks (their last-driver entries → INVALID, their locked cars unlock)
+	ownership marks (their last-driver entries -> INVALID, their locked cars unlock)
 	and pLastVehicle.
 
 	Public API:
-		Veh_IsTheft(playerid, vehicleid)          : bool — would taking this vehicle's
+		Veh_IsTheft(playerid, vehicleid)          : bool - would taking this vehicle's
 		                                            wheel be grand theft auto right now?
 		                                            (reused by the Vehicle Theft mission, §6.19)
-		Veh_IsOwnedBy(playerid, vehicleid)        : bool — is this player the vehicle's last driver?
+		Veh_IsOwnedBy(playerid, vehicleid)        : bool - is this player the vehicle's last driver?
 		Veh_ClearVehicle(vehicleid)               : reset a vehicle to pristine (no owner, unlocked)
 		Veh_OnPlayerStateChange(playerid, ns, os) : hook from OnPlayerStateChange (CnR.pwn)
 		Veh_OnVehicleReset(vehicleid)             : hook from OnVehicleSpawn/OnVehicleDeath
@@ -54,7 +54,7 @@
 */
 
 //==============================================================================
-//	Runtime state (session only — no DB, per design §9.12)
+//	Runtime state (session only - no DB, per design §9.12)
 //==============================================================================
 
 // Per-vehicle: the last player to sit in the driver seat (INVALID_PLAYER_ID = a
@@ -87,8 +87,8 @@ static bool:Veh_ValidId(vehicleid)
 
 // Push the door-lock state of `vehicleid` to a single player: the owner (its last
 // driver) always keeps access; everyone else is locked out when gVehLocked is set.
-// SetVehicleParamsForPlayer(veh, forid, objective, doors) — doors=1 locks.
-// M6 (stage 1): a Car Jacker (SKILL_CARJACKER, §9.12) is NEVER door-locked out — the
+// SetVehicleParamsForPlayer(veh, forid, objective, doors) - doors=1 locks.
+// M6 (stage 1): a Car Jacker (SKILL_CARJACKER, §9.12) is NEVER door-locked out - the
 // skill defeats vehicle locks, so the client doors stay open for them and they can
 // enter to trigger the lock-break/theft path in Veh_OnPlayerStateChange.
 FUNCTION Veh_RefreshLockForPlayer(vehicleid, forid)
@@ -129,7 +129,7 @@ FUNCTION Veh_IsOwnedBy(playerid, vehicleid)
 // re-steal grace, when the taker is not a cop. False for a pristine (never-driven)
 // vehicle, your own vehicle, a recent re-steal, or a cop commandeering.
 // Reused by the Vehicle Theft mission (§6.19) to decide when a lift counts as a
-// crime. Note: an OCCUPIED vehicle is the M3 car-jack path, not this — this
+// crime. Note: an OCCUPIED vehicle is the M3 car-jack path, not this - this
 // returns false when another player is still aboard so the two never double-fire.
 FUNCTION Veh_IsTheft(playerid, vehicleid)
 {
@@ -137,18 +137,18 @@ FUNCTION Veh_IsTheft(playerid, vehicleid)
 	if(IsCop(playerid)) return 0;								// cops commandeer, no GTA
 
 	new owner = gVehLastDriver[vehicleid];
-	if(owner == INVALID_PLAYER_ID) return 0;					// pristine — free to take
+	if(owner == INVALID_PLAYER_ID) return 0;					// pristine - free to take
 	if(owner == playerid) return 0;								// it is already yours
 
-	// Re-steal grace: you drove it within the window → not a crime to retake it.
+	// Re-steal grace: you drove it within the window -> not a crime to retake it.
 	if(gettime() - gVehLastDriveTime[vehicleid] <= VEH_RESTEAL_GRACE) return 0;
 
-	// Occupied vehicles are the M3 car-jack path (WANTED_CARJACK), not GTA — keep
+	// Occupied vehicles are the M3 car-jack path (WANTED_CARJACK), not GTA - keep
 	// the two mutually exclusive so a single act is never punished twice.
 	for(new i = 0; i < MAX_PLAYERS; i++)
 	{
 		if(i == playerid || !IsPlayerConnected(i) || IsPlayerNPC(i)) continue;
-		if(GetPlayerVehicleID(i) == vehicleid) return 0;		// someone else aboard → jack path
+		if(GetPlayerVehicleID(i) == vehicleid) return 0;		// someone else aboard -> jack path
 	}
 	return 1;
 }
@@ -167,7 +167,7 @@ FUNCTION Veh_ClearVehicle(vehicleid)
 }
 
 //==============================================================================
-//	OnPlayerStateChange — the core of the ownership / theft / lock model
+//	OnPlayerStateChange - the core of the ownership / theft / lock model
 //==============================================================================
 
 // Called from OnPlayerStateChange (CnR.pwn) AFTER the M3 car-jack detector so an
@@ -182,7 +182,7 @@ FUNCTION Veh_OnPlayerStateChange(playerid, newstate, oldstate)
 		if(Veh_ValidId(vehicleid) && gVehLocked[vehicleid] && gVehLastDriver[vehicleid] != playerid)
 		{
 			// The owner entering the DRIVER seat auto-unlocks (handled below); any
-			// other entry into a locked car by a non-owner is ejected — UNLESS the
+			// other entry into a locked car by a non-owner is ejected - UNLESS the
 			// intruder is a Car Jacker (M6 SKILL_CARJACKER, §9.12), whose skill
 			// DEFEATS the lock: they force it open, become the new owner, and the
 			// vehicle unlocks. pSkill is set at City Hall via systems/skills.inc.
@@ -192,7 +192,7 @@ FUNCTION Veh_OnPlayerStateChange(playerid, newstate, oldstate)
 				{
 					// Break the lock: clear it, push the new door state to everyone, and
 					// let control fall through to the theft/ownership path below (taking a
-					// locked, owned, not-yours car is still Grand Theft Auto — the skill
+					// locked, owned, not-yours car is still Grand Theft Auto - the skill
 					// only bypasses the door, not the crime).
 					gVehLocked[vehicleid] = false;
 					Veh_RefreshLockForAll(vehicleid);
@@ -218,7 +218,7 @@ FUNCTION Veh_OnPlayerStateChange(playerid, newstate, oldstate)
 	new vehicleid = GetPlayerVehicleID(playerid);
 	if(!Veh_ValidId(vehicleid)) return 0;
 
-	// --- Owner into driver seat of their locked vehicle → auto-unlock (§9.12). ---
+	// --- Owner into driver seat of their locked vehicle -> auto-unlock (§9.12). ---
 	if(gVehLastDriver[vehicleid] == playerid && gVehLocked[vehicleid])
 	{
 		gVehLocked[vehicleid] = false;
@@ -229,7 +229,7 @@ FUNCTION Veh_OnPlayerStateChange(playerid, newstate, oldstate)
 	// --- Theft = crime: evaluate BEFORE reassigning ownership (§9.12). ---
 	// Veh_IsTheft already excludes cops, pristine cars, your own car, re-steals
 	// within grace, and occupied cars (the M3 jack path), so it fires only for an
-	// unoccupied, owned, not-yours vehicle — the pure GTA case.
+	// unoccupied, owned, not-yours vehicle - the pure GTA case.
 	if(Veh_IsTheft(playerid, vehicleid))
 		GivePlayerWanted(playerid, WANTED_GTA, "Grand Theft Auto");
 
@@ -249,7 +249,7 @@ FUNCTION Veh_OnPlayerStateChange(playerid, newstate, oldstate)
 //	Reset hooks
 //==============================================================================
 
-// OnVehicleSpawn / OnVehicleDeath → the vehicle is respawned/destroyed, so it is
+// OnVehicleSpawn / OnVehicleDeath -> the vehicle is respawned/destroyed, so it is
 // pristine again (nobody owns it, no lock). Called from CnR.pwn.
 FUNCTION Veh_OnVehicleReset(vehicleid)
 {
@@ -257,7 +257,7 @@ FUNCTION Veh_OnVehicleReset(vehicleid)
 	return 1;
 }
 
-// OnPlayerDisconnect → drop the leaver's ownership marks: any vehicle they last
+// OnPlayerDisconnect -> drop the leaver's ownership marks: any vehicle they last
 // drove becomes pristine (and unlocks if it was locked, so it is not left sealed
 // against everyone), and their pLastVehicle is cleared. Called from CnR.pwn.
 FUNCTION Veh_OnDisconnect(playerid)
@@ -277,7 +277,7 @@ FUNCTION Veh_OnDisconnect(playerid)
 	return 1;
 }
 
-// OnPlayerConnect (or on login) → push every locked vehicle's door state to the
+// OnPlayerConnect (or on login) -> push every locked vehicle's door state to the
 // freshly-connected player so a car locked before they joined reads as locked for
 // them. Called from CnR.pwn OnPlayerConnect.
 FUNCTION Veh_OnConnect(playerid)
@@ -291,14 +291,14 @@ FUNCTION Veh_OnConnect(playerid)
 }
 
 //==============================================================================
-//	Commands — /lock (/lk) + /unlock (/ulk)  (design §9.12)
+//	Commands - /lock (/lk) + /unlock (/ulk)  (design §9.12)
 //==============================================================================
 
 // Shared body for /lock and /unlock: act on the caller's pLastVehicle, on foot
 // only, and only if they still own it (are still its last driver). Returns 1.
 static Veh_SetLock(playerid, bool:locked)
 {
-	// Must be on foot — "can't run commands from inside a vehicle" (§9.12).
+	// Must be on foot - "can't run commands from inside a vehicle" (§9.12).
 	if(IsPlayerInAnyVehicle(playerid))
 		return SendClientMessage(playerid, COLOR_ERROR, "You must be on foot to lock or unlock your vehicle.");
 
@@ -306,10 +306,10 @@ static Veh_SetLock(playerid, bool:locked)
 	if(!Veh_ValidId(vehicleid))
 		return SendClientMessage(playerid, COLOR_ERROR, "You have not driven a vehicle to lock. Drive one first.");
 
-	// Ownership follows the wheel — if someone else has since driven it, you have
+	// Ownership follows the wheel - if someone else has since driven it, you have
 	// lost the right to lock it (you are no longer its last driver).
 	if(gVehLastDriver[vehicleid] != playerid)
-		return SendClientMessage(playerid, COLOR_ERROR, "That is no longer your vehicle — someone else has driven it.");
+		return SendClientMessage(playerid, COLOR_ERROR, "That is no longer your vehicle - someone else has driven it.");
 
 	if(gVehLocked[vehicleid] == locked)
 		return SendClientMessage(playerid, COLOR_SERVER_INFO, locked ?

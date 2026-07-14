@@ -2,9 +2,9 @@
 
 	Housing system for Cops And Robbers script
 	Scripted by Arose Niazi.
-	Milestone 5 (stage 3) — design §9.1 (Housing — THE spec), §5.5 (house robbery),
-	  §11.3 (the `houses` table), §7 (house lock — distinct from the vehicle lock).
-	Grounding: docs/research/crazybobs-site-full.md (§Housing — own 2 / co-own 8 /
+	Milestone 5 (stage 3) - design §9.1 (Housing - THE spec), §5.5 (house robbery),
+	  §11.3 (the `houses` table), §7 (house lock - distinct from the vehicle lock).
+	Grounding: docs/research/crazybobs-site-full.md (§Housing - own 2 / co-own 8 /
 	  rent 10, storage caps, spawn-at-house, 2-week inactivity decay, Super Lock,
 	  Pets, alarm) + docs/research/economy.md §3 (housing valuation factors). Concrete
 	  prices are OUR DESIGN (CB never published a table): $250k-$5M sane range.
@@ -16,40 +16,40 @@
 	house interior; exit returns them to the entrance.
 
 	Mechanics (§9.1):
-	  - BUY  (/buyhouse) at an unowned for-sale entrance → Bank charge (bank-first
+	  - BUY  (/buyhouse) at an unowned for-sale entrance -> Bank charge (bank-first
 	    then cash), OwnerAID set, own-cap 2. Police get a 10% discount (§3.1). Each
 	    purchase bumps the house value (§3.1 "each sale raises the value").
 	  - SELL (/sellhouse) to the server for HOUSE_SELL_PCT% of the price, OR list it
 	    ForSale-by-owner at a chosen price.
-	  - RENT (/renthouse) — MINIMAL single-renter model: the owner sets a per-game-day
+	  - RENT (/renthouse) - MINIMAL single-renter model: the owner sets a per-game-day
 	    rent (/setrent); a tenant renting auto-pays that each game-day they pass in
 	    server (House_OnGameDay). (co-owners + a full multi-renter contract are M6.)
-	  - STORAGE — money (StorageMoney, /housestore //housewithdraw — dodges wealth
+	  - STORAGE - money (StorageMoney, /housestore //housewithdraw - dodges wealth
 	    tax) + a simple stored-item count (StorageItems). This is what /houserob
-	    steals. (The full per-item stash — drugs/condoms/flowers/… — is deferred to
+	    steals. (The full per-item stash - drugs/condoms/flowers/… - is deferred to
 	    M6; the money + item-count is the M5 minimal storage.)
-	  - SPAWN (/sethousespawn) → OnPlayerSpawn spawns the owner inside their house.
-	  - HOUSE LOCK (/lockhouse //unlockhouse) — owner-set entry lock, distinct from
-	    the vehicle lock (§7). SUPER LOCK (/superlock) — a paid upgrade that lowers
+	  - SPAWN (/sethousespawn) -> OnPlayerSpawn spawns the owner inside their house.
+	  - HOUSE LOCK (/lockhouse //unlockhouse) - owner-set entry lock, distinct from
+	    the vehicle lock (§7). SUPER LOCK (/superlock) - a paid upgrade that lowers
 	    robbery success (§5.5).
-	  - DECAY — a house unvisited for 2 real weeks reverts to for-sale (LastVisited,
+	  - DECAY - a house unvisited for 2 real weeks reverts to for-sale (LastVisited,
 	    §3.2). Checked on the low-frequency game-day tick.
 
 	Admin/scripter: /addhouse (scripter) creates a house at the caller's position;
 	  /edithouse tweaks price/interior/pet of the nearest house.
 
 	Public API (FUNCTION publics so robbery.inc + the callbacks reach them):
-		House_Init()                       : load all houses (async) — OnGameModeInit
+		House_Init()                       : load all houses (async) - OnGameModeInit
 		House_OnPlayerLogin(playerid)      : resolve pHouseSpawn + tally owned houses
-		House_OnPickup(playerid, pickupid) : entrance pickup → enter/exit hint
-		House_OnKeyEnter(playerid)         : KEY_YES at an entrance → /enter (teleport in)
+		House_OnPickup(playerid, pickupid) : entrance pickup -> enter/exit hint
+		House_OnKeyEnter(playerid)         : KEY_YES at an entrance -> /enter (teleport in)
 		House_OnPlayerSpawn(playerid)      : spawn the owner inside their /sethousespawn house
 		House_OnGameDay()                  : rent charge + 2-week inactivity decay tick
 		House_OnDisconnect(playerid)       : drop the inside-house session marker
-		House_NearestOwned(playerid, Float:range) : nearest OWNED house entrance in range (-1 = none) — /houserob
+		House_NearestOwned(playerid, Float:range) : nearest OWNED house entrance in range (-1 = none) - /houserob
 		House_OwnerAID(house)              : the OwnerAID of a house index
-		House_IsOwnerOnline(house, &ownerid) : is the owner connected? (fills ownerid) — /houserob
-		House_RobSteal(playerid, house)    : run the break-in: move storage money to the robber (no mint) — /houserob
+		House_IsOwnerOnline(house, &ownerid) : is the owner connected? (fills ownerid) - /houserob
+		House_RobSteal(playerid, house)    : run the break-in: move storage money to the robber (no mint) - /houserob
 		House_OnDialogResponse(...)        : house menu / buy / storage dialogs
 
 	Functions Being Called:
@@ -65,7 +65,7 @@
 
 enum e_House
 {
-	hID,				// houses.ID (DB primary key) — persisted, stable across reloads
+	hID,				// houses.ID (DB primary key) - persisted, stable across reloads
 	hOwnerAID,			// players.aID of the owner (0 = unowned / bank-owned, for sale)
 	hPrice,				// current market price
 	Float:hX,			// entrance world position
@@ -114,7 +114,7 @@ static House_FindByID(id)
 	return -1;
 }
 
-// Is this player the owner of `house`? (aID match — never name-based.)
+// Is this player the owner of `house`? (aID match - never name-based.)
 static bool:House_IsOwner(playerid, house)
 {
 	if(!House_Valid(house) || !PlayerInfo[playerid][pLoggedIn]) return false;
@@ -164,9 +164,9 @@ static House_Refresh(house)
 	// Entrance label.
 	new label[144];
 	if(gHouseInfo[house][hOwnerAID] == 0)
-		format(label, sizeof(label), ""COL_GREEN"[ House #%d — For Sale ]\n"COL_WHITE"Price: "COL_GREEN"$%d\n"COL_YELLOW"/buyhouse"COL_WHITE" to purchase", gHouseInfo[house][hID], gHouseInfo[house][hPrice]);
+		format(label, sizeof(label), ""COL_GREEN"[ House #%d - For Sale ]\n"COL_WHITE"Price: "COL_GREEN"$%d\n"COL_YELLOW"/buyhouse"COL_WHITE" to purchase", gHouseInfo[house][hID], gHouseInfo[house][hPrice]);
 	else if(gHouseInfo[house][hForSale])
-		format(label, sizeof(label), ""COL_ORANGE"[ House #%d — Owner Selling ]\n"COL_WHITE"Price: "COL_GREEN"$%d\n"COL_YELLOW"/buyhouse"COL_WHITE" to purchase", gHouseInfo[house][hID], gHouseInfo[house][hPrice]);
+		format(label, sizeof(label), ""COL_ORANGE"[ House #%d - Owner Selling ]\n"COL_WHITE"Price: "COL_GREEN"$%d\n"COL_YELLOW"/buyhouse"COL_WHITE" to purchase", gHouseInfo[house][hID], gHouseInfo[house][hPrice]);
 	else
 		format(label, sizeof(label), ""COL_WHITE"[ House #%d ]\n%sPress "COL_YELLOW"~k~~CONVERSATION_YES~"COL_WHITE" or "COL_YELLOW"/enter"COL_WHITE" at the door", gHouseInfo[house][hID], gHouseInfo[house][hLocked] ? (""COL_RED"Locked. ") : (""));
 	gHouseInfo[house][hLabel] = CreateDynamic3DTextLabel(label, 0xFFFFFFFF,
@@ -199,7 +199,7 @@ FUNCTION House_NearestOwned(playerid, Float:range)
 	new Float:bestDist = range + 1.0;
 	for(new i = 0; i < gHouseCount; i++)
 	{
-		if(gHouseInfo[i][hOwnerAID] == 0) continue;	// unowned — nothing to rob
+		if(gHouseInfo[i][hOwnerAID] == 0) continue;	// unowned - nothing to rob
 		new Float:d = GetPlayerDistanceFromPoint(playerid, gHouseInfo[i][hX], gHouseInfo[i][hY], gHouseInfo[i][hZ]);
 		if(d <= range && d < bestDist) { best = i; bestDist = d; }
 	}
@@ -208,7 +208,7 @@ FUNCTION House_NearestOwned(playerid, Float:range)
 
 // Pick a random OWNED house and fill its entrance coords (fx/fy/fz). Returns 1 if a
 // house was picked, 0 if the server has no owned houses. Reused by the M6 Domestic
-// Disturbance mission (§6.3 — respond to a player-owned house). Direct call (housing
+// Disturbance mission (§6.3 - respond to a player-owned house). Direct call (housing
 // is included before missions.inc), so the float references work.
 FUNCTION House_RandomOwnedCoords(&Float:fx, &Float:fy, &Float:fz)
 {
@@ -232,7 +232,7 @@ FUNCTION House_RandomOwnedCoords(&Float:fx, &Float:fy, &Float:fz)
 	return 0;
 }
 
-// Is the owner of `house` online? Fills `ownerid` with their playerid. Public — the
+// Is the owner of `house` online? Fills `ownerid` with their playerid. Public - the
 // house robbery requires the owner to be online (§5.5).
 FUNCTION House_IsOwnerOnline(house, &ownerid)
 {
@@ -259,7 +259,7 @@ static House_RecountOwned(playerid)
 }
 
 //==============================================================================
-//	Load / cleanup — OnGameModeInit / OnGameModeExit
+//	Load / cleanup - OnGameModeInit / OnGameModeExit
 //==============================================================================
 
 FUNCTION House_Init()
@@ -270,7 +270,7 @@ FUNCTION House_Init()
 }
 
 // Destroy every house's streamer objects (pickup + map icon + 3D label) on exit.
-// Mirrors Moneybag_Cleanup / Moneyrush_Cleanup — called from OnGameModeExit.
+// Mirrors Moneybag_Cleanup / Moneyrush_Cleanup - called from OnGameModeExit.
 FUNCTION House_Cleanup()
 {
 	for(new i = 0; i < gHouseCount; i++)
@@ -282,7 +282,7 @@ FUNCTION House_Cleanup()
 	return 1;
 }
 
-// Async result handler for House_Init — read the rows into gHouseInfo[] and build
+// Async result handler for House_Init - read the rows into gHouseInfo[] and build
 // the entrance streamer objects. A per-house VW is assigned by index so each house
 // interior is isolated.
 FUNCTION House_OnLoad()
@@ -405,7 +405,7 @@ static House_TryEnter(playerid)
 	return 1;
 }
 
-// Entrance-pickup hook (from OnPlayerPickUpDynamicPickup). Just a hint — the actual
+// Entrance-pickup hook (from OnPlayerPickUpDynamicPickup). Just a hint - the actual
 // enter is KEY_YES //enter (re-checked there), matching the vehicle-lock style.
 FUNCTION House_OnPickup(playerid, pickupid)
 {
@@ -424,7 +424,7 @@ FUNCTION House_OnPickup(playerid, pickupid)
 	return 0;
 }
 
-// KEY_YES at an entrance → enter (from OnPlayerKeyStateChange). Returns 1 if a house
+// KEY_YES at an entrance -> enter (from OnPlayerKeyStateChange). Returns 1 if a house
 // enter/exit was handled so the caller can skip other KEY_YES consumers.
 FUNCTION House_OnKeyEnter(playerid)
 {
@@ -439,7 +439,7 @@ FUNCTION House_OnKeyEnter(playerid)
 //==============================================================================
 
 // The price this player pays for `house` (police get a discount, §3.1).
-// M7 — the base price is market-scaled: × the House Market stock multiplier ×
+// M7 - the base price is market-scaled: × the House Market stock multiplier ×
 // the global prime rate (design §10.1: housePrice = base * mult(HOUSE_MARKET) *
 // primeRateFactor). Higher prime = pricier houses (economy.md §1.4). Both factors
 // default to 1.0 before the market loads, so behaviour is unchanged pre-M7.
@@ -490,7 +490,7 @@ static House_DoBuy(playerid, house)
 	if(Bank_GetWealth(playerid) < price)
 	{
 		new err[128];
-		format(err, sizeof(err), "You cannot afford this house — it costs "COL_GREEN"$%d"COL_WHITE" (bank + cash).", price);
+		format(err, sizeof(err), "You cannot afford this house - it costs "COL_GREEN"$%d"COL_WHITE" (bank + cash).", price);
 		return SendClientMessage(playerid, COLOR_ERROR, err);
 	}
 	if(!House_ChargeBankFirst(playerid, price)) return SendClientMessage(playerid, COLOR_ERROR, "Payment failed.");
@@ -507,21 +507,21 @@ static House_DoBuy(playerid, house)
 			if(!IsPlayerConnected(i) || IsPlayerNPC(i) || !PlayerInfo[i][pLoggedIn]) continue;
 			if(PlayerInfo[i][pID] == prevOwner)
 			{
-				Bank_Give(i, sellerProceeds);	// the buyer's money + the seller's safe money → seller's bank
-				SendClientMessage(i, COLOR_SERVER_INFO, ""COL_GREEN"* One of your houses sold "COL_WHITE"— the sale price and your stored money were banked.");
+				Bank_Give(i, sellerProceeds);	// the buyer's money + the seller's safe money -> seller's bank
+				SendClientMessage(i, COLOR_SERVER_INFO, ""COL_GREEN"* One of your houses sold "COL_WHITE"- the sale price and your stored money were banked.");
 				Jail_SavePlayer(i);
 				House_RecountOwned(i);
 				break;
 			}
 		}
-		// (Offline previous owner: the proceeds are not credited in M5 — an offline
+		// (Offline previous owner: the proceeds are not credited in M5 - an offline
 		// payout needs an aID-keyed bank UPDATE; deferred like offline bank interest.)
 	}
 
 	gHouseInfo[house][hOwnerAID] = PlayerInfo[playerid][pID];
 	gHouseInfo[house][hForSale] = false;
 	gHouseInfo[house][hLocked] = false;
-	gHouseInfo[house][hSuperLock] = false;	// the new owner buys a fresh house — no inherited super lock
+	gHouseInfo[house][hSuperLock] = false;	// the new owner buys a fresh house - no inherited super lock
 	gHouseInfo[house][hHasPet] = false;
 	gHouseInfo[house][hRenterAID] = 0;
 	gHouseInfo[house][hStorageMoney] = 0;	// the previous owner's safe money was returned to them (or bank-kept if unowned)
@@ -554,7 +554,7 @@ CMD:buyhouse(playerid, params[])
 	new price = House_PriceFor(playerid, house);
 	new caption[256];
 	format(caption, sizeof(caption), ""COL_WHITE"House "COL_YELLOW"#%d"COL_WHITE"\nPrice: "COL_GREEN"$%d"COL_WHITE"%s\nInterior VW: %d\n\nBuy this house? (bank-first, then cash)", gHouseInfo[house][hID], price, IsCop(playerid) ? (" (police -10%)") : (""), gHouseInfo[house][hVW]);
-	// Stash the target house index in pInsideHouse's sibling — reuse a scratch via
+	// Stash the target house index in pInsideHouse's sibling - reuse a scratch via
 	// a static keyed by playerid so the dialog resolves the right house.
 	g_HouseBuyTarget[playerid] = house;
 	ShowPlayerDialog(playerid, HOUSE_BUY_DIALOG, DIALOG_STYLE_MSGBOX, "Buy House", caption, "Buy", "Cancel");
@@ -623,7 +623,7 @@ CMD:sellhouse(playerid, params[])
 }
 
 //==============================================================================
-//	Storage — money (/housestore //housewithdraw) + item count
+//	Storage - money (/housestore //housewithdraw) + item count
 //==============================================================================
 
 // Deposit cash into the house storage money (dodges wealth tax, §3.3). Must be
@@ -643,7 +643,7 @@ static House_DoStore(playerid, amount)
 	Jail_SavePlayer(playerid);
 
 	new msg[144];
-	format(msg, sizeof(msg), ""COL_GREEN"* Stored "COL_WHITE"$%d"COL_GREEN" in the house safe."COL_WHITE" Safe: "COL_GREEN"$%d"COL_WHITE". (Safe from wealth tax — but robbable.)", amount, gHouseInfo[house][hStorageMoney]);
+	format(msg, sizeof(msg), ""COL_GREEN"* Stored "COL_WHITE"$%d"COL_GREEN" in the house safe."COL_WHITE" Safe: "COL_GREEN"$%d"COL_WHITE". (Safe from wealth tax - but robbable.)", amount, gHouseInfo[house][hStorageMoney]);
 	SendClientMessage(playerid, COLOR_SERVER_INFO, msg);
 	return 1;
 }
@@ -687,7 +687,7 @@ CMD:housewithdraw(playerid, params[])
 }
 alias:housewithdraw("hwithdraw", "hwd")
 
-// Simple stored-item deposit (the M5 minimal item stash — a single count; the full
+// Simple stored-item deposit (the M5 minimal item stash - a single count; the full
 // per-type stash lands M6). Buys a "storage crate" for a token fee to seed loot the
 // house robbery can steal, capped at HOUSE_STORE_ITEMS_MAX.
 CMD:housestoreitem(playerid, params[])
@@ -706,7 +706,7 @@ CMD:housestoreitem(playerid, params[])
 	gHouseInfo[house][hStorageItems]++;
 	House_Save(house);
 	new msg[128];
-	format(msg, sizeof(msg), ""COL_GREEN"* Stashed an item "COL_WHITE"in the house. Storage: "COL_GREEN"%d/%d"COL_WHITE" items. (Robbable — full item types land in a future update.)", gHouseInfo[house][hStorageItems], HOUSE_STORE_ITEMS_MAX);
+	format(msg, sizeof(msg), ""COL_GREEN"* Stashed an item "COL_WHITE"in the house. Storage: "COL_GREEN"%d/%d"COL_WHITE" items. (Robbable - full item types land in a future update.)", gHouseInfo[house][hStorageItems], HOUSE_STORE_ITEMS_MAX);
 	SendClientMessage(playerid, COLOR_SERVER_INFO, msg);
 	return 1;
 }
@@ -740,7 +740,7 @@ CMD:clearhousespawn(playerid, params[])
 	return 1;
 }
 
-// House lock (§7) — owner-set entry lock, distinct from the vehicle lock. Shared
+// House lock (§7) - owner-set entry lock, distinct from the vehicle lock. Shared
 // body for /lockhouse //unlockhouse.
 static House_SetLock(playerid, bool:locked)
 {
@@ -774,7 +774,7 @@ CMD:unlockhouse(playerid, params[])
 }
 alias:unlockhouse("hunlock")
 
-// Super Lock upgrade (§5.5) — a paid anti-robbery fitting that lowers break-in
+// Super Lock upgrade (§5.5) - a paid anti-robbery fitting that lowers break-in
 // success. Charged bank-first then cash.
 CMD:superlock(playerid, params[])
 {
@@ -787,7 +787,7 @@ CMD:superlock(playerid, params[])
 	if(Bank_GetWealth(playerid) < HOUSE_SUPERLOCK_PRICE)
 	{
 		new err[128];
-		format(err, sizeof(err), "A super lock costs "COL_GREEN"$%d"COL_WHITE" (bank + cash) — you cannot afford it.", HOUSE_SUPERLOCK_PRICE);
+		format(err, sizeof(err), "A super lock costs "COL_GREEN"$%d"COL_WHITE" (bank + cash) - you cannot afford it.", HOUSE_SUPERLOCK_PRICE);
 		return SendClientMessage(playerid, COLOR_ERROR, err);
 	}
 	if(!House_ChargeBankFirst(playerid, HOUSE_SUPERLOCK_PRICE)) return SendClientMessage(playerid, COLOR_ERROR, "Payment failed.");
@@ -795,7 +795,7 @@ CMD:superlock(playerid, params[])
 	House_Save(house);
 	Jail_SavePlayer(playerid);
 	new msg[160];
-	format(msg, sizeof(msg), ""COL_GREEN"* Super lock fitted "COL_WHITE"($%d)"COL_GREEN"."COL_WHITE" Break-ins are now much harder to pull off (§ house robbery).", HOUSE_SUPERLOCK_PRICE);
+	format(msg, sizeof(msg), ""COL_GREEN"* Super lock fitted "COL_WHITE"($%d)"COL_GREEN"."COL_WHITE" Break-ins are now much harder to pull off (see house robbery).", HOUSE_SUPERLOCK_PRICE);
 	SendClientMessage(playerid, COLOR_SERVER_INFO, msg);
 	return 1;
 }
@@ -835,7 +835,7 @@ CMD:renthouse(playerid, params[])
 	if(!PlayerInfo[playerid][pLoggedIn]) return SendClientMessage(playerid, COLOR_ERROR, "You must be logged in.");
 	new house = House_NearestEntrance(playerid, HOUSE_ENTER_RANGE);
 	if(house == -1) return SendClientMessage(playerid, COLOR_ERROR, "You are not standing at a house entrance.");
-	if(gHouseInfo[house][hOwnerAID] == 0) return SendClientMessage(playerid, COLOR_ERROR, "That house is unowned — buy it with /buyhouse.");
+	if(gHouseInfo[house][hOwnerAID] == 0) return SendClientMessage(playerid, COLOR_ERROR, "That house is unowned - buy it with /buyhouse.");
 	if(House_IsOwner(playerid, house)) return SendClientMessage(playerid, COLOR_ERROR, "You already own this house.");
 	if(gHouseInfo[house][hRent] <= 0) return SendClientMessage(playerid, COLOR_ERROR, "This house is not available to rent.");
 	if(gHouseInfo[house][hRenterAID] != 0) return SendClientMessage(playerid, COLOR_ERROR, "This house is already rented to someone.");
@@ -905,7 +905,7 @@ CMD:houses(playerid, params[])
 	{
 		if(gHouseInfo[i][hOwnerAID] != PlayerInfo[playerid][pID]) continue;
 		count++;
-		format(msg, sizeof(msg), ""COL_WHITE"House "COL_YELLOW"#%d"COL_WHITE" — value "COL_GREEN"$%d"COL_WHITE", safe "COL_GREEN"$%d"COL_WHITE", %s%s", gHouseInfo[i][hID], gHouseInfo[i][hPrice], gHouseInfo[i][hStorageMoney], gHouseInfo[i][hLocked] ? (""COL_RED"locked"COL_WHITE) : (""COL_GREEN"unlocked"COL_WHITE), (PlayerInfo[playerid][pHouseSpawn] == gHouseInfo[i][hID]) ? (" "COL_YELLOW"[spawn]"COL_WHITE) : (""));
+		format(msg, sizeof(msg), ""COL_WHITE"House "COL_YELLOW"#%d"COL_WHITE" - value "COL_GREEN"$%d"COL_WHITE", safe "COL_GREEN"$%d"COL_WHITE", %s%s", gHouseInfo[i][hID], gHouseInfo[i][hPrice], gHouseInfo[i][hStorageMoney], gHouseInfo[i][hLocked] ? (""COL_RED"locked"COL_WHITE) : (""COL_GREEN"unlocked"COL_WHITE), (PlayerInfo[playerid][pHouseSpawn] == gHouseInfo[i][hID]) ? (" "COL_YELLOW"[spawn]"COL_WHITE) : (""));
 		SendClientMessage(playerid, COLOR_SERVER_INFO, msg);
 	}
 	if(count == 0) SendClientMessage(playerid, COLOR_SERVER_INFO, ""COL_WHITE"You do not own any houses. Buy one at a "COL_GREEN"green house pickup"COL_WHITE" with "COL_YELLOW"/buyhouse"COL_WHITE".");
@@ -936,7 +936,7 @@ CMD:exit(playerid, params[])
 }
 
 //==============================================================================
-//	House robbery support (§5.5) — called from robbery.inc's /houserob
+//	House robbery support (§5.5) - called from robbery.inc's /houserob
 //==============================================================================
 
 // Fire the house alarm: notify the owner (if online) + all cops (§5.5).
@@ -975,7 +975,7 @@ FUNCTION House_RobSteal(playerid, house)
 	if(!House_Valid(house)) return 0;
 
 	// Break-in success roll: base %, minus super-lock / pet penalties, plus the
-	// crowbar bonus (a crowbar improves success — §5.7). Read the crowbar flag
+	// crowbar bonus (a crowbar improves success - §5.7). Read the crowbar flag
 	// directly (housing sees PlayerInfo).
 	new chance = HOUSEROB_BASE_SUCCESS;
 	if(gHouseInfo[house][hSuperLock]) chance -= HOUSEROB_SUPERLOCK_PEN;
@@ -990,7 +990,7 @@ FUNCTION House_RobSteal(playerid, house)
 
 	if(random(100) >= chance)
 	{
-		// Foiled — super lock held or a pet drove the intruder off (a pet bites).
+		// Foiled - super lock held or a pet drove the intruder off (a pet bites).
 		if(gHouseInfo[house][hHasPet])
 		{
 			new Float:hp;
@@ -1000,11 +1000,11 @@ FUNCTION House_RobSteal(playerid, house)
 			SetPlayerHealth(playerid, hp);
 			SendClientMessage(playerid, COLOR_ERROR, ""COL_RED"* The house pet attacked you! "COL_WHITE"The break-in failed.");
 		}
-		else SendClientMessage(playerid, COLOR_ERROR, ""COL_RED"* The lock held — the break-in failed."COL_WHITE);
+		else SendClientMessage(playerid, COLOR_ERROR, ""COL_RED"* The lock held - the break-in failed."COL_WHITE);
 		return -1;
 	}
 
-	// Success — MOVE a percentage of the house safe money to the robber (no mint).
+	// Success - MOVE a percentage of the house safe money to the robber (no mint).
 	new take = (gHouseInfo[house][hStorageMoney] / 100) * HOUSEROB_MONEY_PCT;
 	if(take > 0)
 	{
@@ -1019,18 +1019,18 @@ FUNCTION House_RobSteal(playerid, house)
 
 	new msg[176];
 	if(take > 0 || itemsTaken > 0) format(msg, sizeof(msg), ""COL_GREEN"* Break-in! "COL_WHITE"You looted "COL_GREEN"$%d"COL_WHITE" and %d item(s) from house #%d. Run!", take, itemsTaken, gHouseInfo[house][hID]);
-	else format(msg, sizeof(msg), ""COL_GREEN"* Break-in! "COL_WHITE"but the house safe was empty. You still triggered the alarm — run!");
+	else format(msg, sizeof(msg), ""COL_GREEN"* Break-in! "COL_WHITE"but the house safe was empty. You still triggered the alarm - run!");
 	SendClientMessage(playerid, COLOR_SERVER_INFO, msg);
 	return take;
 }
 
 //==============================================================================
-//	Game-day tick — rent charge + 2-week inactivity decay (§3.2/§3.4)
+//	Game-day tick - rent charge + 2-week inactivity decay (§3.2/§3.4)
 //==============================================================================
 
 // Called from GameModeClock()'s day rollover in CnR.pwn (NO new global timer). For
 // each house: charge an online tenant the per-game-day rent (paid to the owner if
-// online, else banked to the owner via aID is deferred — minimal single-renter),
+// online, else banked to the owner via aID is deferred - minimal single-renter),
 // and revert an owner's unvisited-for-2-weeks house to for-sale (§3.2).
 FUNCTION House_OnGameDay()
 {
@@ -1066,7 +1066,7 @@ FUNCTION House_OnGameDay()
 				}
 				else
 				{
-					// Cannot pay — evict.
+					// Cannot pay - evict.
 					gHouseInfo[i][hRenterAID] = 0;
 					House_Save(i);
 					SendClientMessage(tenantid, COLOR_ERROR, ""COL_RED"* You could not pay this game-day's rent "COL_WHITE"and were evicted.");
@@ -1074,7 +1074,7 @@ FUNCTION House_OnGameDay()
 			}
 		}
 
-		// --- Inactivity decay: unvisited for 2 real weeks → revert to for-sale. ---
+		// --- Inactivity decay: unvisited for 2 real weeks -> revert to for-sale. ---
 		// A LastVisited of 0 means "not stamped this session"; a house only decays
 		// once the owner has visited (stamping the clock) and then stayed away.
 		if(gHouseInfo[i][hLastVisited] != 0 && (now - gHouseInfo[i][hLastVisited]) >= HOUSE_DECAY_SECS)
@@ -1095,7 +1095,7 @@ FUNCTION House_OnGameDay()
 				if(PlayerInfo[pid][pID] == prevOwner)
 				{
 					new emsg[160];
-					format(emsg, sizeof(emsg), ""COL_RED"* House #%d was repossessed "COL_WHITE"— you had not visited it in 2 weeks.", gHouseInfo[i][hID]);
+					format(emsg, sizeof(emsg), ""COL_RED"* House #%d was repossessed "COL_WHITE"- you had not visited it in 2 weeks.", gHouseInfo[i][hID]);
 					SendClientMessage(pid, COLOR_ERROR, emsg);
 					House_RecountOwned(pid);
 					break;
@@ -1116,11 +1116,11 @@ FUNCTION House_OnGameDay()
 FUNCTION House_OnPlayerSpawn(playerid)
 {
 	if(!PlayerInfo[playerid][pLoggedIn]) return 0;
-	// Respawning at a city spawn (interior 0) — the caller reset interior/VW, so drop
+	// Respawning at a city spawn (interior 0) - the caller reset interior/VW, so drop
 	// any stale inside-house marker before deciding on a house spawn.
 	PlayerInfo[playerid][pInsideHouse] = -1;
 	if(PlayerInfo[playerid][pHouseSpawn] <= 0) return 0;
-	// A jailed / admin-jailed player is placed at the jail by the jail system — never
+	// A jailed / admin-jailed player is placed at the jail by the jail system - never
 	// override that with a house spawn (marker already cleared above).
 	if(PlayerInfo[playerid][pJailed] || PlayerInfo[playerid][pAdminJailUntil] > gettime()) return 0;
 	new house = House_FindByID(PlayerInfo[playerid][pHouseSpawn]);
@@ -1143,7 +1143,7 @@ FUNCTION House_OnDisconnect(playerid)
 }
 
 //==============================================================================
-//	Scripter — /addhouse (create a house here) + /edithouse
+//	Scripter - /addhouse (create a house here) + /edithouse
 //==============================================================================
 
 // Create a new house at the caller's position. The interior + inside-spawn default
@@ -1170,7 +1170,7 @@ CMD:addhouse(playerid, params[])
 	return 1;
 }
 
-// Async handler for /addhouse — reload the house table so the new row is live with
+// Async handler for /addhouse - reload the house table so the new row is live with
 // its streamer objects, and confirm to the scripter (race-check guarded).
 FUNCTION House_OnAdded(playerid, race_check)
 {

@@ -2,10 +2,10 @@
 
 	Kidnap crime for Cops And Robbers script
 	Scripted by Arose Niazi.
-	Milestone 5 (stage 4) — design §4.4 (kidnap/holdup spec) + docs/research/
+	Milestone 5 (stage 4) - design §4.4 (kidnap/holdup spec) + docs/research/
 	{crazybobs-site-full.md §Kidnapper, primary-sources.md §Kidnapper} (VERIFIED:
 	ransom ≤$50,000/victim; at the hideout steal 20-80% of victim on-hand cash;
-	small bonus on grab; kidnapping ALWAYS gives a warrant — +1 per civilian,
+	small bonus on grab; kidnapping ALWAYS gives a warrant - +1 per civilian,
 	+6 per cop kidnapped; kidnappers disguise as Drivers via /fakeskill).
 
 	The kidnap crime: /kidnap (/kd) a nearby non-cop. You force them into your
@@ -15,17 +15,17 @@
 	grab always raises your wanted (a warrant) and pays a small bonus. The victim
 	is freed by:
 	  - a cop /uncuff-ing them within reach (frees + no cash lost),
-	  - paying the ransom with /payransom (frees, ransom moves victim→kidnapper),
+	  - paying the ransom with /payransom (frees, ransom moves victim->kidnapper),
 	  - escaping (straying KIDNAP_ESCAPE_DIST from the kidnapper),
 	  - the kidnapper's death / arrest / disconnect (all release the victim),
 	  - the victim's own death / disconnect (§4.4: a victim who quits still loses
-	    the ransom to the kidnapper — the crime already "paid").
+	    the ransom to the kidnapper - the crime already "paid").
 
 	This is a session crime (no DB): pKidnapVictim / pKidnappedBy in pInfo, reset
 	on death / disconnect / arrest. It respects the shared crime gate (not a cop,
 	not jailed, not spawn-protected, not in a DM zone) exactly like /rob and /rape.
 
-	>>> M6 EXTENSION POINT — the Kidnapper SKILL (§4.4) scales the ransom and lets
+	>>> M6 EXTENSION POINT - the Kidnapper SKILL (§4.4) scales the ransom and lets
 	    the kidnapper appear as a Driver (/fakeskill). Skills are set at City Hall
 	    in M6; until pSkill can be SKILL_KIDNAPPER, the BASE ransom applies and
 	    /fakeskill is a cosmetic session flag. grep "M6" for the hook. <<<
@@ -34,12 +34,12 @@
 		crazybobs-site-full.md §Kidnapper + primary-sources.md for the numbers.
 
 	Public API:
-		Kidnap_IsVictim(playerid)              : bool — is this player currently kidnapped
+		Kidnap_IsVictim(playerid)              : bool - is this player currently kidnapped
 		Kidnap_FreeVictim(victimid, const why[], bool:tellKidnapper) : release a held victim
-		Kidnap_OnPlayerDeath(playerid, killerid): death hook — release on either side (§4.4)
-		Kidnap_OnDisconnect(playerid)          : disconnect hook — release + victim-quit payout (§4.4)
-		Kidnap_OnArrest(playerid)              : arrest hook — a jailed kidnapper releases the victim
-		Kidnap_OnTick()                        : GameModeClock 1s tick — hideout delivery + escape guard
+		Kidnap_OnPlayerDeath(playerid, killerid): death hook - release on either side (§4.4)
+		Kidnap_OnDisconnect(playerid)          : disconnect hook - release + victim-quit payout (§4.4)
+		Kidnap_OnArrest(playerid)              : arrest hook - a jailed kidnapper releases the victim
+		Kidnap_OnTick()                        : GameModeClock 1s tick - hideout delivery + escape guard
 
 	Commands:
 		/kidnap (/kd) [id] [ransom]  (civ, on-foot) grab a nearby non-cop
@@ -47,21 +47,21 @@
 		/ransom [amount]             (kidnapper)     re-set the ransom on your held victim
 		/payransom (/pr)             (victim)        pay the ransom to free yourself early
 		/uncuff [id]                 (cop, on-foot)  free a kidnapped victim near you
-		/fakeskill                   (civ)           disguise flag — appear as a Driver (§4.4, M6 skill cosmetic)
+		/fakeskill                   (civ)           disguise flag - appear as a Driver (§4.4, M6 skill cosmetic)
 
 	Functions Being Called:
 		misc:    IsCop, IsCivilian, UpdateMoney
 		wanted:  GivePlayerWanted, IsPlayerSpawnProtected
 		jail:    Jail_IsJailed
-		bank:    (cash moves use pMoney + UpdateMoney directly — hand-cash, mirrors /rob)
+		bank:    (cash moves use pMoney + UpdateMoney directly - hand-cash, mirrors /rob)
 */
 
 //==============================================================================
-//	Kidnap hideout (design §4.4 — "drive the victim to a hideout")
+//	Kidnap hideout (design §4.4 - "drive the victim to a hideout")
 //==============================================================================
 
 // The LS kidnap hideout the kidnapper delivers the victim to for the cash steal.
-// A quiet spot in East LS (matches the robbery hideout style — reachable by road).
+// A quiet spot in East LS (matches the robbery hideout style - reachable by road).
 #define KIDNAP_HIDEOUT_X		(2585.0)
 #define KIDNAP_HIDEOUT_Y		(-1310.0)
 #define KIDNAP_HIDEOUT_Z		(6.0)
@@ -74,7 +74,7 @@
 FUNCTION Kidnap_IsVictim(playerid)
 	return (PlayerInfo[playerid][pKidnappedBy] != -1);
 
-// M6 (stage 1) — the Kidnapper SKILL ransom-scaling hook (§4.4). A player who chose
+// M6 (stage 1) - the Kidnapper SKILL ransom-scaling hook (§4.4). A player who chose
 // SKILL_KIDNAPPER at City Hall can demand a higher ransom ceiling; everyone else is
 // capped at the base KIDNAP_RANSOM_MAX. pSkill is set by systems/skills.inc (/skill).
 static Kidnap_RansomMaxFor(playerid)
@@ -154,9 +154,9 @@ static Kidnap_AlertCops(playerid, victimid)
 
 // The cash steal at the hideout (§4.4): take 20-80% of the victim's on-hand cash,
 // clamped so the take never exceeds the ransom cap on it (the ransom is the
-// bargaining amount) is NOT applied here — the hideout steal is the full 20-80%
+// bargaining amount) is NOT applied here - the hideout steal is the full 20-80%
 // slice; /payransom is the alternate, capped, buy-your-freedom path. Money moves
-// victim → kidnapper (hand cash, mirrors /rob) — no minting.
+// victim -> kidnapper (hand cash, mirrors /rob) - no minting.
 static Kidnap_StealAtHideout(kidid, victimid)
 {
 	new pct = KIDNAP_STEAL_MIN_PCT + random(KIDNAP_STEAL_MAX_PCT - KIDNAP_STEAL_MIN_PCT + 1);
@@ -181,13 +181,13 @@ static Kidnap_StealAtHideout(kidid, victimid)
 		PlayerInfo[kidid][pUserName], kidid, amount);
 	SendClientMessage(victimid, COLOR_ERROR, msg);
 
-	// The steal ends the kidnap — the victim is dumped at the hideout.
+	// The steal ends the kidnap - the victim is dumped at the hideout.
 	Kidnap_FreeVictim(victimid, "The kidnapper dumped you at the hideout.", 0);
 	return amount;
 }
 
 //==============================================================================
-//	GameModeClock 1s tick — hideout delivery + escape guard (NO new timer, §4.4)
+//	GameModeClock 1s tick - hideout delivery + escape guard (NO new timer, §4.4)
 //==============================================================================
 
 FUNCTION Kidnap_OnTick()
@@ -198,7 +198,7 @@ FUNCTION Kidnap_OnTick()
 		new victimid = PlayerInfo[kidid][pKidnapVictim];
 		if(victimid == -1) continue;
 
-		// Defensive: a broken link (victim gone / no longer points back) → clear.
+		// Defensive: a broken link (victim gone / no longer points back) -> clear.
 		if(!IsPlayerConnected(victimid) || PlayerInfo[victimid][pKidnappedBy] != kidid)
 		{
 			PlayerInfo[kidid][pKidnapVictim] = -1;
@@ -210,7 +210,7 @@ FUNCTION Kidnap_OnTick()
 		if(Jail_IsJailed(kidid)) { Kidnap_FreeVictim(victimid, "Your kidnapper was arrested.", 1); continue; }
 
 		// Escape: the victim strayed too far from the kidnapper (§4.4). Both must be
-		// in the same interior/VW for the distance to count — a warp apart frees them.
+		// in the same interior/VW for the distance to count - a warp apart frees them.
 		if(GetPlayerInterior(kidid) != GetPlayerInterior(victimid) ||
 			GetPlayerVirtualWorld(kidid) != GetPlayerVirtualWorld(victimid))
 		{
@@ -221,11 +221,11 @@ FUNCTION Kidnap_OnTick()
 		GetPlayerPos(kidid, vx, vy, vz);
 		if(!IsPlayerInRangeOfPoint(victimid, KIDNAP_ESCAPE_DIST, vx, vy, vz))
 		{
-			Kidnap_FreeVictim(victimid, "You escaped your kidnapper — you got too far away!", 1);
+			Kidnap_FreeVictim(victimid, "You escaped your kidnapper - you got too far away!", 1);
 			continue;
 		}
 
-		// Reached the hideout WITH the victim in tow → steal 20-80% on-hand (§4.4).
+		// Reached the hideout WITH the victim in tow -> steal 20-80% on-hand (§4.4).
 		if(IsPlayerInRangeOfPoint(kidid, KIDNAP_HIDEOUT_RANGE, KIDNAP_HIDEOUT_X, KIDNAP_HIDEOUT_Y, KIDNAP_HIDEOUT_Z) &&
 			IsPlayerInRangeOfPoint(victimid, KIDNAP_HIDEOUT_RANGE + 8.0, KIDNAP_HIDEOUT_X, KIDNAP_HIDEOUT_Y, KIDNAP_HIDEOUT_Z))
 		{
@@ -243,14 +243,14 @@ FUNCTION Kidnap_OnTick()
 // Death on EITHER side releases the link. If the KIDNAPPER dies, the victim goes
 // free (nothing lost). If the VICTIM dies in captivity, the kidnapper keeps the
 // hold cleared but earned the grab bonus already (§4.4 "small bonus if the victim
-// dies in the hideout after the timer") — no extra mint here, kept simple.
+// dies in the hideout after the timer") - no extra mint here, kept simple.
 FUNCTION Kidnap_OnPlayerDeath(playerid, killerid)
 {
 	#pragma unused killerid
-	// This player was a kidnapper → free their victim.
+	// This player was a kidnapper -> free their victim.
 	if(PlayerInfo[playerid][pKidnapVictim] != -1)
-		Kidnap_FreeVictim(PlayerInfo[playerid][pKidnapVictim], "Your kidnapper is dead — you are free.", 0);
-	// This player was a victim → break the link (their kidnapper loses the hold).
+		Kidnap_FreeVictim(PlayerInfo[playerid][pKidnapVictim], "Your kidnapper is dead - you are free.", 0);
+	// This player was a victim -> break the link (their kidnapper loses the hold).
 	if(PlayerInfo[playerid][pKidnappedBy] != -1)
 	{
 		new kidid = PlayerInfo[playerid][pKidnappedBy];
@@ -267,12 +267,12 @@ FUNCTION Kidnap_OnPlayerDeath(playerid, killerid)
 }
 
 // Disconnect. §4.4: a VICTIM who quits while kidnapped still loses the ransom to
-// the kidnapper (the crime already paid) — we hand the kidnapper the set ransom
+// the kidnapper (the crime already paid) - we hand the kidnapper the set ransom
 // (capped to what the victim can back with cash+bank is not tracked at quit; we
 // pay the ransom outright as the "still paid" bonus, a small deliberate subsidy).
 FUNCTION Kidnap_OnDisconnect(playerid)
 {
-	// Kidnapper leaving → free their victim cleanly.
+	// Kidnapper leaving -> free their victim cleanly.
 	if(PlayerInfo[playerid][pKidnapVictim] != -1)
 	{
 		new victimid = PlayerInfo[playerid][pKidnapVictim];
@@ -282,10 +282,10 @@ FUNCTION Kidnap_OnDisconnect(playerid)
 		{
 			PlayerInfo[victimid][pKidnappedBy] = -1;
 			DisablePlayerCheckpoint(victimid);
-			SendClientMessage(victimid, COLOR_SERVER_INFO, ""COL_GREEN"* Your kidnapper disconnected — you are free."COL_WHITE);
+			SendClientMessage(victimid, COLOR_SERVER_INFO, ""COL_GREEN"* Your kidnapper disconnected - you are free."COL_WHITE);
 		}
 	}
-	// Victim leaving → the kidnapper is still paid the ransom (§4.4).
+	// Victim leaving -> the kidnapper is still paid the ransom (§4.4).
 	if(PlayerInfo[playerid][pKidnappedBy] != -1)
 	{
 		new kidid = PlayerInfo[playerid][pKidnappedBy];
@@ -299,7 +299,7 @@ FUNCTION Kidnap_OnDisconnect(playerid)
 			{
 				Bank_GiveCash(kidid, ransom);
 				new msg[144];
-				format(msg, sizeof(msg), ""COL_GREEN"* Your victim fled the server "COL_WHITE"— the ransom "COL_GREEN"$%d"COL_WHITE" was paid anyway.", ransom);
+				format(msg, sizeof(msg), ""COL_GREEN"* Your victim fled the server "COL_WHITE"- the ransom "COL_GREEN"$%d"COL_WHITE" was paid anyway.", ransom);
 				SendClientMessage(kidid, COLOR_SERVER_INFO, msg);
 			}
 		}
@@ -312,7 +312,7 @@ FUNCTION Kidnap_OnArrest(playerid)
 {
 	if(PlayerInfo[playerid][pKidnapVictim] != -1)
 		Kidnap_FreeVictim(PlayerInfo[playerid][pKidnapVictim], "Your kidnapper was arrested.", 1);
-	// If the arrested player was themselves a victim, break that too (unlikely — a
+	// If the arrested player was themselves a victim, break that too (unlikely - a
 	// kidnapped player is not arrestable mid-hold, but keep the state clean).
 	if(PlayerInfo[playerid][pKidnappedBy] != -1)
 	{
@@ -329,7 +329,7 @@ FUNCTION Kidnap_OnArrest(playerid)
 }
 
 //==============================================================================
-//	Command — /kidnap (/kd) [id] [ransom] (design §4.4)
+//	Command - /kidnap (/kd) [id] [ransom] (design §4.4)
 //==============================================================================
 
 CMD:kidnap(playerid, params[])
@@ -350,12 +350,12 @@ CMD:kidnap(playerid, params[])
 	if(gettime() < PlayerInfo[playerid][pKidnapCooldown])
 	{
 		new err[112];
-		format(err, sizeof(err), "You cannot kidnap again yet — wait %d seconds.", PlayerInfo[playerid][pKidnapCooldown] - gettime());
+		format(err, sizeof(err), "You cannot kidnap again yet - wait %d seconds.", PlayerInfo[playerid][pKidnapCooldown] - gettime());
 		return SendClientMessage(playerid, COLOR_ERROR, err);
 	}
 
-	// Parse the optional target + optional ransom: sscanf "u D(default)" — the target
-	// is optional (blank → nearest), the ransom is optional (defaults if omitted).
+	// Parse the optional target + optional ransom: sscanf "u D(default)" - the target
+	// is optional (blank -> nearest), the ransom is optional (defaults if omitted).
 	new targetid = INVALID_PLAYER_ID, ransom = KIDNAP_RANSOM_DEFAULT;
 	if(!isNull(params))
 	{
@@ -379,7 +379,7 @@ CMD:kidnap(playerid, params[])
 		return SendClientMessage(playerid, COLOR_ERROR, "You cannot reach that person.");
 
 	// Clamp the ransom to the skill-scaled cap (§4.4). Base players cap at $50,000;
-	// a Kidnapper (SKILL_KIDNAPPER, set via /skill in skills.inc) can demand more —
+	// a Kidnapper (SKILL_KIDNAPPER, set via /skill in skills.inc) can demand more -
 	// this is the M6 "ransom scaling" hook now live.
 	new ransomMax = Kidnap_RansomMaxFor(playerid);
 	if(ransom < 0) ransom = 0;
@@ -403,11 +403,11 @@ CMD:kidnap(playerid, params[])
 	SetPlayerCheckpoint(playerid, KIDNAP_HIDEOUT_X, KIDNAP_HIDEOUT_Y, KIDNAP_HIDEOUT_Z, 5.0);
 
 	// Small grab bonus (§4.4 "small bonus on kidnap"). A Kidnapper (SKILL_KIDNAPPER)
-	// earns the larger bonus — part of the M6 kidnapper-skill activation.
+	// earns the larger bonus - part of the M6 kidnapper-skill activation.
 	Bank_GiveCash(playerid, (PlayerInfo[playerid][pSkill] == SKILL_KIDNAPPER) ? KIDNAP_SKILL_GRAB_BONUS : KIDNAP_GRAB_BONUS);
 
 	// Always a warrant (§4.4): +1 per civilian, +6 per cop kidnapped. The victim is
-	// never a cop here (the gate blocks it), so this is the civilian value — the cop
+	// never a cop here (the gate blocks it), so this is the civilian value - the cop
 	// branch is kept for completeness / future UC-cop grabs.
 	new wanted = IsCop(targetid) ? KIDNAP_WANTED_COP : KIDNAP_WANTED_CIV;
 	GivePlayerWanted(playerid, wanted, "Kidnapping");
@@ -416,7 +416,7 @@ CMD:kidnap(playerid, params[])
 	format(msg, sizeof(msg), ""COL_RED"* KIDNAP! "COL_WHITE"You grabbed %s (%d). Ransom set to "COL_GREEN"$%d"COL_WHITE". Drive them to the "COL_YELLOW"hideout checkpoint"COL_WHITE" to strip their cash (%d-%d%%).",
 		PlayerInfo[targetid][pUserName], targetid, ransom, KIDNAP_STEAL_MIN_PCT, KIDNAP_STEAL_MAX_PCT);
 	SendClientMessage(playerid, COLOR_SERVER_INFO, msg);
-	SendClientMessage(playerid, COLOR_SERVER_INFO, "Keep them close — if they get too far away they escape. "COL_YELLOW"/release"COL_WHITE" to let them go.");
+	SendClientMessage(playerid, COLOR_SERVER_INFO, "Keep them close - if they get too far away they escape. "COL_YELLOW"/release"COL_WHITE" to let them go.");
 
 	format(msg, sizeof(msg), ""COL_RED"* You have been KIDNAPPED by %s (%d)! "COL_WHITE"Ransom: "COL_GREEN"$%d"COL_WHITE". "COL_YELLOW"/payransom"COL_WHITE" to buy your freedom, or wait for a cop to "COL_YELLOW"/uncuff"COL_WHITE" you.",
 		PlayerInfo[playerid][pUserName], playerid, ransom);
@@ -428,7 +428,7 @@ CMD:kidnap(playerid, params[])
 alias:kidnap("kd")
 
 //==============================================================================
-//	Command — /release (/rel) (kidnapper lets the victim go, no payout)
+//	Command - /release (/rel) (kidnapper lets the victim go, no payout)
 //==============================================================================
 
 CMD:release(playerid, params[])
@@ -444,14 +444,14 @@ CMD:release(playerid, params[])
 alias:release("rel")
 
 //==============================================================================
-//	Command — /ransom [amount] (re-set the ransom on the held victim)
+//	Command - /ransom [amount] (re-set the ransom on the held victim)
 //==============================================================================
 
 CMD:ransom(playerid, params[])
 {
 	if(PlayerInfo[playerid][pKidnapVictim] == -1)
 		return SendClientMessage(playerid, COLOR_ERROR, "You are not holding anyone to ransom.");
-	new amount, ransomMax = Kidnap_RansomMaxFor(playerid);	// skill-scaled cap (§4.4 — Kidnapper skill)
+	new amount, ransomMax = Kidnap_RansomMaxFor(playerid);	// skill-scaled cap (§4.4 - Kidnapper skill)
 	if(sscanf(params, "d", amount))
 	{
 		new msg[128];
@@ -474,10 +474,10 @@ CMD:ransom(playerid, params[])
 }
 
 //==============================================================================
-//	Command — /payransom (/pr) (victim pays the ransom to free themselves early)
+//	Command - /payransom (/pr) (victim pays the ransom to free themselves early)
 //==============================================================================
 
-// The ransom moves victim → kidnapper (cash + bank, mirrors a normal fee), then
+// The ransom moves victim -> kidnapper (cash + bank, mirrors a normal fee), then
 // the victim is freed. Capped at KIDNAP_RANSOM_MAX by the grab/ransom commands.
 CMD:payransom(playerid, params[])
 {
@@ -487,7 +487,7 @@ CMD:payransom(playerid, params[])
 	new kidid = PlayerInfo[playerid][pKidnappedBy];
 	new ransom = PlayerInfo[playerid][pKidnapRansom];
 	if(ransom <= 0)
-		return SendClientMessage(playerid, COLOR_ERROR, "There is no ransom set — you cannot buy your freedom (wait for a cop or escape).");
+		return SendClientMessage(playerid, COLOR_ERROR, "There is no ransom set - you cannot buy your freedom (wait for a cop or escape).");
 
 	// The victim pays cash-first, then bank (mirrors the medical-fee debit order).
 	if((PlayerInfo[playerid][pMoney] + PlayerInfo[playerid][pBankMoney]) < ransom)
@@ -515,7 +515,7 @@ CMD:payransom(playerid, params[])
 alias:payransom("pr")
 
 //==============================================================================
-//	Command — /uncuff [id] (a cop frees a kidnapped victim near them, §4.4)
+//	Command - /uncuff [id] (a cop frees a kidnapped victim near them, §4.4)
 //==============================================================================
 
 CMD:uncuff(playerid, params[])
@@ -561,20 +561,20 @@ CMD:uncuff(playerid, params[])
 }
 
 //==============================================================================
-//	Command — /fakeskill (kidnapper disguise — appear as a Driver, §4.4)
+//	Command - /fakeskill (kidnapper disguise - appear as a Driver, §4.4)
 //==============================================================================
 
 // §4.4 / research: Kidnappers disguise as Drivers. The full skill-name spoof is an
 // M6 skill feature; here /fakeskill toggles a session flag other systems can read
-// (no visual/name change is applied in M5 — skins/skill names land in M6).
+// (no visual/name change is applied in M5 - skins/skill names land in M6).
 CMD:fakeskill(playerid, params[])
 {
 	#pragma unused params
 	if(!PlayerInfo[playerid][pLoggedIn]) return SendClientMessage(playerid, COLOR_ERROR, "You must be logged in.");
 	PlayerInfo[playerid][pFakeSkillDriver] = !PlayerInfo[playerid][pFakeSkillDriver];
 	if(PlayerInfo[playerid][pFakeSkillDriver])
-		SendClientMessage(playerid, COLOR_SERVER_INFO, ""COL_GREEN"* Disguise ON "COL_WHITE"— you now appear as a Driver to others (full skin/name spoof lands with skills in M6).");
+		SendClientMessage(playerid, COLOR_SERVER_INFO, ""COL_GREEN"* Disguise ON "COL_WHITE"- you now appear as a Driver to others (full skin/name spoof lands with skills in M6).");
 	else
-		SendClientMessage(playerid, COLOR_SERVER_INFO, ""COL_GREEN"* Disguise OFF "COL_WHITE"— your real profession is shown again.");
+		SendClientMessage(playerid, COLOR_SERVER_INFO, ""COL_GREEN"* Disguise OFF "COL_WHITE"- your real profession is shown again.");
 	return 1;
 }

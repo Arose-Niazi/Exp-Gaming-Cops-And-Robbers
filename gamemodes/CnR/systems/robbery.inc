@@ -2,12 +2,12 @@
 
 	Full robbery system + crowbar for Cops And Robbers script
 	Scripted by Arose Niazi.
-	Milestone 5 (stage 2) — design §5 (the robberies system — THE spec):
+	Milestone 5 (stage 2) - design §5 (the robberies system - THE spec):
 	  §5.1 shoplifting, §5.2 store-holdup UPGRADE (crowbar bonus + cop interrupt),
-	  §5.3 bank robbery, §5.4 casino robbery, §5.5 house robbery (shell — depends on
+	  §5.3 bank robbery, §5.4 casino robbery, §5.5 house robbery (shell - depends on
 	  M5 stage-3 housing), §5.6 special/major robberies (12-min hideout window),
 	  §5.7 the crowbar (clothing item, dual effect, confiscated on arrest).
-	Grounding: docs/research/crazybobs-site-full.md (§Robberies and Crowbar —
+	Grounding: docs/research/crazybobs-site-full.md (§Robberies and Crowbar -
 	VERIFIED numbers) + design §5.8 / §11.2 / §11.4 (DB additions).
 
 	This is the M5 robbery framework. It UPGRADES the M4 base store holdup
@@ -17,16 +17,16 @@
 
 	  - SAFE-TYPE robberies (bank/casino/special): a two-phase sequence driven by a
 	    per-player 1s crack countdown (pRobTimer) then a gettime()-deadline carry
-	    window checked on the shared GameModeClock tick (Robbery_OnTick — NO new
+	    window checked on the shared GameModeClock tick (Robbery_OnTick - NO new
 	    global timer for the 12-minute window). Crack the safe at the site
 	    checkpoint, then deliver it to a RANDOM hideout checkpoint before the
 	    deadline. Payout on delivery via the Bank_* API.
 	  - The BANK robbery physically MOVES money: it drains random ONLINE players'
 	    BANK balances (max $100k each) with Bank_Take and hands it to the robber
-	    with Bank_GiveCash — victims lose exactly what the robber gains. Bank-insured
+	    with Bank_GiveCash - victims lose exactly what the robber gains. Bank-insured
 	    victims (an active LifeInsurance/HealthInsurance policy) are refunded 75% of
 	    their loss from a gov/void source (this is the ONLY minted money by design,
-	    a deliberate insurance subsidy — not a dupe of the robber's take).
+	    a deliberate insurance subsidy - not a dupe of the robber's take).
 	  - SHOPLIFTING: a low-risk on-foot item steal at a store clerk (small cash, +2).
 
 	Crowbar (§5.7): pCrowbarEquipped (LSplayers.CrowbarEquipped) is a clothing item
@@ -34,28 +34,28 @@
 	equipped it shortens the clerk wait + safe-crack time and raises the register
 	take + safe-crack success. On ARREST it is confiscated if the robber's
 	RobberyHistory (LSplayers.RobberyHistory, ROB_* bitmask) carries a robbery flag
-	(Robbery_OnArrest, hooked from Jail_SendToJail) — UNLESS the robber was killed
+	(Robbery_OnArrest, hooked from Jail_SendToJail) - UNLESS the robber was killed
 	by a cop (lethal force keeps the crowbar, Robbery_OnPlayerDeath).
 
 	Public API:
 		Robbery_Init()                       : create bank/casino/special site checkpoints + map icons (OnGameModeInit)
-		Robbery_OnTick()                     : shared GameModeClock 1s tick — carry-window deadline enforcement
-		Robbery_OnArrest(playerid)           : arrest hook — abort a running rob + confiscate crowbar (from jail.inc)
-		Robbery_OnPlayerDeath(playerid, killerid) : death hook — abort a running rob; keep crowbar if killed by a cop (§5.7)
+		Robbery_OnTick()                     : shared GameModeClock 1s tick - carry-window deadline enforcement
+		Robbery_OnArrest(playerid)           : arrest hook - abort a running rob + confiscate crowbar (from jail.inc)
+		Robbery_OnPlayerDeath(playerid, killerid) : death hook - abort a running rob; keep crowbar if killed by a cop (§5.7)
 		Robbery_OnDisconnect(playerid)       : kill the crack timer on disconnect
 		Robbery_OnEnterCP(playerid, STREAMER_TAG_CP:cpid) : dynamic-CP hook (from OnPlayerEnterDynamicCP)
-		Robbery_HasHistory(playerid)         : bool — RobberyHistory carries any ROB_* flag
+		Robbery_HasHistory(playerid)         : bool - RobberyHistory carries any ROB_* flag
 		Robbery_CrowbarShortenSecs(playerid, base) : safe-crack seconds after the crowbar reduction
 		Holdup_CrowbarEquipped(playerid)     : bool the holdup upgrade reads for its wait/rate bonus
 
-	Commands (crowbar buy/remove UI moved to systems/clothes.inc in M6 — this module
+	Commands (crowbar buy/remove UI moved to systems/clothes.inc in M6 - this module
 	keeps only the crowbar EFFECT + the Robbery_BuyCrowbar/Robbery_RemoveCrowbar publics
 	the clothes menu calls):
-		/shoplift                            (civ, on-foot)  §5.1 — low-risk store item steal
-		/bankrob (/robbank)                  (civ)           §5.3 — start a bank-safe crack at a bank checkpoint
-		/casinorob                           (civ)           §5.4 — start a casino-safe crack
-		/robbery                             (civ)           §5.6 — start a special/major-site safe crack (dispatch by checkpoint)
-		/houserob (/hrob /hsrob)             (civ)           §5.5 — break into the nearest OWNED house (owner must be online); money moves house→robber, no mint (housing.inc)
+		/shoplift                            (civ, on-foot)  §5.1 - low-risk store item steal
+		/bankrob (/robbank)                  (civ)           §5.3 - start a bank-safe crack at a bank checkpoint
+		/casinorob                           (civ)           §5.4 - start a casino-safe crack
+		/robbery                             (civ)           §5.6 - start a special/major-site safe crack (dispatch by checkpoint)
+		/houserob (/hrob /hsrob)             (civ)           §5.5 - break into the nearest OWNED house (owner must be online); money moves house->robber, no mint (housing.inc)
 		/stoprobbery (/stoprob)              (cop, on-foot)  interrupt a nearby robber mid-holdup/crack (§5.2)
 
 	Functions Being Called:
@@ -67,7 +67,7 @@
 */
 
 //==============================================================================
-//	Robbery site tables (checkpoints) — design §5.3/§5.4/§5.6
+//	Robbery site tables (checkpoints) - design §5.3/§5.4/§5.6
 //==============================================================================
 
 // A robbery site: the crack checkpoint the player starts the robbery at. `kind`
@@ -85,10 +85,10 @@ enum e_RobSite
 
 // Only LS sites are live now (CITY_ == LS); SF/LV coords are kept for when those
 // cities go live (§5.3 lists all 7 banks / 5 casinos). We create checkpoints for
-// every listed site — out-of-city ones simply never get walked into.
+// every listed site - out-of-city ones simply never get walked into.
 static const g_RobSites[][e_RobSite] =
 {
-	// --- Banks (§5.3 — 7 total; the 3 city branches carry a cooldown branch) ---
+	// --- Banks (§5.3 - 7 total; the 3 city branches carry a cooldown branch) ---
 	{ 620.250,  -1258.000, 13.500, ROBKIND_BANK,    0, "Los Santos Bank" },
 	{ -2021.000, 460.250,  35.000, ROBKIND_BANK,    1, "San Fierro Bank" },
 	{ 2470.000,  2258.750, 10.500, ROBKIND_BANK,    2, "Las Venturas Bank" },
@@ -100,7 +100,7 @@ static const g_RobSites[][e_RobSite] =
 	{ -1699.000, 1036.000, 45.000, ROBKIND_SPECIAL, -1, "SF Federal Mint" }
 };
 
-// Hideouts (§5.3/§5.6 — deliver the safe to a RANDOM one). Spread across the map.
+// Hideouts (§5.3/§5.6 - deliver the safe to a RANDOM one). Spread across the map.
 static const Float:g_RobHideouts[][3] =
 {
 	{ 1638.000, -2237.000, 13.500 },	// LS Ocean Docks
@@ -182,7 +182,7 @@ static Robbery_AlertCops(playerid, const what[])
 	new string[160], zoneName[MAX_ZONE_NAME];
 	if(isNull(PlayerInfo[playerid][pZoneName])) format(zoneName, sizeof(zoneName), "the city");
 	else format(zoneName, sizeof(zoneName), "%s", PlayerInfo[playerid][pZoneName]);
-	format(string, sizeof(string), ""COL_ORANGE"[ROBBERY] "COL_WHITE"%s (%d) — %s near %s! Respond!", PlayerInfo[playerid][pUserName], playerid, what, zoneName);
+	format(string, sizeof(string), ""COL_ORANGE"[ROBBERY] "COL_WHITE"%s (%d) - %s near %s! Respond!", PlayerInfo[playerid][pUserName], playerid, what, zoneName);
 	for(new i = 0; i < MAX_PLAYERS; i++)
 	{
 		if(!IsPlayerConnected(i) || IsPlayerNPC(i) || i == playerid) continue;
@@ -191,7 +191,7 @@ static Robbery_AlertCops(playerid, const what[])
 }
 
 //==============================================================================
-//	Site setup (checkpoints + map icons) — OnGameModeInit
+//	Site setup (checkpoints + map icons) - OnGameModeInit
 //==============================================================================
 
 FUNCTION Robbery_Init()
@@ -211,7 +211,7 @@ FUNCTION Robbery_Init()
 }
 
 // Destroy all robbery-site checkpoints and bank map icons on gamemode exit.
-// Mirrors Moneybag_Cleanup — called from OnGameModeExit.
+// Mirrors Moneybag_Cleanup - called from OnGameModeExit.
 FUNCTION Robbery_Cleanup()
 {
 	for(new i = 0; i < sizeof(g_RobSites); i++)
@@ -236,7 +236,7 @@ static Robbery_SiteAt(playerid, kindFilter)
 }
 
 //==============================================================================
-//	Bank-cooldown branch helpers (server_data.BankRobLast*) — §5.3
+//	Bank-cooldown branch helpers (server_data.BankRobLast*) - §5.3
 //==============================================================================
 
 static Robbery_BranchStamp(branch)
@@ -262,7 +262,7 @@ static Robbery_SetBranchStamp(branch, stamp)
 }
 
 //==============================================================================
-//	Safe-type robbery sequence (crack -> carry -> deliver) — §5.3/§5.4/§5.6
+//	Safe-type robbery sequence (crack -> carry -> deliver) - §5.3/§5.4/§5.6
 //==============================================================================
 
 // Abort a running safe-type robbery (any phase). announce prints the failure.
@@ -298,7 +298,7 @@ static Robbery_BeginCarry(playerid)
 	PlayerInfo[playerid][pRobHideout] = random(sizeof(g_RobHideouts));
 	PlayerInfo[playerid][pRobDeadline] = gettime() + ((PlayerInfo[playerid][pRobKind] == ROBKIND_BANK) ? BANKROB_HIDEOUT_SECS : ROB_HIDEOUT_SECS);
 
-	// Extra wanted for carrying the safe (§5.3 escalation → WL9-10).
+	// Extra wanted for carrying the safe (§5.3 escalation -> WL9-10).
 	GivePlayerWanted(playerid, (PlayerInfo[playerid][pRobKind] == ROBKIND_BANK) ? BANKROB_WANTED_CARRY : ROB_WANTED_CARRY, "Carrying a robbery safe");
 
 	new h = PlayerInfo[playerid][pRobHideout];
@@ -306,7 +306,7 @@ static Robbery_BeginCarry(playerid)
 
 	new mins = ((PlayerInfo[playerid][pRobKind] == ROBKIND_BANK) ? BANKROB_HIDEOUT_SECS : ROB_HIDEOUT_SECS) / 60;
 	new msg[160];
-	format(msg, sizeof(msg), ""COL_GREEN"* Safe cracked! "COL_WHITE"Get the safe to the marked hideout within "COL_YELLOW"%d minutes"COL_WHITE" — the cops are on you!", mins);
+	format(msg, sizeof(msg), ""COL_GREEN"* Safe cracked! "COL_WHITE"Get the safe to the marked hideout within "COL_YELLOW"%d minutes"COL_WHITE" - the cops are on you!", mins);
 	SendClientMessage(playerid, COLOR_SERVER_INFO, msg);
 	Robbery_AlertCops(playerid, "is fleeing with a cracked safe");
 }
@@ -330,12 +330,12 @@ FUNCTION Robbery_CrackTick(playerid)
 	if(PlayerInfo[playerid][pRobCrackLeft] <= 0)
 	{
 		if(PlayerInfo[playerid][pRobTimer] != -1) { KillTimer(PlayerInfo[playerid][pRobTimer]); PlayerInfo[playerid][pRobTimer] = -1; }
-		// Success roll (§5.7 — a crowbar RAISES the chance of a successful crack).
+		// Success roll (§5.7 - a crowbar RAISES the chance of a successful crack).
 		// Base ROB_CRACK_BASE_SUCCESS%, +CROWBAR_SUCCESS_BONUS% with a crowbar.
 		new chance = ROB_CRACK_BASE_SUCCESS + (PlayerInfo[playerid][pCrowbarEquipped] ? CROWBAR_SUCCESS_BONUS : 0);
 		if(random(100) >= chance)
 		{
-			Robbery_Abort(playerid, true, "the safe jammed — the crack failed. Try again.");
+			Robbery_Abort(playerid, true, "the safe jammed - the crack failed. Try again.");
 			return 1;
 		}
 		Robbery_BeginCarry(playerid);
@@ -373,13 +373,13 @@ static Robbery_StartCrack(playerid, s)
 	PlayerInfo[playerid][pRobTimer] = SetTimerEx("Robbery_CrackTick", 1000, true, "d", playerid);
 
 	new msg[176];
-	format(msg, sizeof(msg), ""COL_RED"* ROBBERY! "COL_WHITE"Cracking the %s safe — hold position for "COL_YELLOW"~%d seconds"COL_WHITE".%s", g_RobSites[s][rsName], secs, PlayerInfo[playerid][pCrowbarEquipped] ? " (crowbar: faster)" : "");
+	format(msg, sizeof(msg), ""COL_RED"* ROBBERY! "COL_WHITE"Cracking the %s safe - hold position for "COL_YELLOW"~%d seconds"COL_WHITE".%s", g_RobSites[s][rsName], secs, PlayerInfo[playerid][pCrowbarEquipped] ? " (crowbar: faster)" : "");
 	SendClientMessage(playerid, COLOR_SERVER_INFO, msg);
 	Robbery_AlertCops(playerid, "is cracking a safe");
 }
 
 //==============================================================================
-//	Payout on hideout delivery — §5.3 (money MOVES), §5.4/§5.6 (server yield)
+//	Payout on hideout delivery - §5.3 (money MOVES), §5.4/§5.6 (server yield)
 //==============================================================================
 
 // Bank rob payout: drain random ONLINE players' BANK balances (max $100k each),
@@ -420,7 +420,7 @@ static Robbery_PayoutBank(playerid)
 		}
 
 		new vmsg[176];
-		if(insured) format(vmsg, sizeof(vmsg), ""COL_RED"* Bank robbery! "COL_WHITE"$%d"COL_RED" was taken from your account — insurance refunded "COL_GREEN"$%d"COL_WHITE".", take, refund);
+		if(insured) format(vmsg, sizeof(vmsg), ""COL_RED"* Bank robbery! "COL_WHITE"$%d"COL_RED" was taken from your account - insurance refunded "COL_GREEN"$%d"COL_WHITE".", take, refund);
 		else format(vmsg, sizeof(vmsg), ""COL_RED"* Bank robbery! "COL_WHITE"$%d"COL_RED" was stolen from your bank account. Get insured to recover losses."COL_WHITE, take);
 		SendClientMessage(i, COLOR_VICTIM, vmsg);
 
@@ -445,7 +445,7 @@ static Robbery_PayoutYield(playerid, kind)
 	if(kind == ROBKIND_CASINO) { lo = CASINOROB_YIELD_MIN; hi = CASINOROB_YIELD_MAX; }
 	else { lo = SPECIALROB_YIELD_MIN; hi = SPECIALROB_YIELD_MAX; }
 
-	// Scale with the online population (§5 — payouts scale with server size).
+	// Scale with the online population (§5 - payouts scale with server size).
 	new online = 0;
 	for(new i = 0; i < MAX_PLAYERS; i++) if(IsPlayerConnected(i) && !IsPlayerNPC(i)) online++;
 	new span = hi - lo;
@@ -457,7 +457,7 @@ static Robbery_PayoutYield(playerid, kind)
 	return pay;
 }
 
-// The player reached the hideout carrying a safe — pay out + finish. §5.3/§5.6.
+// The player reached the hideout carrying a safe - pay out + finish. §5.3/§5.6.
 static Robbery_Deliver(playerid)
 {
 	new kind = PlayerInfo[playerid][pRobKind], take = 0, histFlag = ROB_SPECIAL;
@@ -490,7 +490,7 @@ static Robbery_Deliver(playerid)
 }
 
 //==============================================================================
-//	Shared GameModeClock tick — carry-window deadline (NO new global timer) §5.6
+//	Shared GameModeClock tick - carry-window deadline (NO new global timer) §5.6
 //==============================================================================
 
 FUNCTION Robbery_OnTick()
@@ -500,13 +500,13 @@ FUNCTION Robbery_OnTick()
 		if(!IsPlayerConnected(playerid) || IsPlayerNPC(playerid)) continue;
 		if(PlayerInfo[playerid][pRobStage] != ROBSTAGE_CARRYING) continue;
 
-		// Deadline blown — the safe is lost (§5.6 12-minute window).
+		// Deadline blown - the safe is lost (§5.6 12-minute window).
 		if(gettime() >= PlayerInfo[playerid][pRobDeadline])
 		{
 			Robbery_Abort(playerid, true, "you ran out of time to reach the hideout.");
 			continue;
 		}
-		// Reached the hideout on foot? (checkpoint proximity — belt-and-braces to
+		// Reached the hideout on foot? (checkpoint proximity - belt-and-braces to
 		// OnPlayerEnterCheckpoint so a missed callback still resolves the delivery.)
 		new h = PlayerInfo[playerid][pRobHideout];
 		if(!IsPlayerInAnyVehicle(playerid) && IsPlayerInRangeOfPoint(playerid, 4.0, g_RobHideouts[h][0], g_RobHideouts[h][1], g_RobHideouts[h][2]))
@@ -519,7 +519,7 @@ FUNCTION Robbery_OnTick()
 //	Checkpoint / hook entry points
 //==============================================================================
 
-// Standard (non-race) checkpoint entry — the hideout delivery is a plain
+// Standard (non-race) checkpoint entry - the hideout delivery is a plain
 // SetPlayerCheckpoint, so this resolves it. Hooked from OnPlayerEnterCheckpoint.
 FUNCTION Robbery_OnPlayerEnterCheckpoint(playerid)
 {
@@ -535,7 +535,7 @@ FUNCTION Robbery_OnPlayerEnterCheckpoint(playerid)
 	return 0;
 }
 
-// Dynamic-CP entry (site checkpoints). Just a hint — the actual start is the
+// Dynamic-CP entry (site checkpoints). Just a hint - the actual start is the
 // /bankrob //casinorob //robbery command (site proximity is re-checked there).
 FUNCTION Robbery_OnEnterCP(playerid, STREAMER_TAG_CP:cpid)
 {
@@ -559,12 +559,12 @@ FUNCTION Robbery_OnEnterCP(playerid, STREAMER_TAG_CP:cpid)
 }
 
 //==============================================================================
-//	Arrest / death / disconnect hooks — crowbar confiscation (§5.7)
+//	Arrest / death / disconnect hooks - crowbar confiscation (§5.7)
 //==============================================================================
 
 // Arrest hook (from Jail_SendToJail). Aborts any running robbery and confiscates
 // the crowbar if RobberyHistory carries a robbery flag (§5.7). The ARREST path
-// always confiscates — the "killed by a cop keeps it" exception is death-only.
+// always confiscates - the "killed by a cop keeps it" exception is death-only.
 FUNCTION Robbery_OnArrest(playerid)
 {
 	Robbery_Abort(playerid, false, "");
@@ -582,8 +582,8 @@ FUNCTION Robbery_OnArrest(playerid)
 
 // Death hook (from OnPlayerDeath). Aborts a running robbery. §5.7 exception: if
 // the robber was KILLED BY A COP (lethal force), the crowbar is NOT confiscated.
-// Any OTHER death (civilian kill, environment, suicide) also keeps the crowbar —
-// only a lawful ARREST confiscates it — so here we only abort the sequence.
+// Any OTHER death (civilian kill, environment, suicide) also keeps the crowbar -
+// only a lawful ARREST confiscates it - so here we only abort the sequence.
 FUNCTION Robbery_OnPlayerDeath(playerid, killerid)
 {
 	#pragma unused killerid
@@ -603,12 +603,12 @@ FUNCTION Robbery_OnDisconnect(playerid)
 }
 
 //==============================================================================
-//	The crowbar (clothing item) — buy / remove path (§5.7)
+//	The crowbar (clothing item) - buy / remove path (§5.7)
 //==============================================================================
 
 // Shared crowbar purchase path. $40,000 via Bank_TakeCash. The item's UI (the
 // /clotheswear menu entry, /buycrowbar, /crowbar) lives in systems/clothes.inc as
-// of M6 (the clothes system) — this stays here because the crowbar's crime EFFECT
+// of M6 (the clothes system) - this stays here because the crowbar's crime EFFECT
 // (holdup/safe-crack readers, arrest confiscation) is owned by this module. Clothes
 // calls this public to buy+equip so /buycrowbar and the clothes menu are unified.
 FUNCTION Robbery_BuyCrowbar(playerid)
@@ -618,7 +618,7 @@ FUNCTION Robbery_BuyCrowbar(playerid)
 	if(PlayerInfo[playerid][pMoney] < CROWBAR_PRICE)
 	{
 		new err[128];
-		format(err, sizeof(err), "A crowbar costs "COL_GREEN"$%d"COL_WHITE" cash — you cannot afford it.", CROWBAR_PRICE);
+		format(err, sizeof(err), "A crowbar costs "COL_GREEN"$%d"COL_WHITE" cash - you cannot afford it.", CROWBAR_PRICE);
 		return SendClientMessage(playerid, COLOR_ERROR, err);
 	}
 	if(!Bank_TakeCash(playerid, CROWBAR_PRICE)) return SendClientMessage(playerid, COLOR_ERROR, "Payment failed.");
@@ -627,12 +627,12 @@ FUNCTION Robbery_BuyCrowbar(playerid)
 	Jail_SavePlayer(playerid);	// persist the equip flag (§5.8)
 
 	new msg[176];
-	format(msg, sizeof(msg), ""COL_GREEN"* Crowbar equipped "COL_WHITE"($%d)"COL_GREEN". "COL_WHITE"It shortens holdup/robbery time and raises your register take (§ robberies). Lost on arrest.", CROWBAR_PRICE);
+	format(msg, sizeof(msg), ""COL_GREEN"* Crowbar equipped "COL_WHITE"($%d)"COL_GREEN". "COL_WHITE"It shortens holdup/robbery time and raises your register take (see robberies). Lost on arrest.", CROWBAR_PRICE);
 	SendClientMessage(playerid, COLOR_SERVER_INFO, msg);
 	return 1;
 }
 
-// Put the crowbar away (unequip). §5.7 remove path — called from /crowbar (clothes.inc).
+// Put the crowbar away (unequip). §5.7 remove path - called from /crowbar (clothes.inc).
 FUNCTION Robbery_RemoveCrowbar(playerid)
 {
 	if(!PlayerInfo[playerid][pLoggedIn]) return SendClientMessage(playerid, COLOR_ERROR, "You must be logged in.");
@@ -644,7 +644,7 @@ FUNCTION Robbery_RemoveCrowbar(playerid)
 }
 
 //==============================================================================
-//	§5.1 Shoplifting — /shoplift (low-risk store item steal)
+//	§5.1 Shoplifting - /shoplift (low-risk store item steal)
 //==============================================================================
 
 CMD:shoplift(playerid, params[])
@@ -655,7 +655,7 @@ CMD:shoplift(playerid, params[])
 	if(gettime() < PlayerInfo[playerid][pShopliftCooldown])
 	{
 		new err[112];
-		format(err, sizeof(err), "You just shoplifted — wait %d seconds before trying again.", PlayerInfo[playerid][pShopliftCooldown] - gettime());
+		format(err, sizeof(err), "You just shoplifted - wait %d seconds before trying again.", PlayerInfo[playerid][pShopliftCooldown] - gettime());
 		return SendClientMessage(playerid, COLOR_ERROR, err);
 	}
 	// Must be at a store clerk (reuse the holdup store-actor gate).
@@ -678,7 +678,7 @@ CMD:shoplift(playerid, params[])
 }
 
 //==============================================================================
-//	§5.3 Bank robbery — /bankrob (safe crack at a bank checkpoint)
+//	§5.3 Bank robbery - /bankrob (safe crack at a bank checkpoint)
 //==============================================================================
 
 CMD:bankrob(playerid, params[])
@@ -698,7 +698,7 @@ CMD:bankrob(playerid, params[])
 	{
 		new left = (Robbery_BranchStamp(branch) - gettime() + 59) / 60;
 		new err[128];
-		format(err, sizeof(err), "This bank is closed after a recent robbery — try again in ~%d minutes.", left);
+		format(err, sizeof(err), "This bank is closed after a recent robbery - try again in ~%d minutes.", left);
 		return SendClientMessage(playerid, COLOR_ERROR, err);
 	}
 
@@ -708,7 +708,7 @@ CMD:bankrob(playerid, params[])
 alias:bankrob("robbank")
 
 //==============================================================================
-//	§5.4 Casino robbery — /casinorob
+//	§5.4 Casino robbery - /casinorob
 //==============================================================================
 
 CMD:casinorob(playerid, params[])
@@ -725,7 +725,7 @@ CMD:casinorob(playerid, params[])
 	{
 		new left = (g_RobSiteCooldown[s] - gettime() + 59) / 60;
 		new err[112];
-		format(err, sizeof(err), "This casino was just robbed — try again in ~%d minutes.", left);
+		format(err, sizeof(err), "This casino was just robbed - try again in ~%d minutes.", left);
 		return SendClientMessage(playerid, COLOR_ERROR, err);
 	}
 	Robbery_StartCrack(playerid, s);
@@ -733,7 +733,7 @@ CMD:casinorob(playerid, params[])
 }
 
 //==============================================================================
-//	§5.6 Special / major robberies — /robbery (dispatch by checkpoint)
+//	§5.6 Special / major robberies - /robbery (dispatch by checkpoint)
 //==============================================================================
 
 CMD:robbery(playerid, params[])
@@ -752,7 +752,7 @@ CMD:robbery(playerid, params[])
 	{
 		new left = (g_RobSiteCooldown[s] - gettime() + 59) / 60;
 		new err[112];
-		format(err, sizeof(err), "This site was just robbed — try again in ~%d minutes.", left);
+		format(err, sizeof(err), "This site was just robbed - try again in ~%d minutes.", left);
 		return SendClientMessage(playerid, COLOR_ERROR, err);
 	}
 	Robbery_StartCrack(playerid, s);
@@ -760,15 +760,15 @@ CMD:robbery(playerid, params[])
 }
 
 //==============================================================================
-//	§5.5 House robbery — /houserob (wired into the M5 stage-3 housing system)
+//	§5.5 House robbery - /houserob (wired into the M5 stage-3 housing system)
 //==============================================================================
 
 // Break into the nearest OWNED house at the player's position (§5.5). Gates: crime
 // gate (cop/jailed/spawn-protected/DM-zone), on foot, per-robber cooldown, a house
-// entrance within range, and — the CB rule — the OWNER must be ONLINE. The break-in
+// entrance within range, and - the CB rule - the OWNER must be ONLINE. The break-in
 // rolls against the house's super lock / pet defenses (House_RobSteal, in housing.inc,
 // included before this module). On a SUCCESSFUL break-in the house's stored money
-// MOVES into the robber's hand (Bank_GiveCash) — the house loses exactly what the
+// MOVES into the robber's hand (Bank_GiveCash) - the house loses exactly what the
 // robber gains (NO minting). Either way a warrant (+6) is issued, the ROB_HOUSE flag
 // is set, the house alarm fires (owner + cops), and the cooldown is stamped.
 CMD:houserob(playerid, params[])
@@ -781,7 +781,7 @@ CMD:houserob(playerid, params[])
 	if(gettime() < PlayerInfo[playerid][pHouseRobCooldown])
 	{
 		new err[128];
-		format(err, sizeof(err), "You just attempted a house robbery — wait %d seconds before the next one.", PlayerInfo[playerid][pHouseRobCooldown] - gettime());
+		format(err, sizeof(err), "You just attempted a house robbery - wait %d seconds before the next one.", PlayerInfo[playerid][pHouseRobCooldown] - gettime());
 		return SendClientMessage(playerid, COLOR_ERROR, err);
 	}
 
@@ -811,7 +811,7 @@ CMD:houserob(playerid, params[])
 alias:houserob("hrob", "hsrob")
 
 //==============================================================================
-//	§5.2 Cop mid-robbery interrupt — /stoprobbery (minimal interrupt)
+//	§5.2 Cop mid-robbery interrupt - /stoprobbery (minimal interrupt)
 //==============================================================================
 
 // A cop on foot near a robber can interrupt a running holdup OR safe-crack. This
@@ -842,7 +842,7 @@ CMD:stoprobbery(playerid, params[])
 	new msg[144];
 	format(msg, sizeof(msg), ""COL_ORANGE"* You interrupted %s (%d)'s robbery! "COL_WHITE"Arrest them before they flee.", PlayerInfo[target][pUserName], target);
 	SendClientMessage(playerid, COLOR_SERVER_INFO, msg);
-	format(msg, sizeof(msg), ""COL_RED"* A cop interrupted your robbery — you got nothing! "COL_WHITE"Run or you'll be arrested.");
+	format(msg, sizeof(msg), ""COL_RED"* A cop interrupted your robbery - you got nothing! "COL_WHITE"Run or you'll be arrested.");
 	SendClientMessage(target, COLOR_ERROR, msg);
 	return 1;
 }

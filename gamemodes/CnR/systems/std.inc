@@ -2,12 +2,12 @@
 
 	STD (disease) system for Cops And Robbers script
 	Scripted by Arose Niazi.
-	Milestone 3 (stage 3) — design §4.2 (STD tiers, HP drain, cures).
+	Milestone 3 (stage 3) - design §4.2 (STD tiers, HP drain, cures).
 
 	Owns the disease side of the rape/drug/STD triangle. STDs live in a bitmask
 	(pSTD) with five tiers (Chlamydia..Mary Lou); each infected tier drains HP on
 	a slow timer and kills if untreated. Drugs stall the drain (a buzzed player
-	takes no STD damage — the drug system sets pDrugEffectUntil). Cures: condoms
+	takes no STD damage - the drug system sets pDrugEffectUntil). Cures: condoms
 	reduce the infection chance at /rape time (not a cure), the Adrenaline pill
 	(/ad, M4) fully heals + cures all, and a Public Medic can force-cure (M6).
 
@@ -16,17 +16,17 @@
 
 	Public API (called by cmds/crimes.inc + CnR.pwn):
 		STD_Has(playerid, stdBit)                : is this specific STD carried?
-		STD_HasAny(playerid)                     : bool — any STD at all
+		STD_HasAny(playerid)                     : bool - any STD at all
 		STD_Count(playerid)                      : number of tiers infected (0..MAX_STD_TYPES)
 		STD_Give(playerid, stdBit, const src[])  : infect with one STD tier
 		STD_GiveRandom(playerid, const src[])    : infect with a random not-yet-held tier
 		STD_CureAll(playerid, const reason[])    : clear all STDs (adrenaline / medic)
 		STD_NameFor(stdBit)                      : readable tier name
-		STD_OnGameModeClockTick()                : hook from GameModeClock() (1s) — HP drain
+		STD_OnGameModeClockTick()                : hook from GameModeClock() (1s) - HP drain
 		STD_SavePlayer(playerid)                 : persist (disconnect)
 
 	Functions Being Called:
-		misc:    (none — self-contained)
+		misc:    (none - self-contained)
 */
 
 //==============================================================================
@@ -81,7 +81,7 @@ FUNCTION STD_Give(playerid, stdBit, const src[])
 	PlayerInfo[playerid][pSTD] |= stdBit;
 
 	new string[144];
-	format(string, sizeof(string), ""COL_DISEASE"* You have contracted %s%s%s. "COL_WHITE"It drains your health — cure it with an Adrenaline pill (/ad) or a Public Medic.",
+	format(string, sizeof(string), ""COL_DISEASE"* You have contracted %s%s%s. "COL_WHITE"It drains your health - cure it with an Adrenaline pill (/ad) or a Public Medic.",
 		STD_NameFor(stdBit), isNull(src) ? ("") : (" from "), isNull(src) ? ("") : (src));
 	SendClientMessage(playerid, COLOR_DISEASE, string);
 	return 1;
@@ -118,12 +118,12 @@ FUNCTION STD_CureAll(playerid, const reason[])
 }
 
 //==============================================================================
-//	HP drain — hooked from GameModeClock() (1-second timer, design §4.2)
+//	HP drain - hooked from GameModeClock() (1-second timer, design §4.2)
 //==============================================================================
 
 // Runs once per real second (no new global timer). Infected players lose HP
 // scaled by how many tiers they carry, unless a drug buzz is stalling the drain
-// (§4.3 — drugs counteract the STD drain to buy time until cured). Draining to
+// (§4.3 - drugs counteract the STD drain to buy time until cured). Draining to
 // 0 HP kills the untreated carrier.
 FUNCTION STD_OnGameModeClockTick()
 {
@@ -132,7 +132,7 @@ FUNCTION STD_OnGameModeClockTick()
 		if(!IsPlayerConnected(playerid) || IsPlayerNPC(playerid)) continue;
 		if(!PlayerInfo[playerid][pLoggedIn] || !PlayerInfo[playerid][pSpawned]) continue;
 		if(PlayerInfo[playerid][pSTD] == 0) continue;
-		// Jailed/admin-jailed players are frozen — don't drain them into a death loop.
+		// Jailed/admin-jailed players are frozen - don't drain them into a death loop.
 		if(PlayerInfo[playerid][pJailed] || PlayerInfo[playerid][pAdminJailed]) continue;
 		// A live drug buzz stalls the drain (§4.3).
 		if(PlayerInfo[playerid][pDrugEffectUntil] != 0 && gettime() < PlayerInfo[playerid][pDrugEffectUntil]) continue;
@@ -165,7 +165,7 @@ FUNCTION STD_OnGameModeClockTick()
 }
 
 //==============================================================================
-//	Persistence (disconnect) — LSplayers.STDs / Condoms / ChastityBelt
+//	Persistence (disconnect) - LSplayers.STDs / Condoms / ChastityBelt
 //==============================================================================
 
 FUNCTION STD_SavePlayer(playerid)

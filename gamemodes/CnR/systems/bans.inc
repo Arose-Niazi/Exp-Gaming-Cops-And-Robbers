@@ -2,17 +2,17 @@
 
 	Native ban system for Cops And Robbers script
 	Scripted by Arose Niazi.
-	Milestone 2 — design §11.3
+	Milestone 2 - design §11.3
 
 	Replaces the legacy Bans filterscript (shared MG/MM ban DB whose credentials
-	are burned — never reused). All ban state now lives in the local `bans` table
+	are burned - never reused). All ban state now lives in the local `bans` table
 	(§9.3): Type (0 name, 1 IP, 2 serial), Value, Nick, AdminName, Reason, Date,
 	Expiry (NULL = permanent), Active.
 
 	Credits:
 
 	Functions:
-		OnBanCheck(playerid, race_check)  : async ban-lookup result → BanCheckDone
+		OnBanCheck(playerid, race_check)  : async ban-lookup result -> BanCheckDone
 		InsertBan(type, value, nick, admin, reason, days)
 		BanTarget(adminid, targetid, days, reason)  : ban name+IP+serial, kick
 
@@ -24,7 +24,7 @@
 		/unbanid <banID>    (ADMIN)
 
 	Functions Being Called:
-		bans:     BanCheckDone (login_register calls CallForChecking → here)
+		bans:     BanCheckDone (login_register calls CallForChecking -> here)
 		messages: SendMessageToAdmins, IRC_SendMessage
 */
 
@@ -50,7 +50,7 @@ FUNCTION OnBanCheck(playerid, race_check)
 		cache_get_value_name(0, "Expiry", expiry, sizeof(expiry));
 		if(isNull(expiry) || !strcmp(expiry, "NULL", true)) format(expiry, sizeof(expiry), "Never (permanent)");
 		format(string, sizeof(string), ""COL_RED"You are banned from "COMMUNITY_NAME".\n\n"COL_WHITE"Reason: "COL_YELLOW"%s\n"COL_WHITE"By: "COL_YELLOW"%s\n"COL_WHITE"Expires: "COL_YELLOW"%s\n\n"COL_WHITE"Appeal on the community forums if you believe this is a mistake.", isNull(reason) ? ("No reason given") : reason, isNull(admin) ? (SERVER_BOT) : admin, expiry);
-		ShowPlayerDialog(playerid, BAN_DIALOG, DIALOG_STYLE_MSGBOX, ""COMMUNITY_NAME" — Banned", string, "Okay", "");
+		ShowPlayerDialog(playerid, BAN_DIALOG, DIALOG_STYLE_MSGBOX, ""COMMUNITY_NAME" - Banned", string, "Okay", "");
 		CallLocalFunction("BanCheckDone", "dd", playerid, 1);
 	}
 	else
@@ -60,7 +60,7 @@ FUNCTION OnBanCheck(playerid, race_check)
 	return 1;
 }
 
-// Insert a ban row. days<=0 → permanent (Expiry NULL).
+// Insert a ban row. days<=0 -> permanent (Expiry NULL).
 InsertBan(type, const value[], const nick[], const admin[], const reason[], days)
 {
 	new string[400];
@@ -150,7 +150,7 @@ FUNCTION OnOfflineBanResolve(playerid, const packed[])
 	cache_get_row_count(rows);
 	if(!rows)
 	{
-		if(IsPlayerConnected(playerid)) SendClientMessage(playerid, COLOR_SERVER_INFO, "Name banned. (No account row found for IP/serial — name-ban only.)");
+		if(IsPlayerConnected(playerid)) SendClientMessage(playerid, COLOR_SERVER_INFO, "Name banned. (No account row found for IP/serial - name-ban only.)");
 		return 0;
 	}
 	new ip[MAX_IP_SIZE], serial[MAX_SERIAL_SIZE];

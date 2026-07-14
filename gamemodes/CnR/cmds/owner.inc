@@ -2,7 +2,7 @@
 
 	Owner commands for Cops And Robbers script
 	Scripted by Arose Niazi.
-	Milestone 2 — design §11.5 / §6.2
+	Milestone 2 - design §11.5 / §6.2
 	Last Updated: -----
 
 	Credits:
@@ -11,12 +11,12 @@
 		GrantRefreshPlayer(targetid)  : re-apply a live grant to an online player
 
 	Commands:
-		/atime <h> [m]                — set game clock + broadcast (OWNER)
-		/makeadmin <id> <0-5>         — set staff rank (MANAGER+, up to rank<own)
-		/makeregular <id> [0/1]       — toggle Regular Player (OWNER)
-		/makedj <id> [0/1]            — toggle DJ (OWNER)
-		/makedonator <id> [0/1]       — toggle VIP/Donator (OWNER)
-		/startmoneyrush               — start the money-rush event (shell, OWNER)
+		/atime <h> [m]                - set game clock + broadcast (OWNER)
+		/makeadmin <id> <0-5>         - set staff rank (MANAGER+, up to rank<own)
+		/makeregular <id> [0/1]       - toggle Regular Player (OWNER)
+		/makedj <id> [0/1]            - toggle DJ (OWNER)
+		/makedonator <id> [0/1]       - toggle VIP/Donator (OWNER)
+		/startmoneyrush               - start the money-rush event (shell, OWNER)
 
 	Functions Being Called:
 		messages: SendMessageToAdmins, IRC_SendMessage
@@ -128,13 +128,13 @@ CMD:makeregular(playerid, params[]) return GrantBoolFlag(playerid, params, "Regu
 CMD:makedj(playerid, params[])      return GrantBoolFlag(playerid, params, "Dj", "dj");
 CMD:makedonator(playerid, params[]) return GrantBoolFlag(playerid, params, "Vip", "donator");
 
-// M4 (stage 2) — start (or force-end) the money-rush cash-rain event (§8.2).
+// M4 (stage 2) - start (or force-end) the money-rush cash-rain event (§8.2).
 // The event mechanics live in systems/moneyrush.inc; this is the owner gate.
 CMD:startmoneyrush(playerid, params[])
 {
 	if(PlayerInfo[playerid][pRank] < SERVER_OWNER) return SendClientMessage(playerid, COLOR_ERROR, ERROR_NOT_ADMIN);
 
-	// /startmoneyrush stop → force-end a running rush early.
+	// /startmoneyrush stop -> force-end a running rush early.
 	if(!isNull(params) && !strcmp(params, "stop", true))
 	{
 		if(!Moneyrush_IsActive()) return SendClientMessage(playerid, COLOR_ERROR, "No money-rush event is running.");
@@ -148,7 +148,7 @@ CMD:startmoneyrush(playerid, params[])
 
 	if(Moneyrush_IsActive()) return SendClientMessage(playerid, COLOR_ERROR, "A money-rush event is already running. Use /startmoneyrush stop to end it.");
 	if(!Moneyrush_Start(playerid))
-		return SendClientMessage(playerid, COLOR_ERROR, "The money-rush is on cooldown — try again shortly.");
+		return SendClientMessage(playerid, COLOR_ERROR, "The money-rush is on cooldown - try again shortly.");
 
 	new string[128];
 	format(string, sizeof(string), "%s (%d) started a money-rush event.", PlayerInfo[playerid][pUserName], playerid);

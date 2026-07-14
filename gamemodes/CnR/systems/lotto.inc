@@ -2,7 +2,7 @@
 
 	Lotto (pick-a-number lottery) for Cops And Robbers script
 	Scripted by Arose Niazi.
-	Milestone 4 (stage 2) — design §9.5 (lotto) + §10.3 (the clock-tick draw
+	Milestone 4 (stage 2) - design §9.5 (lotto) + §10.3 (the clock-tick draw
 	fix) + §11.4 (server_data.LottoJackpot) + docs/research/economy.md §4.
 
 	Pick-a-number lotto: /lotto <1..LOTTO_MAX> buys one ticket for the current
@@ -11,7 +11,7 @@
 	server_data.LottoJackpot (ServerInfo[sLottoJackpot]).
 
 	THE CLOCK-TICK FIX (§10.3): the draw is bound to the IN-GAME clock, not a
-	real-time timer — this is the legacy "lottery timer bug" fix. Lotto_Draw()
+	real-time timer - this is the legacy "lottery timer bug" fix. Lotto_Draw()
 	fires from GameModeClock()'s hour transition when GameHour hits
 	LOTTO_DRAW_HOUR (18), guarded by a static "last drawn game-day" so it fires
 	exactly once per game-day and never double-fires on a skipped/relogged hour.
@@ -27,7 +27,7 @@
 
 	Public API:
 		Lotto_Draw()                 : run a draw (clock hour 18 / /alotto force)
-		Lotto_ResetDayGuard()        : (none — the guard is static in CnR.pwn)
+		Lotto_ResetDayGuard()        : (none - the guard is static in CnR.pwn)
 
 	Commands:
 		/lotto <1..125>   (player)  buy a ticket for the game-day (§9.5)
@@ -54,7 +54,7 @@ static Lotto_FeedJackpot(amount)
 }
 
 //==============================================================================
-//	The draw (design §9.5 / §10.3) — called from the game-clock hour transition
+//	The draw (design §9.5 / §10.3) - called from the game-clock hour transition
 //==============================================================================
 
 // Run one lotto draw. Picks a winning number, pays every holder of it an equal
@@ -78,10 +78,10 @@ FUNCTION Lotto_Draw()
 
 	if(winners == 0)
 	{
-		// Nobody won — roll the jackpot over to the next draw (kept, floored).
+		// Nobody won - roll the jackpot over to the next draw (kept, floored).
 		if(ServerInfo[sLottoJackpot] < LOTTO_JACKPOT_BASE) ServerInfo[sLottoJackpot] = LOTTO_JACKPOT_BASE;
 		SaveLottoJackpot();
-		format(string, sizeof(string), ""COL_YELLOW"[LOTTO] "COL_WHITE"The number was "COL_GREEN"%d"COL_WHITE" — no winner! The "COL_GREEN"$%d"COL_WHITE" jackpot rolls over.", winningNumber, jackpot);
+		format(string, sizeof(string), ""COL_YELLOW"[LOTTO] "COL_WHITE"The number was "COL_GREEN"%d"COL_WHITE" - no winner! The "COL_GREEN"$%d"COL_WHITE" jackpot rolls over.", winningNumber, jackpot);
 		SendClientMessageToAll(COLOR_SERVER_INFO, string);
 	}
 	else
@@ -103,7 +103,7 @@ FUNCTION Lotto_Draw()
 			SendClientMessage(i, COLOR_SERVER_INFO, msg);
 		}
 
-		// Jackpot paid out — reset to the base for the next round.
+		// Jackpot paid out - reset to the base for the next round.
 		ServerInfo[sLottoJackpot] = LOTTO_JACKPOT_BASE;
 		SaveLottoJackpot();
 	}
@@ -124,7 +124,7 @@ FUNCTION Lotto_Draw()
 }
 
 //==============================================================================
-//	Command — /lotto <1..LOTTO_MAX> : buy a ticket for the game-day (§9.5)
+//	Command - /lotto <1..LOTTO_MAX> : buy a ticket for the game-day (§9.5)
 //==============================================================================
 
 CMD:lotto(playerid, params[])
@@ -153,7 +153,7 @@ CMD:lotto(playerid, params[])
 		return SendClientMessage(playerid, COLOR_ERROR, err);
 	}
 	if(PlayerInfo[playerid][pLottoNumber] != 0)
-		return SendClientMessage(playerid, COLOR_ERROR, "You already bought a ticket for today's draw — one ticket per game-day.");
+		return SendClientMessage(playerid, COLOR_ERROR, "You already bought a ticket for today's draw - one ticket per game-day.");
 
 	// Charge the ticket from cash-in-hand (feeds the jackpot).
 	if(!Bank_TakeCash(playerid, LOTTO_TICKET_PRICE))
@@ -168,13 +168,13 @@ CMD:lotto(playerid, params[])
 	Jail_SavePlayer(playerid);	// persist the ticket (shared LSplayers UPDATE)
 
 	new string[176];
-	format(string, sizeof(string), ""COL_GREEN"* Lotto ticket bought "COL_WHITE"($%d)"COL_GREEN" — your number is "COL_WHITE"%d"COL_GREEN". Draw at "COL_WHITE"%02d:00"COL_GREEN" game-time. Jackpot: "COL_WHITE"$%d"COL_GREEN".", LOTTO_TICKET_PRICE, number, LOTTO_DRAW_HOUR, ServerInfo[sLottoJackpot]);
+	format(string, sizeof(string), ""COL_GREEN"* Lotto ticket bought "COL_WHITE"($%d)"COL_GREEN" - your number is "COL_WHITE"%d"COL_GREEN". Draw at "COL_WHITE"%02d:00"COL_GREEN" game-time. Jackpot: "COL_WHITE"$%d"COL_GREEN".", LOTTO_TICKET_PRICE, number, LOTTO_DRAW_HOUR, ServerInfo[sLottoJackpot]);
 	SendClientMessage(playerid, COLOR_SERVER_INFO, string);
 	return 1;
 }
 
 //==============================================================================
-//	Command — /alotto (scripter) : force a draw for testing (§8.3 / §10.3)
+//	Command - /alotto (scripter) : force a draw for testing (§8.3 / §10.3)
 //==============================================================================
 
 CMD:alotto(playerid, params[])

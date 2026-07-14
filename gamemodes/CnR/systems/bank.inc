@@ -2,29 +2,29 @@
 
 	Bank, taxes & insurance (the money core) for Cops And Robbers script
 	Scripted by Arose Niazi.
-	Milestone 4 (stage 1) — design §10 (economy integration: prime rate, tax
+	Milestone 4 (stage 1) - design §10 (economy integration: prime rate, tax
 	model), §11.2 (LSplayers columns) + docs/research/economy.md §1 (money flow,
 	bank interest ~5-15%/2 game-days, taxes: wealth 12% over ~$10M, income 7%,
 	insurance / medical fees).
 
 	This owns the money core the later M4 stages build on:
-	  - Bank accounts (LSplayers.BankMoney) — cash you deposit is safe from
+	  - Bank accounts (LSplayers.BankMoney) - cash you deposit is safe from
 	    robbery/pickpockets/medical fees but exposed to wealth tax (economy §1.5).
-	  - Bank interest — paid on BankMoney on the game-clock day schedule (every
+	  - Bank interest - paid on BankMoney on the game-clock day schedule (every
 	    BANK_INTEREST_DAYS game-days) via Bank_OnGameDay(), hooked into the day
 	    transition in GameModeClock() (NO new global timer, per the brief).
-	  - Taxes (LSplayers.TaxOwed) — a periodic wealth+income tax tick on the same
+	  - Taxes (LSplayers.TaxOwed) - a periodic wealth+income tax tick on the same
 	    day schedule via Tax_OnGameDay(); deduct bank-first then cash, accrue any
 	    unpayable remainder to TaxOwed. Donators (pVip) are wealth-tax exempt.
-	  - Insurance (LSplayers.LifeInsurance / HealthInsExpiry) — a medical fee on
+	  - Insurance (LSplayers.LifeInsurance / HealthInsExpiry) - a medical fee on
 	    death unless health-insured; /buyinsurance for health cover + life policies
 	    that waive the fee and preserve weapons on death.
 
 	Every money amount is validated: positive, integer, not more than available,
 	clamped below MAX_MONEY so no step overflows the signed 32-bit cell. All cash
-	changes go through UpdateMoney (misc.inc — applies a signed delta). Persistence
-	is folded into Jail_SavePlayer (jail.inc) — the single per-player LSplayers
-	UPDATE — so there is no competing disconnect save; deposit/withdraw also call
+	changes go through UpdateMoney (misc.inc - applies a signed delta). Persistence
+	is folded into Jail_SavePlayer (jail.inc) - the single per-player LSplayers
+	UPDATE - so there is no competing disconnect save; deposit/withdraw also call
 	it directly so the money core is durable immediately.
 
 	Clean bank API exposed for stage 2 (lotto/events) and stage 3 (missions):
@@ -47,12 +47,12 @@
 
 	Functions Being Called:
 		misc:     UpdateMoney
-		jail:     Jail_SavePlayer (shared persistence — no competing UPDATE)
+		jail:     Jail_SavePlayer (shared persistence - no competing UPDATE)
 		messages: SendMessageToModerators (givecash audit log)
 */
 
 //==============================================================================
-//	Clean bank API (exposed for stages 2/3) — all amounts validated + clamped
+//	Clean bank API (exposed for stages 2/3) - all amounts validated + clamped
 //==============================================================================
 
 // Current banked balance.
@@ -63,7 +63,7 @@ FUNCTION Bank_GetBalance(playerid)
 FUNCTION Bank_GetCash(playerid)
 	return PlayerInfo[playerid][pMoney];
 
-// Total wealth (cash + bank) — the wealth-tax base and the /balance summary.
+// Total wealth (cash + bank) - the wealth-tax base and the /balance summary.
 // Uses floats internally only where a sum could exceed the cell; here both are
 // clamped <= MAX_MONEY so the sum still fits (2*MAX_MONEY < cellmax).
 FUNCTION Bank_GetWealth(playerid)
@@ -194,7 +194,7 @@ static Bank_ShowMenu(playerid)
 }
 
 //==============================================================================
-//	Commands — bank
+//	Commands - bank
 //==============================================================================
 
 // NOTE (ATM/bank-actor proximity): the design implies deposit/withdraw happen at
@@ -215,7 +215,7 @@ CMD:atm(playerid, params[])
 {
 	#pragma unused params
 	if(!PlayerInfo[playerid][pLoggedIn]) return SendClientMessage(playerid, COLOR_ERROR, "You must be logged in.");
-	// ATM-point placement deferred (see note above) — same as /bank for now.
+	// ATM-point placement deferred (see note above) - same as /bank for now.
 	return Bank_ShowMenu(playerid);
 }
 
@@ -256,7 +256,7 @@ CMD:balance(playerid, params[])
 alias:balance("bal")
 
 //==============================================================================
-//	Command — /givecash (/pay) : hand cash to a nearby player (NOT a bank xfer)
+//	Command - /givecash (/pay) : hand cash to a nearby player (NOT a bank xfer)
 //==============================================================================
 
 CMD:givecash(playerid, params[])
@@ -280,7 +280,7 @@ CMD:givecash(playerid, params[])
 	if(gettime() < PlayerInfo[playerid][pGiveCashCooldown])
 	{
 		new err[96];
-		format(err, sizeof(err), "Slow down — you can hand cash again in %d seconds.", PlayerInfo[playerid][pGiveCashCooldown] - gettime());
+		format(err, sizeof(err), "Slow down - you can hand cash again in %d seconds.", PlayerInfo[playerid][pGiveCashCooldown] - gettime());
 		return SendClientMessage(playerid, COLOR_ERROR, err);
 	}
 
@@ -288,7 +288,7 @@ CMD:givecash(playerid, params[])
 	if(PlayerInfo[playerid][pMoney] < amount)
 		return SendClientMessage(playerid, COLOR_ERROR, "You do not have that much cash on you.");
 
-	// Proximity + same interior/VW (must be close enough — economy §1.3).
+	// Proximity + same interior/VW (must be close enough - economy §1.3).
 	new Float:x, Float:y, Float:z;
 	GetPlayerPos(playerid, x, y, z);
 	if(GetPlayerInterior(playerid) != GetPlayerInterior(targetid) ||
@@ -313,7 +313,7 @@ CMD:givecash(playerid, params[])
 	format(string, sizeof(string), ""COL_GREEN"* %s (%d) handed you "COL_WHITE"$%d"COL_GREEN"."COL_WHITE, PlayerInfo[playerid][pUserName], playerid, amount);
 	SendClientMessage(targetid, COLOR_SERVER_INFO, string);
 
-	// Audit log (anti-abuse trail) — visible to staff.
+	// Audit log (anti-abuse trail) - visible to staff.
 	format(string, sizeof(string), "[GIVECASH] %s (%d) gave $%d to %s (%d).", PlayerInfo[playerid][pUserName], playerid, amount, PlayerInfo[targetid][pUserName], targetid);
 	SendMessageToModerators(COLOR_ADMIN_INFO, string);
 	return 1;
@@ -321,7 +321,7 @@ CMD:givecash(playerid, params[])
 alias:givecash("pay", "gc", "sendcash", "givemoney")
 
 //==============================================================================
-//	Command — /buyinsurance (/buyins) : health cover + life policies
+//	Command - /buyinsurance (/buyins) : health cover + life policies
 //==============================================================================
 
 // Charge a price from bank-first-then-cash. Returns 1 if fully paid, 0 if the
@@ -364,7 +364,7 @@ CMD:buyinsurance(playerid, params[])
 		new base = (PlayerInfo[playerid][pHealthInsExpiry] > gettime()) ? PlayerInfo[playerid][pHealthInsExpiry] : gettime();
 		PlayerInfo[playerid][pHealthInsExpiry] = base + (HEALTH_INS_DAYS * SECS_PER_GAME_DAY);
 		Jail_SavePlayer(playerid);
-		format(string, sizeof(string), ""COL_GREEN"* Health insurance bought "COL_WHITE"($%d)"COL_GREEN" — %d game-days of medical cover.", HEALTH_INS_PRICE, HEALTH_INS_DAYS);
+		format(string, sizeof(string), ""COL_GREEN"* Health insurance bought "COL_WHITE"($%d)"COL_GREEN" - %d game-days of medical cover.", HEALTH_INS_PRICE, HEALTH_INS_DAYS);
 		SendClientMessage(playerid, COLOR_SERVER_INFO, string);
 		return 1;
 	}
@@ -380,7 +380,7 @@ CMD:buyinsurance(playerid, params[])
 		Bank_ChargeBankFirst(playerid, LIFE_INS_PRICE);
 		PlayerInfo[playerid][pLifeInsurance]++;
 		Jail_SavePlayer(playerid);
-		format(string, sizeof(string), ""COL_GREEN"* Life policy bought "COL_WHITE"($%d)"COL_GREEN" — now holding %d/%d. Waives the medical fee and saves your weapons on death.", LIFE_INS_PRICE, PlayerInfo[playerid][pLifeInsurance], LIFE_INS_MAX);
+		format(string, sizeof(string), ""COL_GREEN"* Life policy bought "COL_WHITE"($%d)"COL_GREEN" - now holding %d/%d. Waives the medical fee and saves your weapons on death.", LIFE_INS_PRICE, PlayerInfo[playerid][pLifeInsurance], LIFE_INS_MAX);
 		SendClientMessage(playerid, COLOR_SERVER_INFO, string);
 		return 1;
 	}
@@ -405,7 +405,7 @@ FUNCTION Bank_OnDialogResponse(playerid, dialogid, response, listitem, inputtext
 				ShowPlayerDialog(playerid, BANK_DEPOSIT_DIALOG, DIALOG_STYLE_INPUT, "Deposit", ""COL_WHITE"Enter the amount to deposit (or "COL_GREEN"all"COL_WHITE"):", "Deposit", "Back");
 			else if(listitem == 4)
 				ShowPlayerDialog(playerid, BANK_WITHDRAW_DIALOG, DIALOG_STYLE_INPUT, "Withdraw", ""COL_WHITE"Enter the amount to withdraw (or "COL_GREEN"all"COL_WHITE"):", "Withdraw", "Back");
-			else Bank_ShowMenu(playerid);	// tapped a balance line — reopen
+			else Bank_ShowMenu(playerid);	// tapped a balance line - reopen
 			return 1;
 		}
 		case BANK_DEPOSIT_DIALOG:
@@ -427,7 +427,7 @@ FUNCTION Bank_OnDialogResponse(playerid, dialogid, response, listitem, inputtext
 }
 
 //==============================================================================
-//	Bank interest — game-clock day schedule (economy §1.3 — every 2 game-days)
+//	Bank interest - game-clock day schedule (economy §1.3 - every 2 game-days)
 //==============================================================================
 
 // Called from GameModeClock()'s day transition in CnR.pwn (NO new global timer).
@@ -445,7 +445,7 @@ FUNCTION Bank_OnGameDay(gameDay)
 		if(!PlayerInfo[playerid][pLoggedIn]) continue;
 		if(PlayerInfo[playerid][pBankMoney] <= 0) continue;
 
-		// Interest = pct% of balance (integer division floors it — no free cent).
+		// Interest = pct% of balance (integer division floors it - no free cent).
 		new interest = (PlayerInfo[playerid][pBankMoney] / 100) * BANK_INTEREST_PCT;
 		if(interest <= 0) continue;
 		// Overflow guard on the credit.
@@ -467,7 +467,7 @@ FUNCTION Bank_OnGameDay(gameDay)
 // last-online days, which is deferred to keep this stage minimal (per the brief).
 
 //==============================================================================
-//	Taxes — game-clock day schedule (economy §1.4 — wealth + income, every 2 days)
+//	Taxes - game-clock day schedule (economy §1.4 - wealth + income, every 2 days)
 //==============================================================================
 
 // Called from GameModeClock()'s day transition in CnR.pwn (shared day hook).
@@ -528,7 +528,7 @@ FUNCTION Tax_OnGameDay(gameDay)
 		SendClientMessage(playerid, COLOR_SERVER_INFO, string);
 		if(remaining > 0)
 		{
-			format(string, sizeof(string), ""COL_RED"* You still owe "COL_WHITE"$%d"COL_RED" in tax — it will be collected next tax day."COL_WHITE, remaining);
+			format(string, sizeof(string), ""COL_RED"* You still owe "COL_WHITE"$%d"COL_RED" in tax - it will be collected next tax day."COL_WHITE, remaining);
 			SendClientMessage(playerid, COLOR_ERROR, string);
 		}
 		Jail_SavePlayer(playerid);
@@ -537,7 +537,7 @@ FUNCTION Tax_OnGameDay(gameDay)
 }
 
 //==============================================================================
-//	Insurance / medical fee on death (economy §1.5/§1.6) — hooked from OnPlayerDeath
+//	Insurance / medical fee on death (economy §1.5/§1.6) - hooked from OnPlayerDeath
 //==============================================================================
 
 // Charge the medical fee on death unless the player holds active health insurance
@@ -554,7 +554,7 @@ FUNCTION Bank_OnPlayerDeath(playerid)
 	{
 		PlayerInfo[playerid][pLifeInsurance]--;
 		new string[128];
-		format(string, sizeof(string), ""COL_GREEN"* Life insurance paid out "COL_WHITE"— no medical fee, weapons saved."COL_GREEN" Policies left: "COL_WHITE"%d"COL_GREEN"/%d.", PlayerInfo[playerid][pLifeInsurance], LIFE_INS_MAX);
+		format(string, sizeof(string), ""COL_GREEN"* Life insurance paid out "COL_WHITE"- no medical fee, weapons saved."COL_GREEN" Policies left: "COL_WHITE"%d"COL_GREEN"/%d.", PlayerInfo[playerid][pLifeInsurance], LIFE_INS_MAX);
 		SendClientMessage(playerid, COLOR_SERVER_INFO, string);
 		return 1;	// preserve weapons
 	}
@@ -566,7 +566,7 @@ FUNCTION Bank_OnPlayerDeath(playerid)
 		return 0;
 	}
 
-	// No insurance — charge the medical fee from cash-first then bank (cash is the
+	// No insurance - charge the medical fee from cash-first then bank (cash is the
 	// vulnerable pool, economy §1.5). Whatever cannot be paid is written off (you
 	// don't go into debt on death); we take what's there.
 	new fee = MEDICAL_FEE, taken = 0;

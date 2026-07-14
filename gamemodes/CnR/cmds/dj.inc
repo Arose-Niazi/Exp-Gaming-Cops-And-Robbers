@@ -2,7 +2,7 @@
 
 	DJ radio broadcast (/djradio, /stopdjradio) for Cops And Robbers script
 	Scripted by Arose Niazi.
-	Milestone 6 (stage 3) — design §8.1 (DJ /djradio) + jobs §4.3 (radio).
+	Milestone 6 (stage 3) - design §8.1 (DJ /djradio) + jobs §4.3 (radio).
 
 	A server DJ (pDj) broadcasts a live audio stream to EVERYONE: PlayAudioStreamForPlayer
 	is called for every connected player with the DJ's stream URL, and the now-playing
@@ -10,7 +10,7 @@
 	is server-wide (one active DJ stream at a time) so a player who connects mid-broadcast
 	is auto-synced to the stream on spawn (DJ_SyncPlayer). /stopdjradio ends it for all.
 
-	This is separate from the personal /radio picker in cmds/player.inc (M4) — that plays a
+	This is separate from the personal /radio picker in cmds/player.inc (M4) - that plays a
 	preset stream for one player only. Stopping the DJ broadcast does NOT clobber a player's
 	own /radio choice beyond the shared StopAudioStreamForPlayer (a client has one stream
 	slot; the design accepts that the DJ broadcast owns it while live).
@@ -33,7 +33,7 @@ new g_DjStreamUrl[192];					// the live stream URL
 new g_DjNowPlaying[96];					// the now-playing title text
 
 //==============================================================================
-//	/djradio <url> [now-playing text] — start / update the broadcast (pDj)
+//	/djradio <url> [now-playing text] - start / update the broadcast (pDj)
 //==============================================================================
 
 CMD:djradio(playerid, params[])
@@ -49,7 +49,7 @@ CMD:djradio(playerid, params[])
 	if(strlen(url) < 7 || (strfind(url, "http", true) == -1))
 		return SendClientMessage(playerid, COLOR_ERROR, "Provide a valid http(s) stream URL.");
 
-	// Another DJ is already live — only that DJ (or an admin) may take over.
+	// Another DJ is already live - only that DJ (or an admin) may take over.
 	if(g_DjBroadcasting && g_DjBroadcaster != playerid && g_DjBroadcaster != INVALID_PLAYER_ID && PlayerInfo[playerid][pRank] < SERVER_ADMIN)
 		return SendClientMessage(playerid, COLOR_ERROR, "Another DJ is already broadcasting. Ask them to /stopdjradio first.");
 
@@ -83,7 +83,7 @@ CMD:djradio(playerid, params[])
 }
 
 //==============================================================================
-//	/stopdjradio — end the broadcast for everyone (pDj / admin)
+//	/stopdjradio - end the broadcast for everyone (pDj / admin)
 //==============================================================================
 
 CMD:stopdjradio(playerid, params[])
@@ -112,7 +112,7 @@ DJ_EndBroadcast(byid)
 	}
 	new string[160];
 	if(byid != INVALID_PLAYER_ID && IsPlayerConnected(byid))
-		format(string, sizeof(string), ""COL_PURPLE"[DJ] "COL_WHITE"%s"COL_PURPLE" ended the broadcast. The radio is off — use "COL_WHITE"/radio"COL_PURPLE" for your own stream.", PlayerInfo[byid][pUserName]);
+		format(string, sizeof(string), ""COL_PURPLE"[DJ] "COL_WHITE"%s"COL_PURPLE" ended the broadcast. The radio is off - use "COL_WHITE"/radio"COL_PURPLE" for your own stream.", PlayerInfo[byid][pUserName]);
 	else
 		format(string, sizeof(string), ""COL_PURPLE"[DJ] "COL_WHITE"The DJ broadcast ended. Use "COL_WHITE"/radio"COL_PURPLE" for your own stream.");
 	SendClientMessageToAll(COLOR_DJ, string);
@@ -125,7 +125,7 @@ DJ_EndBroadcast(byid)
 }
 
 //==============================================================================
-//	Hooks — sync a (re)spawning player, end on DJ disconnect
+//	Hooks - sync a (re)spawning player, end on DJ disconnect
 //==============================================================================
 
 // If a DJ broadcast is live, start the stream for a player who just spawned/connected.

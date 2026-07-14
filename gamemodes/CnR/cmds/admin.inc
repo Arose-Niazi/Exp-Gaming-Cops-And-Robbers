@@ -2,7 +2,7 @@
 
 	Admin command suite for Cops And Robbers script
 	Scripted by Arose Niazi.
-	Milestone 2 — design §11.2
+	Milestone 2 - design §11.2
 	Last Updated: -----
 
 	Credits:
@@ -37,7 +37,7 @@
 
 // ---- Admin-jail apply / release -------------------------------------------
 
-// Auto-release timer entry — fires when an admin-jail sentence expires.
+// Auto-release timer entry - fires when an admin-jail sentence expires.
 FUNCTION AdminJailRelease(playerid)
 {
 	if(!IsPlayerConnected(playerid)) return 0;
@@ -67,7 +67,7 @@ ApplyAdminJail(playerid, mins, const reason[], const byname[])
 	ResetPlayerWeapons(playerid);
 	TogglePlayerControllable(playerid, false);
 
-	// M6 — force the player out of any arena so a death-respawn cannot re-place
+	// M6 - force the player out of any arena so a death-respawn cannot re-place
 	// them in the arena VW and skip the admin-jail (jail-bypass fix).
 	PlayerInfo[playerid][pArena] = ARENA_NONE;
 	PlayerInfo[playerid][pInDMZone] = false;
@@ -267,7 +267,7 @@ CMD:aduty(playerid)
 
 // ---- also-known-as / ip history -------------------------------------------
 
-// Online /aka — matches accounts sharing the target's Latest_IP or Latest_Serial.
+// Online /aka - matches accounts sharing the target's Latest_IP or Latest_Serial.
 CMD:aka(playerid, params[])
 {
 	if(PlayerInfo[playerid][pRank] < SERVER_MODERATOR) return SendClientMessage(playerid, COLOR_ERROR, ERROR_NOT_ADMIN);
@@ -296,7 +296,7 @@ CMD:offlineaka(playerid, params[])
 	return 1;
 }
 
-// Online /ips — IP history for an online account (by aID).
+// Online /ips - IP history for an online account (by aID).
 CMD:ips(playerid, params[])
 {
 	if(PlayerInfo[playerid][pRank] < SERVER_MODERATOR) return SendClientMessage(playerid, COLOR_ERROR, ERROR_NOT_ADMIN);
@@ -323,7 +323,7 @@ CMD:offlineips(playerid, params[])
 	return 1;
 }
 
-// Shared async result formatter for aka(mode 0)/ips(mode 1) → info dialog.
+// Shared async result formatter for aka(mode 0)/ips(mode 1) -> info dialog.
 FUNCTION OnAdminInfoQuery(playerid, mode, const subject[], race_check)
 {
 	if(!IsPlayerConnected(playerid)) return 0;
@@ -340,8 +340,8 @@ FUNCTION OnAdminInfoQuery(playerid, mode, const subject[], race_check)
 		format(row, sizeof(row), "{FFFFFF}%s\t%s\n", uname, ip);
 		strcat(list, row);
 	}
-	if(mode == 0) format(title, sizeof(title), "AKA — %s (%d match(es))", subject, rows);
-	else format(title, sizeof(title), "IP History — %s", subject);
+	if(mode == 0) format(title, sizeof(title), "AKA - %s (%d match(es))", subject, rows);
+	else format(title, sizeof(title), "IP History - %s", subject);
 	ShowPlayerDialog(playerid, ADMIN_INFO_DIALOG, DIALOG_STYLE_TABLIST_HEADERS, title, list, "Okay", "");
 	return 1;
 }
@@ -440,7 +440,7 @@ CMD:aflip(playerid, params[])
 	return 1;
 }
 
-// /move — bring the target to the admin.
+// /move - bring the target to the admin.
 CMD:move(playerid, params[])
 {
 	if(PlayerInfo[playerid][pRank] < SERVER_MODERATOR) return SendClientMessage(playerid, COLOR_ERROR, ERROR_NOT_ADMIN);
@@ -463,7 +463,7 @@ CMD:move(playerid, params[])
 	return 1;
 }
 
-// /goto — staff-only (design §5) teleport to a player.
+// /goto - staff-only (design §5) teleport to a player.
 CMD:goto(playerid, params[])
 {
 	if(PlayerInfo[playerid][pRank] < SERVER_MODERATOR) return SendClientMessage(playerid, COLOR_ERROR, ERROR_NOT_ADMIN);
@@ -641,7 +641,7 @@ CMD:osearch(playerid, params[])
 	if(targetid == INVALID_PLAYER_ID || !IsPlayerConnected(targetid) || !PlayerInfo[targetid][pLoggedIn])
 		return SendClientMessage(playerid, COLOR_ERROR, "That player is not connected/logged in.");
 	new list[1400], row[128];
-	format(row, sizeof(row), "{FFFF00}Search — %s (%d)\n{FFFFFF}Cash: $%d\n", PlayerInfo[targetid][pUserName], targetid, PlayerInfo[targetid][pMoney]);
+	format(row, sizeof(row), "{FFFF00}Search - %s (%d)\n{FFFFFF}Cash: $%d\n", PlayerInfo[targetid][pUserName], targetid, PlayerInfo[targetid][pMoney]);
 	strcat(list, row);
 	new Float:hp, Float:ar;
 	GetPlayerHealth(targetid, hp);
@@ -678,7 +678,7 @@ CMD:healthhack(playerid, params[])
 		strcat(list, row);
 		count++;
 	}
-	if(!count) strcat(list, "(no players flagged — detection heuristic lands in M3)\n");
+	if(!count) strcat(list, "(no players flagged - detection heuristic lands in M3)\n");
 	ShowPlayerDialog(playerid, ADMIN_INFO_DIALOG, DIALOG_STYLE_MSGBOX, "Health-Hack Flags", list, "Okay", "");
 	return 1;
 }
@@ -695,7 +695,7 @@ CMD:aimbotters(playerid)
 		strcat(list, row);
 		count++;
 	}
-	if(!count) strcat(list, "(no players flagged — detection heuristic lands in M3)\n");
+	if(!count) strcat(list, "(no players flagged - detection heuristic lands in M3)\n");
 	ShowPlayerDialog(playerid, ADMIN_INFO_DIALOG, DIALOG_STYLE_MSGBOX, "Aimbot Flags", list, "Okay", "");
 	return 1;
 }

@@ -2,11 +2,11 @@
 
 	Store holdup (base) for Cops And Robbers script
 	Scripted by Arose Niazi.
-	Milestone 4 (stage 2) — design §5.2 (store holdup base) + §4.4 + §2.3 (holdup
+	Milestone 4 (stage 2) - design §5.2 (store holdup base) + §4.4 + §2.3 (holdup
 	= set +7 wanted) + docs/research/crazybobs-site-full.md (§Store Holdups).
 
 	The BASE store holdup. On foot near a store / 24-7 clerk actor, /holdup sets
-	the robber's wanted to +HOLDUP_WANTED (7 — Felon tier, into Warrant range),
+	the robber's wanted to +HOLDUP_WANTED (7 - Felon tier, into Warrant range),
 	makes the clerk wait ~HOLDUP_CLERK_WAIT seconds, then the register pays out
 	$HOLDUP_RATE_MIN..HOLDUP_RATE_MAX per second for HOLDUP_PAYOUT_SECS seconds
 	(via Bank_GiveCash). Each completed holdup = +1 score. A per-player cooldown
@@ -14,10 +14,10 @@
 	a DM zone (the shared crime gate).
 
 	The whole sequence is driven by a per-player SetTimerEx tick (mirrors the jail
-	countdown pattern) — the register pays once per second and stops if the robber
+	countdown pattern) - the register pays once per second and stops if the robber
 	dies, moves too far from the store, or disconnects.
 
-	>>> M5 EXTENSION POINT — the FULL robbery system + crowbar bonus lands in M5.
+	>>> M5 EXTENSION POINT - the FULL robbery system + crowbar bonus lands in M5.
 	    §5.7: a crowbar reduces the clerk wait by a couple of seconds AND raises
 	    the per-second payout. Other robbery types (banks, houses, ATMs), the
 	    Version-23 alarm delay, and cop mid-holdup interrupt/arrest also land in
@@ -43,12 +43,12 @@
 */
 
 //==============================================================================
-//	Store-clerk actor gate (design §5.2 — eligible store types)
+//	Store-clerk actor gate (design §5.2 - eligible store types)
 //==============================================================================
 
 // Actor types that count as a robbable store clerk (ActorTypeName index order in
 // server/actors.inc): 24-7, Sex Shop, Bar, Pizza, Burger, Chicken, Ammunation,
-// RPC Bar, Hippie. (Bank/Casino/PD/etc. are NOT store holdups — those are M5.)
+// RPC Bar, Hippie. (Bank/Casino/PD/etc. are NOT store holdups - those are M5.)
 static bool:Holdup_IsStoreActorType(type)
 {
 	switch(type)
@@ -60,7 +60,7 @@ static bool:Holdup_IsStoreActorType(type)
 
 // Find the nearest robbable store-clerk actor to the player (same interior/VW,
 // within HOLDUP_ACTOR_RANGE). Returns the ActorInfo slot index, or -1 if none.
-// NOTE (M5): no longer static — the M5 robbery module (/shoplift, robbery.inc)
+// NOTE (M5): no longer static - the M5 robbery module (/shoplift, robbery.inc)
 // reuses this store-clerk proximity gate.
 Holdup_NearestStore(playerid)
 {
@@ -103,7 +103,7 @@ static Holdup_End(playerid, bool:announce)
 			format(string, sizeof(string), ""COL_GREEN"* Holdup complete: "COL_WHITE"you cleared "COL_GREEN"$%d"COL_WHITE" from the register. +1 score. Get out before the cops arrive!", PlayerInfo[playerid][pHoldupTake]);
 			SendClientMessage(playerid, COLOR_SERVER_INFO, string);
 		}
-		else SendClientMessage(playerid, COLOR_ERROR, "The holdup was interrupted — you got nothing.");
+		else SendClientMessage(playerid, COLOR_ERROR, "The holdup was interrupted - you got nothing.");
 	}
 	PlayerInfo[playerid][pHoldupStage] = 0;
 	PlayerInfo[playerid][pHoldupTake] = 0;
@@ -122,14 +122,14 @@ FUNCTION Holdup_Tick(playerid)
 	if(IsPlayerInAnyVehicle(playerid) ||
 		!IsPlayerInRangeOfPoint(playerid, HOLDUP_ACTOR_RANGE + 3.0, PlayerInfo[playerid][pHoldupX], PlayerInfo[playerid][pHoldupY], PlayerInfo[playerid][pHoldupZ]))
 	{
-		SendClientMessage(playerid, COLOR_ERROR, "You left the store — the holdup is off.");
+		SendClientMessage(playerid, COLOR_ERROR, "You left the store - the holdup is off.");
 		Holdup_End(playerid, true);
 		return 0;
 	}
 
 	PlayerInfo[playerid][pHoldupStage]++;
 
-	// M5 (§5.7) — a crowbar shortens the clerk wait by a couple of seconds AND
+	// M5 (§5.7) - a crowbar shortens the clerk wait by a couple of seconds AND
 	// raises the per-second register take. Holdup_CrowbarEquipped lives in
 	// robbery.inc (which owns the crowbar item); it is included after this module
 	// but the FUNCTION public is resolvable via CallLocalFunction at call time.
@@ -148,7 +148,7 @@ FUNCTION Holdup_Tick(playerid)
 		return 1;
 	}
 
-	// Register open — pay a random per-second amount for HOLDUP_PAYOUT_SECS. A
+	// Register open - pay a random per-second amount for HOLDUP_PAYOUT_SECS. A
 	// crowbar raises the rate band (§5.7 higher register take).
 	new payingSecond = PlayerInfo[playerid][pHoldupStage] - clerkWait + 1;	// 1..PAYOUT_SECS
 	new rateMin = crowbar ? CROWBAR_RATE_MIN : HOLDUP_RATE_MIN;
@@ -174,7 +174,7 @@ FUNCTION Holdup_Tick(playerid)
 //==============================================================================
 
 // Dying mid-holdup aborts it (the robber keeps whatever the register already
-// paid — it's cash-in-hand, at risk to the medical fee / robbery like any cash).
+// paid - it's cash-in-hand, at risk to the medical fee / robbery like any cash).
 FUNCTION Holdup_OnPlayerDeath(playerid)
 {
 	if(PlayerInfo[playerid][pHoldingUp]) Holdup_End(playerid, false);
@@ -192,10 +192,10 @@ FUNCTION Holdup_OnDisconnect(playerid)
 	return 1;
 }
 
-// M5 (§5.2) — a cop mid-holdup interrupt ends the holdup with nothing (the
+// M5 (§5.2) - a cop mid-holdup interrupt ends the holdup with nothing (the
 // robbery.inc /stoprobbery command calls this for a nearby robber). Also called
 // if the robber is shot while holding up (Holdup_OnPlayerDeath already aborts on
-// death). The robber keeps whatever the register already paid — it's cash at risk.
+// death). The robber keeps whatever the register already paid - it's cash at risk.
 FUNCTION Holdup_CopInterrupt(playerid)
 {
 	if(!PlayerInfo[playerid][pHoldingUp]) return 0;
@@ -205,7 +205,7 @@ FUNCTION Holdup_CopInterrupt(playerid)
 }
 
 //==============================================================================
-//	Command — /holdup (/hup /storerob /robstore) (design §5.2)
+//	Command - /holdup (/hup /storerob /robstore) (design §5.2)
 //==============================================================================
 
 CMD:holdup(playerid, params[])
@@ -224,7 +224,7 @@ CMD:holdup(playerid, params[])
 	if(gettime() < PlayerInfo[playerid][pHoldupCooldown])
 	{
 		new err[112];
-		format(err, sizeof(err), "You cannot hold up another store yet — wait %d seconds.", PlayerInfo[playerid][pHoldupCooldown] - gettime());
+		format(err, sizeof(err), "You cannot hold up another store yet - wait %d seconds.", PlayerInfo[playerid][pHoldupCooldown] - gettime());
 		return SendClientMessage(playerid, COLOR_ERROR, err);
 	}
 
@@ -240,9 +240,9 @@ CMD:holdup(playerid, params[])
 	PlayerInfo[playerid][pHoldupTake] = 0;
 	PlayerInfo[playerid][pHoldupCooldown] = gettime() + HOLDUP_STORE_CD;
 
-	// Instantly +7 wanted (Felon — into Warrant range). §5.2 VERIFIED.
+	// Instantly +7 wanted (Felon - into Warrant range). §5.2 VERIFIED.
 	GivePlayerWanted(playerid, HOLDUP_WANTED, "Store holdup");
-	// M5 (§5.7) — record a holdup on the robbery history so the crowbar is
+	// M5 (§5.7) - record a holdup on the robbery history so the crowbar is
 	// confiscated on a later arrest (robbery.inc owns the bitmask + persistence).
 	CallLocalFunction("Robbery_MarkHoldupHistory", "d", playerid);
 
@@ -250,7 +250,7 @@ CMD:holdup(playerid, params[])
 	PlayerInfo[playerid][pHoldupTimer] = SetTimerEx("Holdup_Tick", 1000, true, "d", playerid);
 
 	new string[160];
-	format(string, sizeof(string), ""COL_RED"* HOLD-UP! "COL_WHITE"You pull a gun on the clerk — wait "COL_YELLOW"~%d seconds"COL_WHITE" for the register to open. Stay at the counter!", HOLDUP_CLERK_WAIT);
+	format(string, sizeof(string), ""COL_RED"* HOLD-UP! "COL_WHITE"You pull a gun on the clerk - wait "COL_YELLOW"~%d seconds"COL_WHITE" for the register to open. Stay at the counter!", HOLDUP_CLERK_WAIT);
 	SendClientMessage(playerid, COLOR_SERVER_INFO, string);
 
 	// Nearby cops get a heads-up (the crime announce in GivePlayerWanted already

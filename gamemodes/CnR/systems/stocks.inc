@@ -2,7 +2,7 @@
 
 	Stock market MACHINERY for Cops And Robbers script
 	Scripted by Arose Niazi.
-	Milestone 7 — the stock market + full economy (THE finale). Design §9.4 (the
+	Milestone 7 - the stock market + full economy (THE finale). Design §9.4 (the
 	market: 21 stocks, trading hours game 07:00-19:00, /markets //shares
 	//sharessell, own ≤100k shares/company, 1% fee, price formula + activity-fed
 	pool, daily tick) + §10 (economy integration: prime rate + per-domain
@@ -30,12 +30,12 @@
 	                             can't go negative / exceed the cap / oversell.
 
 	NO MINT: money moves player<->market. The market is not a player, so a buy is a
-	sink and a sell is a source (a gov-style sink/source by design, §9.4) — but every
+	sink and a sell is a source (a gov-style sink/source by design, §9.4) - but every
 	share bought is PAID FOR (Bank_TakeCash cost+fee) and every sell is CREDITED
 	(Bank_GiveCash proceeds-fee), with the holding tracked in stock_holdings.
 
 	Public API:
-		Stocks_Init()                    : load/seed the market (async) — OnGameModeInit
+		Stocks_Init()                    : load/seed the market (async) - OnGameModeInit
 		Stocks_OnPlayerLogin(playerid)   : load this player's holdings (async, race-guarded)
 		Stocks_Tick()                    : run the daily market tick (§10.3 / /astocktick)
 	Async handlers (public, via mysql_pquery):
@@ -48,7 +48,7 @@
 */
 
 //==============================================================================
-//	Seed roster — the 21 CB stocks (economy.md §7.1). Order MUST match E_STOCK_*.
+//	Seed roster - the 21 CB stocks (economy.md §7.1). Order MUST match E_STOCK_*.
 //	Each: name, IPO price, IPO float. MaxShares = IPOShares (available = IPOShares
 //	at seed). Seeded on first boot only (Stocks_Init when the table is empty).
 //==============================================================================
@@ -79,7 +79,7 @@ static const g_StockSeed[MAX_STOCKS][e_Stock] = {
 };
 
 //==============================================================================
-//	Init — load the stocks table (async). Seed on first boot if empty.
+//	Init - load the stocks table (async). Seed on first boot if empty.
 //==============================================================================
 
 FUNCTION Stocks_Init()
@@ -107,7 +107,7 @@ static Stocks_SeedRoster()
 	return 1;
 }
 
-// Async result handler for Stocks_Init — read the rows, or seed if the table is empty.
+// Async result handler for Stocks_Init - read the rows, or seed if the table is empty.
 FUNCTION Stocks_OnLoad()
 {
 	new rows;
@@ -155,7 +155,7 @@ static Stocks_SaveOne(stockid)
 }
 
 //==============================================================================
-//	Per-player holdings — load on login (race-guarded), upsert on trade
+//	Per-player holdings - load on login (race-guarded), upsert on trade
 //==============================================================================
 
 // Load a player's holdings from stock_holdings (async). Race-guarded so a slot
@@ -170,7 +170,7 @@ FUNCTION Stocks_OnPlayerLogin(playerid)
 	return 1;
 }
 
-// Async result handler — fill the cached holdings if the slot is still the same login.
+// Async result handler - fill the cached holdings if the slot is still the same login.
 FUNCTION Stocks_OnHoldingsLoad(playerid, race_check)
 {
 	if(!IsPlayerConnected(playerid) || race_check != g_MysqlRaceCheck[playerid]) return 0;
@@ -230,7 +230,7 @@ static Stocks_Fee(gross)
 }
 
 //==============================================================================
-//	The daily market tick (economy.md §7.2) — recompute prices, dividends, report
+//	The daily market tick (economy.md §7.2) - recompute prices, dividends, report
 //==============================================================================
 
 // Recompute one stock's price from its pool + drift, cap/floor it, then bleed the
@@ -256,7 +256,7 @@ static Float:Stocks_TickPrice(stockid)
 	// Dividend allocation = a small % of the day's pool (paid before the bleed).
 	new Float:dividendPot = (pool * float(STOCK_DIVIDEND_PCT)) / 100.0;
 
-	// Bleed a fraction of the pool (mean reversion — activity fades over time).
+	// Bleed a fraction of the pool (mean reversion - activity fades over time).
 	pool -= (pool * float(STOCK_POOL_BLEED_PCT)) / 100.0;
 	if(pool < 0.0) pool = 0.0;
 	g_Stock[stockid][stPool] = pool;
@@ -266,7 +266,7 @@ static Float:Stocks_TickPrice(stockid)
 
 // Pay a dividend from `pot` to every shareholder pro-rata (shares / sold shares).
 // Shares sold = MaxShares - AvailableShares. Online holders get cash immediately;
-// the cash is a source by design (like the lotto payout) — no mint from holdings.
+// the cash is a source by design (like the lotto payout) - no mint from holdings.
 static Stocks_PayDividends(stockid, Float:pot)
 {
 	if(pot < 1.0) return 0;
@@ -314,7 +314,7 @@ static Stocks_CheckBankruptcy(stockid)
 		PlayerInfo[i][pStocks][stockid] = keep;
 		Stocks_SaveHolding(PlayerInfo[i][pID], stockid, keep);
 		new msg[160];
-		format(msg, sizeof(msg), ""COL_RED"* %s went BANKRUPT and relisted "COL_WHITE"— you lost %d%% of your shares (%d left).", g_Stock[stockid][stName], STOCK_BANKRUPTCY_HAIRCUT_PCT, keep);
+		format(msg, sizeof(msg), ""COL_RED"* %s went BANKRUPT and relisted "COL_WHITE"- you lost %d%% of your shares (%d left).", g_Stock[stockid][stName], STOCK_BANKRUPTCY_HAIRCUT_PCT, keep);
 		SendClientMessage(i, COLOR_ERROR, msg);
 	}
 	// Offline holders: haircut their rows in one query (delete any that round to 0).
@@ -326,14 +326,14 @@ static Stocks_CheckBankruptcy(stockid)
 	mysql_pquery(g_SQL, query);
 
 	new bmsg[144];
-	format(bmsg, sizeof(bmsg), ""COL_RED"[MARKET] "COL_WHITE"%s "COL_RED"crashed and went bankrupt — relisted at IPO ($%d).", g_Stock[stockid][stName], floatround(ipo));
+	format(bmsg, sizeof(bmsg), ""COL_RED"[MARKET] "COL_WHITE"%s "COL_RED"crashed and went bankrupt - relisted at IPO ($%d).", g_Stock[stockid][stName], floatround(ipo));
 	SendClientMessageToAll(COLOR_ERROR, bmsg);
 	return 1;
 }
 
 // Move the prime rate a little toward where the aggregate market sits vs its IPO
 // baseline (economy.md §1.4 "prime governs the whole economy"). Above-IPO market
-// → prime drifts up (goods cheaper, houses pricier); below → down. Clamped + stepped.
+// -> prime drifts up (goods cheaper, houses pricier); below -> down. Clamped + stepped.
 static Stocks_MovePrimeRate()
 {
 	new Float:sumRatio = 0.0;
@@ -373,7 +373,7 @@ static Stocks_WriteReports(day)
 	return 1;
 }
 
-// THE DAILY TICK — recompute every price from pool+drift, pay dividends, check
+// THE DAILY TICK - recompute every price from pool+drift, pay dividends, check
 // bankruptcy, move the prime rate, write a report row, persist. Fired from
 // GameModeClock at the game-day rollover (§10.3, guarded once-per-day) and by
 // /astocktick. Uses the monotonic g_GameDayCounter as the report day.
@@ -399,7 +399,7 @@ FUNCTION Stocks_Tick()
 }
 
 //==============================================================================
-//	Trading — the shared buy/sell paths (all money via Bank_*, guarded)
+//	Trading - the shared buy/sell paths (all money via Bank_*, guarded)
 //==============================================================================
 
 // Buy `qty` shares of `stockid`. Validates hours, the share cap, availability and
@@ -411,7 +411,7 @@ static Stocks_DoBuy(playerid, stockid, qty)
 	if(stockid < 0 || stockid >= MAX_STOCKS)
 		return SendClientMessage(playerid, COLOR_ERROR, "Invalid stock id. See /markets.");
 	if(!PlayerInfo[playerid][pStocksLoaded])
-		return SendClientMessage(playerid, COLOR_ERROR, "Your holdings are still loading — try again in a moment.");
+		return SendClientMessage(playerid, COLOR_ERROR, "Your holdings are still loading - try again in a moment.");
 	if(qty <= 0) return SendClientMessage(playerid, COLOR_ERROR, "Enter a positive number of shares to buy.");
 
 	// Share cap per company (§9.4).
@@ -454,8 +454,8 @@ static Stocks_DoBuy(playerid, stockid, qty)
 	Stocks_SaveHolding(PlayerInfo[playerid][pID], stockid, held + qty);
 	Stocks_SaveOne(stockid);
 
-	// Buying is demand → feed the pool (pushes the price up, §7.2). Factor 0.25 like
-	// the shop/ammu buy activity — the gross spend flows into the company pool.
+	// Buying is demand -> feed the pool (pushes the price up, §7.2). Factor 0.25 like
+	// the shop/ammu buy activity - the gross spend flows into the company pool.
 	StockMarket_UpdateEarnings(stockid, gross, STOCK_FACTOR_SHOP);
 
 	new msg[176];
@@ -473,7 +473,7 @@ static Stocks_DoSell(playerid, stockid, qty)
 	if(stockid < 0 || stockid >= MAX_STOCKS)
 		return SendClientMessage(playerid, COLOR_ERROR, "Invalid stock id. See /markets.");
 	if(!PlayerInfo[playerid][pStocksLoaded])
-		return SendClientMessage(playerid, COLOR_ERROR, "Your holdings are still loading — try again in a moment.");
+		return SendClientMessage(playerid, COLOR_ERROR, "Your holdings are still loading - try again in a moment.");
 	if(qty <= 0) return SendClientMessage(playerid, COLOR_ERROR, "Enter a positive number of shares to sell.");
 
 	new held = PlayerInfo[playerid][pStocks][stockid];
@@ -497,7 +497,7 @@ static Stocks_DoSell(playerid, stockid, qty)
 	Stocks_SaveHolding(PlayerInfo[playerid][pID], stockid, held - qty);
 	if(proceeds > 0) Bank_GiveCash(playerid, proceeds);
 
-	// Selling is supply → pull the pool down (dumping depresses the price, §7.2).
+	// Selling is supply -> pull the pool down (dumping depresses the price, §7.2).
 	StockMarket_UpdateEarnings(stockid, gross, -STOCK_FACTOR_SHOP);
 	Stocks_SaveOne(stockid);
 
@@ -511,12 +511,12 @@ static Stocks_DoSell(playerid, stockid, qty)
 //	Commands
 //==============================================================================
 
-// /markets (/market) — list all stocks: id, name, price, %vs IPO, your holding.
+// /markets (/market) - list all stocks: id, name, price, %vs IPO, your holding.
 CMD:markets(playerid, params[])
 {
 	#pragma unused params
 	if(!PlayerInfo[playerid][pLoggedIn]) return SendClientMessage(playerid, COLOR_ERROR, "You must be logged in.");
-	if(!g_StocksLoaded) return SendClientMessage(playerid, COLOR_ERROR, "The market is still loading — try again in a moment.");
+	if(!g_StocksLoaded) return SendClientMessage(playerid, COLOR_ERROR, "The market is still loading - try again in a moment.");
 
 	new hdr[144];
 	format(hdr, sizeof(hdr), ""COL_YELLOW"===== STOCK MARKET =====  "COL_WHITE"%s (prime "COL_GREEN"%.2f"COL_WHITE"). "COL_GREEN"/shares <id> <qty>"COL_WHITE" buy, "COL_GREEN"/sharessell <id> <qty>"COL_WHITE" sell.",
@@ -536,12 +536,12 @@ CMD:markets(playerid, params[])
 }
 alias:markets("market")
 
-// /shares (/stocks) — with no/"list" args: show your holdings + values. With
+// /shares (/stocks) - with no/"list" args: show your holdings + values. With
 // "<id> <qty>" or "buy <id> <qty>": buy that many shares (§9.4).
 CMD:shares(playerid, params[])
 {
 	if(!PlayerInfo[playerid][pLoggedIn]) return SendClientMessage(playerid, COLOR_ERROR, "You must be logged in.");
-	if(!g_StocksLoaded) return SendClientMessage(playerid, COLOR_ERROR, "The market is still loading — try again in a moment.");
+	if(!g_StocksLoaded) return SendClientMessage(playerid, COLOR_ERROR, "The market is still loading - try again in a moment.");
 
 	new action[8], sid, qty;
 	// Accept: "/shares", "/shares <id> <qty>", "/shares buy <id> <qty>".
@@ -550,8 +550,8 @@ CMD:shares(playerid, params[])
 	if(!sscanf(params, "dd", sid, qty))
 		return Stocks_DoBuy(playerid, sid, qty);
 
-	// No buy args → show holdings.
-	if(!PlayerInfo[playerid][pStocksLoaded]) return SendClientMessage(playerid, COLOR_ERROR, "Your holdings are still loading — try again in a moment.");
+	// No buy args -> show holdings.
+	if(!PlayerInfo[playerid][pStocksLoaded]) return SendClientMessage(playerid, COLOR_ERROR, "Your holdings are still loading - try again in a moment.");
 	SendClientMessage(playerid, COLOR_SERVER_INFO, ""COL_YELLOW"===== YOUR SHARES =====  "COL_WHITE"("COL_GREEN"/shares <id> <qty>"COL_WHITE" buy, "COL_GREEN"/sharessell <id> <qty>"COL_WHITE" sell)");
 	new any = 0;
 	for(new i = 0; i < MAX_STOCKS; i++)
@@ -570,11 +570,11 @@ CMD:shares(playerid, params[])
 }
 alias:shares("stocks")
 
-// /sharessell (/stockssell) <id> <qty> — sell shares you hold (§9.4).
+// /sharessell (/stockssell) <id> <qty> - sell shares you hold (§9.4).
 CMD:sharessell(playerid, params[])
 {
 	if(!PlayerInfo[playerid][pLoggedIn]) return SendClientMessage(playerid, COLOR_ERROR, "You must be logged in.");
-	if(!g_StocksLoaded) return SendClientMessage(playerid, COLOR_ERROR, "The market is still loading — try again in a moment.");
+	if(!g_StocksLoaded) return SendClientMessage(playerid, COLOR_ERROR, "The market is still loading - try again in a moment.");
 	new sid, qty;
 	if(sscanf(params, "dd", sid, qty))
 		return SendClientMessage(playerid, COLOR_SERVER_INFO, "USAGE: /sharessell <stock id> <qty>  (see /markets for ids)");
@@ -582,11 +582,11 @@ CMD:sharessell(playerid, params[])
 }
 alias:sharessell("stockssell")
 
-// /markethistory <id> — show the last N daily closing prices for a stock (§7.2).
+// /markethistory <id> - show the last N daily closing prices for a stock (§7.2).
 CMD:markethistory(playerid, params[])
 {
 	if(!PlayerInfo[playerid][pLoggedIn]) return SendClientMessage(playerid, COLOR_ERROR, "You must be logged in.");
-	if(!g_StocksLoaded) return SendClientMessage(playerid, COLOR_ERROR, "The market is still loading — try again in a moment.");
+	if(!g_StocksLoaded) return SendClientMessage(playerid, COLOR_ERROR, "The market is still loading - try again in a moment.");
 	new sid;
 	if(sscanf(params, "d", sid) || sid < 0 || sid >= MAX_STOCKS)
 		return SendClientMessage(playerid, COLOR_SERVER_INFO, "USAGE: /markethistory <stock id>  (see /markets for ids)");
@@ -596,7 +596,7 @@ CMD:markethistory(playerid, params[])
 	return 1;
 }
 
-// Async handler for /markethistory — print the rows.
+// Async handler for /markethistory - print the rows.
 FUNCTION Stocks_OnHistory(playerid, stockid)
 {
 	if(!IsPlayerConnected(playerid) || !PlayerInfo[playerid][pLoggedIn]) return 0;
@@ -606,9 +606,9 @@ FUNCTION Stocks_OnHistory(playerid, stockid)
 	if(stockid >= 0 && stockid < MAX_STOCKS) format(sName, sizeof(sName), "%s", g_Stock[stockid][stName]);
 	else format(sName, sizeof(sName), "?");
 	new hdr[96];
-	format(hdr, sizeof(hdr), ""COL_YELLOW"===== %s — price history ====="COL_WHITE, sName);
+	format(hdr, sizeof(hdr), ""COL_YELLOW"===== %s - price history ====="COL_WHITE, sName);
 	SendClientMessage(playerid, COLOR_SERVER_INFO, hdr);
-	if(rows == 0) return SendClientMessage(playerid, COLOR_WHITE, "No history yet — the first report is written on the daily market tick.");
+	if(rows == 0) return SendClientMessage(playerid, COLOR_WHITE, "No history yet - the first report is written on the daily market tick.");
 	for(new i = 0; i < rows; i++)
 	{
 		new day; new Float:price;
@@ -621,7 +621,7 @@ FUNCTION Stocks_OnHistory(playerid, stockid)
 	return 1;
 }
 
-// /astocktick (scripter) — force a market tick for testing (§10.3, like /alotto).
+// /astocktick (scripter) - force a market tick for testing (§10.3, like /alotto).
 CMD:astocktick(playerid, params[])
 {
 	#pragma unused params

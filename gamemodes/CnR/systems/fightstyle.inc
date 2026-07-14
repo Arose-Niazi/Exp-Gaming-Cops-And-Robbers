@@ -2,7 +2,7 @@
 
 	Fighting styles system for Cops And Robbers script
 	Scripted by Arose Niazi.
-	Milestone 6 (stage 1) — design §9.8 (fighting styles) + jobs-progression §2.2
+	Milestone 6 (stage 1) - design §9.8 (fighting styles) + jobs-progression §2.2
 	(gym / fighting styles) + crazybobs-site-full §Gym.
 
 	CB: "Visit any of the three gyms and change your fighting style! There are three
@@ -12,7 +12,7 @@
 
 	The chosen style persists (LSplayers.FightStyle, default 4=NORMAL) and is re-applied
 	with SetPlayerFightingStyle on every spawn (FightStyle_ApplyOnSpawn). It ties into
-	/jumpkick (M4 melee) — a heavier style lands harder-looking kicks.
+	/jumpkick (M4 melee) - a heavier style lands harder-looking kicks.
 
 	Public API:
 		FightStyle_Init()                                : create the 3 gym markers/map icons (OnGameModeInit)
@@ -39,21 +39,21 @@ enum e_FightStyleDef
 {
 	fsId,				// FIGHTING_STYLE_* id
 	fsName[16],			// display name
-	fsFee				// fee to switch to this style ($) — Normal is free
+	fsFee				// fee to switch to this style ($) - Normal is free
 };
 
-// Style ids are stored as plain ints in this table (and in pFightStyle) — the
+// Style ids are stored as plain ints in this table (and in pFightStyle) - the
 // SetPlayerFightingStyle call tags them with FIGHT_STYLE: at the call site. The raw
 // values match the SA-MP ids: NORMAL 4, BOXING 5, KUNGFU 6, KNEEHEAD 7 (§9.8).
 static const g_FightStyles[][e_FightStyleDef] =
 {
-	{ 4, "Normal",    0 },				// FIGHT_STYLE_NORMAL — reset to default (free)
+	{ 4, "Normal",    0 },				// FIGHT_STYLE_NORMAL - reset to default (free)
 	{ 5, "Boxing",    FIGHTSTYLE_FEE },	// FIGHT_STYLE_BOXING
 	{ 6, "Kung-Fu",   FIGHTSTYLE_FEE },	// FIGHT_STYLE_KUNGFU
 	{ 7, "Knee-head", FIGHTSTYLE_FEE }	// FIGHT_STYLE_KNEEHEAD
 };
 
-// The 3 gym locations (jobs §2.2 — Ganton/Garcia/Redsands East). Only the LS gym
+// The 3 gym locations (jobs §2.2 - Ganton/Garcia/Redsands East). Only the LS gym
 // (Ganton) is reachable while CITY_ == LS; the SF/LV markers are kept for when those
 // cities go live (they simply never get walked into meanwhile).
 static const Float:g_GymSpots[][3] =
@@ -104,14 +104,14 @@ static FightStyle_AtGym(playerid)
 }
 
 //==============================================================================
-//	Spawn re-apply (§9.8 — persist + re-apply on every spawn)
+//	Spawn re-apply (§9.8 - persist + re-apply on every spawn)
 //==============================================================================
 
 FUNCTION FightStyle_ApplyOnSpawn(playerid)
 {
 	if(IsPlayerNPC(playerid)) return 0;
 	new style = PlayerInfo[playerid][pFightStyle];
-	// Guard a garbage/legacy value → fall back to NORMAL. Raw SA-MP ids: NORMAL 4,
+	// Guard a garbage/legacy value -> fall back to NORMAL. Raw SA-MP ids: NORMAL 4,
 	// BOXING 5, KUNGFU 6, KNEEHEAD 7, GRABKICK 15, ELBOW 16 (the FIGHT_STYLE_* macros).
 	switch(style)
 	{
@@ -123,7 +123,7 @@ FUNCTION FightStyle_ApplyOnSpawn(playerid)
 }
 
 //==============================================================================
-//	Command — /fightstyle (/fs /gym) — set a fighting style at a gym (§9.8)
+//	Command - /fightstyle (/fs /gym) - set a fighting style at a gym (§9.8)
 //==============================================================================
 
 CMD:fightstyle(playerid, params[])
@@ -144,7 +144,7 @@ CMD:fightstyle(playerid, params[])
 			format(row, sizeof(row), "%s%s\t"COL_WHITE"free\n", isCurrent ? (""COL_GREEN) : (""COL_WHITE), g_FightStyles[i][fsName]);
 		strcat(list, row, sizeof(list));
 	}
-	ShowPlayerDialog(playerid, FIGHTSTYLE_DIALOG, DIALOG_STYLE_TABLIST, ""COL_WHITE"Gym — Fighting Style\tFee", list, "Set", "Cancel");
+	ShowPlayerDialog(playerid, FIGHTSTYLE_DIALOG, DIALOG_STYLE_TABLIST, ""COL_WHITE"Gym - Fighting Style\tFee", list, "Set", "Cancel");
 	return 1;
 }
 alias:fightstyle("fs", "gym")
@@ -169,7 +169,7 @@ FUNCTION FightStyle_OnDialogResponse(playerid, dialogid, response, listitem)
 		if(PlayerInfo[playerid][pMoney] < fee)
 		{
 			new err[128];
-			format(err, sizeof(err), "That fighting style costs "COL_GREEN"$%d"COL_WHITE" cash — you cannot afford it.", fee);
+			format(err, sizeof(err), "That fighting style costs "COL_GREEN"$%d"COL_WHITE" cash - you cannot afford it.", fee);
 			return SendClientMessage(playerid, COLOR_ERROR, err);
 		}
 		if(!Bank_TakeCash(playerid, fee)) return SendClientMessage(playerid, COLOR_ERROR, "Payment failed.");

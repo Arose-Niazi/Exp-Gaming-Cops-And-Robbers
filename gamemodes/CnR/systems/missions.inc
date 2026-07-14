@@ -2,26 +2,26 @@
 
 	Reusable mission framework + 4 core missions for Cops And Robbers script
 	Scripted by Arose Niazi.
-	Milestone 4 (stage 3) — design §6 (missions intro), §6.4 Drug Delivery,
+	Milestone 4 (stage 3) - design §6 (missions intro), §6.4 Drug Delivery,
 	§6.18 Truck Delivery, §6.17 Trash Pickup, §6.6 Food Delivery, §6.20 (mission
-	milestone placement) + docs/research/crazybobs-site-full.md (§Missions —
+	milestone placement) + docs/research/crazybobs-site-full.md (§Missions -
 	exact payouts / cooldowns / structure).
 
 	This is the SHARED mission infrastructure the whole rest of the mission roster
-	(M5/M6 — ~15 more missions) is built on. A mission is DATA + a tiny handler:
+	(M5/M6 - ~15 more missions) is built on. A mission is DATA + a tiny handler:
 
-	  - MissionReg[]   — one row per mission: id, name, civ/cop type, cooldown (in
+	  - MissionReg[]   - one row per mission: id, name, civ/cop type, cooldown (in
 	                     GAME hours), start marker + reach, whether it needs a
 	                     vehicle (and which models qualify), payout-per-checkpoint,
 	                     all-complete bonus, and per-checkpoint wanted-if-cop-near.
-	  - MissionRoute[] — a pool of candidate checkpoint coords per mission; the
+	  - MissionRoute[] - a pool of candidate checkpoint coords per mission; the
 	                     launcher samples a route of MissionReg[][mCheckpoints] from
 	                     it (random, no repeats) so every run is a fresh delivery
 	                     route (§6.4 "5 randomly-selected locations").
 
 	Adding an M5/M6 mission is ~30 lines: append a MISSION_* id (defines.inc),
-	append a MissionReg[] row + its MissionRoute[] pool here, and — only if it
-	needs bespoke logic — a small switch arm in Mission_Complete/Mission_OnStartCmd.
+	append a MissionReg[] row + its MissionRoute[] pool here, and - only if it
+	needs bespoke logic - a small switch arm in Mission_Complete/Mission_OnStartCmd.
 
 	Checkpoint routing uses PER-PLAYER RACE checkpoints (SetPlayerRaceCheckpoint):
 	each leg points an arrow at the next drop, and the final leg shows the finish
@@ -36,7 +36,7 @@
 	monotonic game-hour = g_GameDayCounter*24 + GameHour (never rewinds on the
 	game-week rollover). Loaded in loading_data.inc, saved on completion + on
 	disconnect via Mission_SavePlayer. DECISION: compact persistent column (not
-	session-only) — cooldowns survive relogs, which matters for the 5/12 game-hour
+	session-only) - cooldowns survive relogs, which matters for the 5/12 game-hour
 	gates, and it is a single column so the schema stays lean.
 
 	Abort conditions (all clean up the race-checkpoint + reset state):
@@ -46,24 +46,24 @@
 	  - straying MISSION_OFFROUTE_DIST from the active checkpoint (stuck/teleport)
 	  - being jailed mid-run (the tick catches it)
 
-	>>> M5/M6 EXTENSION POINT — this framework generalises to the whole §6 roster:
+	>>> M5/M6 EXTENSION POINT - this framework generalises to the whole §6 roster:
 	    checkpoint routes (Vehicle Theft, House Delivery), vehicle-gated jobs
 	    (Courier, Lawn Mowing, Tractor), cop-only missions (Routine Patrol,
-	    Domestic Disturbance — MISSION_TYPE_COP is already wired), timed windows
+	    Domestic Disturbance - MISSION_TYPE_COP is already wired), timed windows
 	    (the cooldown-hours field doubles as the run window), and payout+bonus.
 	    grep "TODO(M5)" / "TODO(M6)" for the documented hooks. <<<
 
 	Credits:
 		crazybobs-site-full.md §Missions for the mechanic grounding.
 
-	Public API (FUNCTION publics — cross-module; the CP callback + hooks call these):
-		Mission_IsOnMission(playerid)                 : bool — is a mission active
+	Public API (FUNCTION publics - cross-module; the CP callback + hooks call these):
+		Mission_IsOnMission(playerid)                 : bool - is a mission active
 		Mission_Start(playerid, missionId)            : begin a mission (validated)
 		Mission_NextCheckpoint(playerid)              : advance to / place the next CP
-		Mission_Complete(playerid)                    : final CP reached — pay bonus + end
+		Mission_Complete(playerid)                    : final CP reached - pay bonus + end
 		Mission_Abort(playerid, const reason[])       : cancel + clean up (any reason)
 		Mission_OnCheckpoint(playerid)                : dispatched from the race-CP callback
-		Mission_OnCooldown(playerid, missionId)       : bool — still cooling down
+		Mission_OnCooldown(playerid, missionId)       : bool - still cooling down
 		Mission_SetCooldown(playerid, missionId)      : stamp completion (now, game-hours)
 		Mission_OnPlayerDeath(playerid)               : abort on death (hook)
 		Mission_OnDisconnect(playerid)                : abort + persist (hook)
@@ -84,7 +84,7 @@
 */
 
 //==============================================================================
-//	Mission registry — the data table (append rows for M5/M6; never renumber ids)
+//	Mission registry - the data table (append rows for M5/M6; never renumber ids)
 //==============================================================================
 
 enum e_MissionReg
@@ -106,106 +106,106 @@ enum e_MissionReg
 
 // The registry. Order MUST match the MISSION_* enum in defines.inc.
 // Start markers are the VERIFIED §6 city start locations (Los Santos):
-//   Drug Delivery  — Las Colinas         (§6.4)
-//   Truck Delivery — LS docks depot area  (§6.18 — trucks spawn at depots)
-//   Trash Pickup   — LS city (Trashmaster job, roams the city) (§6.17)
-//   Food Delivery  — LS city (food-vehicle job) (§6.6)
+//   Drug Delivery  - Las Colinas         (§6.4)
+//   Truck Delivery - LS docks depot area  (§6.18 - trucks spawn at depots)
+//   Trash Pickup   - LS city (Trashmaster job, roams the city) (§6.17)
+//   Food Delivery  - LS city (food-vehicle job) (§6.6)
 static const MissionReg[MISSION_COUNT][e_MissionReg] =
 {
-	// MISSION_DRUG_DELIVERY (§6.4) — civ, WL0 to start, 5 CP, $5k/cp + $50k, 5hr CD, +2 wanted/cp if cop near.
+	// MISSION_DRUG_DELIVERY (§6.4) - civ, WL0 to start, 5 CP, $5k/cp + $50k, 5hr CD, +2 wanted/cp if cop near.
 	{ "Drug Delivery",	MISSION_TYPE_CIVILIAN,	MDRUG_COOLDOWN_HRS,	5,	MDRUG_CP_PAY,	MDRUG_BONUS,	MDRUG_WANTED_PER_CP,	true,	true,	2278.7715, -85.6265, 26.4453,	10 },
-	// MISSION_TRUCK_DELIVERY (§6.18) — civ, needs a delivery truck, 5 CP, 12hr window/CD.
+	// MISSION_TRUCK_DELIVERY (§6.18) - civ, needs a delivery truck, 5 CP, 12hr window/CD.
 	{ "Truck Delivery",	MISSION_TYPE_CIVILIAN,	MTRUCK_COOLDOWN_HRS,	5,	MTRUCK_CP_PAY,	MTRUCK_BONUS,	0,						true,	true,	2749.7590, -2454.5906, 13.6350,	10 },
-	// MISSION_TRASH_PICKUP (§6.17) — civ, needs a Trashmaster, 5 CP, $2.5k/cp + $25k.
+	// MISSION_TRASH_PICKUP (§6.17) - civ, needs a Trashmaster, 5 CP, $2.5k/cp + $25k.
 	{ "Trash Pickup",	MISSION_TYPE_CIVILIAN,	MTRASH_COOLDOWN_HRS,	5,	MTRASH_CP_PAY,	MTRASH_BONUS,	0,						true,	true,	2434.5364, -1521.5165, 23.9946,	10 },
-	// MISSION_FOOD_DELIVERY (§6.6) — civ, needs a food vehicle, 5 CP, $2.5k/cp + $25k.
+	// MISSION_FOOD_DELIVERY (§6.6) - civ, needs a food vehicle, 5 CP, $2.5k/cp + $25k.
 	{ "Food Delivery",	MISSION_TYPE_CIVILIAN,	MFOOD_COOLDOWN_HRS,	5,	MFOOD_CP_PAY,	MFOOD_BONUS,	0,						true,	true,	2105.5417, -1806.5814, 13.5547,	10 },
-	// MISSION_VEHICLE_THEFT (§6.19) — civ, deliver 5 stolen cars to chop-shop drops
+	// MISSION_VEHICLE_THEFT (§6.19) - civ, deliver 5 stolen cars to chop-shop drops
 	// (needs a land vehicle to score each drop; the LAST drop forces WL10). Start at
 	// LS Market. $15k/car + $75k bonus (=$150k), 15 game-hr cooldown.
 	{ "Vehicle Theft",	MISSION_TYPE_CIVILIAN,	MVEHTHEFT_COOLDOWN_HRS,	5,	MVEHTHEFT_CP_PAY,	MVEHTHEFT_BONUS,	MVEHTHEFT_WANTED_PER_CP,	true,	true,	1032.5000, -1032.0000, 32.1000,	10 },
-	// MISSION_HOLDUP_MISSION (§6.7) — civ, chain 3 store-holdup checkpoints ON FOOT
+	// MISSION_HOLDUP_MISSION (§6.7) - civ, chain 3 store-holdup checkpoints ON FOOT
 	// ($10k min each + a large completion bonus). Start at LS Market. 5 game-hr CD.
 	{ "Holdup Mission",	MISSION_TYPE_CIVILIAN,	MHOLDUP_COOLDOWN_HRS,	MHOLDUP_STORES,	MHOLDUP_CP_PAY,	MHOLDUP_BONUS,	MHOLDUP_WANTED_PER_CP,	false,	true,	1315.5000, -1279.0000, 13.5500,	10 },
-	// MISSION_AIRPORT_ROBBERY (§6.1) — civ, box-collection mechanic (bespoke handler,
+	// MISSION_AIRPORT_ROBBERY (§6.1) - civ, box-collection mechanic (bespoke handler,
 	// NOT the route CPs). Needs a truck/van/garbage truck; the row carries the launcher
 	// marker + cooldown only (mCheckpoints/route are unused). Start at LS International.
 	{ "Airport Robbery",MISSION_TYPE_CIVILIAN,	MAIRPORT_COOLDOWN_HRS,	1,	0,				MAIRPORT_BONUS,	MAIRPORT_WANTED_START,	true,	true,	1685.0000, -2333.0000, 13.5000,	1 },
-	// ---- M6 (stage 4) — the final ~12 missions (append, never renumber). --------
-	// MISSION_COURIER_DELIVERY (§6.2) — civ, any land vehicle, 5 city drops, warrant on
+	// ---- M6 (stage 4) - the final ~12 missions (append, never renumber). --------
+	// MISSION_COURIER_DELIVERY (§6.2) - civ, any land vehicle, 5 city drops, warrant on
 	// pickup, distance pay, 12 game-hr window. Start at LS docks (far-from-city pickup).
 	{ "Courier Delivery",MISSION_TYPE_CIVILIAN,	MCOURIER_COOLDOWN_HRS,	5,	MCOURIER_CP_PAY,	MCOURIER_BONUS,	0,						true,	true,	2749.0000, -2450.0000, 13.6300,	10 },
-	// MISSION_HOUSE_DELIVERY (§6.8) — civ, any land vehicle, 5 house drops (some illegal
-	// → +wanted if cop near), 12 game-hr window. Start at LS Ocean Docks (§6.8 VERIFIED).
+	// MISSION_HOUSE_DELIVERY (§6.8) - civ, any land vehicle, 5 house drops (some illegal
+	// -> +wanted if cop near), 12 game-hr window. Start at LS Ocean Docks (§6.8 VERIFIED).
 	{ "House Delivery",	MISSION_TYPE_CIVILIAN,	MHOUSEDEL_COOLDOWN_HRS,	5,	MHOUSEDEL_CP_PAY,	MHOUSEDEL_BONUS,	MHOUSEDEL_WANTED_PER_CP,true,	true,	2165.5000, -2279.5000, 13.5000,	10 },
-	// MISSION_ILLEGAL_IMMIGRANT (§6.9) — innocent civ, 5-leg pickup+return route, WANTED
+	// MISSION_ILLEGAL_IMMIGRANT (§6.9) - innocent civ, 5-leg pickup+return route, WANTED
 	// ON COMPLETION (not pickup), night reduces cop sight. Start at East Los Santos.
 	{ "Illegal Immigrant",MISSION_TYPE_CIVILIAN,MIMMIG_COOLDOWN_HRS,	5,	MIMMIG_CP_PAY,	MIMMIG_BONUS,	0,						true,	true,	2748.0000, -1330.0000, 21.5000,	10 },
-	// MISSION_LAWN_MOWING (§6.10) — civ, needs a Mower, timed mow route + completion
+	// MISSION_LAWN_MOWING (§6.10) - civ, needs a Mower, timed mow route + completion
 	// bonus. LV golf course start (Prickle Pine). Built-in restart wait on cancel.
 	{ "Lawn Mowing",	MISSION_TYPE_CIVILIAN,	MLAWN_COOLDOWN_HRS,		5,	MLAWN_CP_PAY,	MLAWN_BONUS,	0,						true,	true,	1237.0000, 1834.0000, 8.5000,	10 },
-	// MISSION_PAPERBOY (§6.11) — innocent civ, ON FOOT, 4-MIN REAL-TIME limit, $500/drop.
+	// MISSION_PAPERBOY (§6.11) - innocent civ, ON FOOT, 4-MIN REAL-TIME limit, $500/drop.
 	// Start at LS Vinewood (§6.11 VERIFIED). mNeedsVehicle=false (on foot).
 	{ "Paperboy",		MISSION_TYPE_CIVILIAN,	MPAPERBOY_COOLDOWN_HRS,	5,	MPAPERBOY_CP_PAY,	MPAPERBOY_BONUS,	0,					false,	true,	845.2500, -1042.0000, 22.5000,	10 },
-	// MISSION_PICKPOCKET (§6.12) — civ (Pickpocket skill scales), rob $10k from players
+	// MISSION_PICKPOCKET (§6.12) - civ (Pickpocket skill scales), rob $10k from players
 	// via /pickpocket (bespoke target-based). Start at LS Willowfield. mCheckpoints unused.
 	{ "Pickpocket",		MISSION_TYPE_CIVILIAN,	MPICKPOCKET_COOLDOWN_HRS,1,	0,				MPICKPOCKET_COMPLETE_BONUS,	MPICKPOCKET_WANTED,	false,	true,	2450.0000, -1970.0000, 13.5500,	1 },
-	// MISSION_SEXUAL_ENCOUNTER (§6.15) — innocent civ (Rapist/Prostitute scale), 5
+	// MISSION_SEXUAL_ENCOUNTER (§6.15) - innocent civ (Rapist/Prostitute scale), 5
 	// encounters via /encounter (bespoke). Start at a LS sex shop. mCheckpoints unused.
 	{ "Sexual Encounter",MISSION_TYPE_CIVILIAN,	MSEX_COOLDOWN_HRS,		1,	0,				MSEX_COMPLETE_BONUS,	0,				false,	true,	2093.0000, -1785.0000, 13.5500,	1 },
-	// MISSION_TRACTOR (§6.16) — civ, needs a Tractor, wraps the /farmjob crop system at
+	// MISSION_TRACTOR (§6.16) - civ, needs a Tractor, wraps the /farmjob crop system at
 	// CrazyBob's Farm (bespoke hand-off). The row carries marker + cooldown only.
 	{ "Tractor Mission",MISSION_TYPE_CIVILIAN,	MTRACTOR_COOLDOWN_HRS,	1,	0,				0,				0,						true,	true,	FARM_X, FARM_Y, FARM_Z,	1 },
-	// MISSION_FLOWER_DELIVERY (§6.5) — COP OR CIV, deliver flowers to 5 players via
+	// MISSION_FLOWER_DELIVERY (§6.5) - COP OR CIV, deliver flowers to 5 players via
 	// /flowers (bespoke). Start at LS Jefferson. mType is civ but the entry gate is
 	// relaxed for this row (Mission_Start special-cases it to allow cops too).
 	{ "Flower Delivery",MISSION_TYPE_CIVILIAN,	MFLOWER_COOLDOWN_HRS,	1,	0,				MFLOWER_COMPLETE_BONUS,	0,				false,	true,	2179.0000, -1160.0000, 25.0000,	1 },
-	// MISSION_RACE_CHALLENGE (§6.13) — all players, /challenge race framework (bespoke
+	// MISSION_RACE_CHALLENGE (§6.13) - all players, /challenge race framework (bespoke
 	// race-CP route from g_RaceReg). The row carries marker + cooldown only.
 	{ "Race Challenge",	MISSION_TYPE_CIVILIAN,	MRACE_COOLDOWN_HRS,		1,	0,				0,				0,						false,	false,	1960.0000, -1400.0000, 13.5000,	1 },
-	// MISSION_ROUTINE_PATROL (§6.14, COP) — cop-only, 5 sequential PD checkpoints,
+	// MISSION_ROUTINE_PATROL (§6.14, COP) - cop-only, 5 sequential PD checkpoints,
 	// $2.5k/cp + $25k bonus. Start at LSPD HQ (§6.14 VERIFIED 1582.375,-1635.000).
 	{ "Routine Patrol",	MISSION_TYPE_COP,		MPATROL_COOLDOWN_HRS,	5,	MPATROL_CP_PAY,	MPATROL_BONUS,	0,						true,	true,	1582.3750, -1635.0000, 13.5600,	10 },
-	// MISSION_DOMESTIC_DISTURBANCE (§6.3, COP) — cop-only, drive PD → a player-owned
+	// MISSION_DOMESTIC_DISTURBANCE (§6.3, COP) - cop-only, drive PD -> a player-owned
 	// house (bespoke single-destination). Start at LSPD HQ. mCheckpoints unused.
 	{ "Domestic Disturbance",MISSION_TYPE_COP,	MDOMESTIC_COOLDOWN_HRS,	1,	0,				MDOMESTIC_BASE_PAY,	0,					true,	true,	1582.3750, -1635.0000, 13.5600,	1 }
 };
 
-// Candidate checkpoint pools — one row per mission (MISSION_MAX_ROUTE_POOL cols).
+// Candidate checkpoint pools - one row per mission (MISSION_MAX_ROUTE_POOL cols).
 // The launcher samples mCheckpoints of these (random, no repeats) per run so the
 // route is fresh each time (§6.4 "5 randomly-selected locations, any order").
 // Points are spread Los-Santos-wide (all street-level, reachable by land vehicle).
 static const Float:MissionRoute[MISSION_COUNT][MISSION_MAX_ROUTE_POOL][3] =
 {
-	// MISSION_DRUG_DELIVERY — LS-wide drops.
+	// MISSION_DRUG_DELIVERY - LS-wide drops.
 	{
 		{ 1479.5000, -1755.9000, 12.5500 }, { 2178.5000, -1160.5000, 25.0000 }, { 1930.0000, -1780.0000, 13.3800 },
 		{ 2494.0000, -1690.0000, 13.3200 }, { 1170.0000, -1300.0000, 13.5000 }, { 655.0000,  -1275.0000, 13.5800 },
 		{ 2100.0000, -1170.0000, 24.9000 }, { 1560.0000, -1000.0000, 24.0000 }, { 1830.0000, -1950.0000, 13.4000 },
 		{ 2600.0000, -1310.0000, 25.7000 }
 	},
-	// MISSION_TRUCK_DELIVERY — depot / warehouse deliveries (docks & industrial).
+	// MISSION_TRUCK_DELIVERY - depot / warehouse deliveries (docks & industrial).
 	{
 		{ 2749.7590, -2454.5906, 13.6350 }, { 2411.0000, -2530.0000, 13.6500 }, { 2170.0000, -2280.0000, 13.5000 },
 		{ 1080.0000, -2020.0000, 13.0000 }, { 2635.0000, -2020.0000, 13.5500 }, { 1720.0000, -1890.0000, 13.5600 },
 		{ 2450.0000, -1520.0000, 24.0000 }, { 970.0000,  -1230.0000, 16.5000 }, { 1930.0000, -2640.0000, 13.5000 },
 		{ 2200.0000, -2020.0000, 13.5500 }
 	},
-	// MISSION_TRASH_PICKUP — bins scattered around the LS streets.
+	// MISSION_TRASH_PICKUP - bins scattered around the LS streets.
 	{
 		{ 2434.5364, -1521.5165, 23.9946 }, { 1830.0000, -1680.0000, 13.5300 }, { 2100.0000, -1470.0000, 23.9700 },
 		{ 1560.0000, -1360.0000, 13.5000 }, { 2270.0000, -1660.0000, 14.5000 }, { 1290.0000, -1600.0000, 13.5400 },
 		{ 2560.0000, -1300.0000, 25.7000 }, { 1990.0000, -1440.0000, 13.5400 }, { 1470.0000, -1770.0000, 12.5500 },
 		{ 2660.0000, -1670.0000, 10.0000 }
 	},
-	// MISSION_FOOD_DELIVERY — food drops around residential LS.
+	// MISSION_FOOD_DELIVERY - food drops around residential LS.
 	{
 		{ 2105.5417, -1806.5814, 13.5547 }, { 2490.0000, -1960.0000, 13.5500 }, { 1830.0000, -1140.0000, 24.0000 },
 		{ 2200.0000, -1150.0000, 25.0000 }, { 1360.0000, -1520.0000, 13.5000 }, { 660.0000,  -1860.0000, 5.5000 },
 		{ 2760.0000, -1620.0000, 12.2000 }, { 1470.0000, -1180.0000, 23.9000 }, { 1930.0000, -1300.0000, 13.5600 },
 		{ 2410.0000, -1490.0000, 24.0000 }
 	},
-	// MISSION_VEHICLE_THEFT — chop-shop delivery drops (industrial / garage yards).
+	// MISSION_VEHICLE_THEFT - chop-shop delivery drops (industrial / garage yards).
 	// Deliver each stolen car here; the final drop pays the bonus + forces WL10.
 	{
 		{ 1032.5000, -1032.0000, 32.1000 }, { 2645.0000, -2010.0000, 13.5500 }, { 1780.0000, -1900.0000, 13.5600 },
@@ -213,7 +213,7 @@ static const Float:MissionRoute[MISSION_COUNT][MISSION_MAX_ROUTE_POOL][3] =
 		{ 1930.0000, -1080.0000, 25.0000 }, { 620.0000,  -1275.0000, 13.5800 }, { 2760.0000, -2450.0000, 13.6300 },
 		{ 1080.0000, -1220.0000, 16.5000 }
 	},
-	// MISSION_HOLDUP_MISSION — store-holdup checkpoints (near 24-7 / food / gas store
+	// MISSION_HOLDUP_MISSION - store-holdup checkpoints (near 24-7 / food / gas store
 	// clerks across LS). The route framework samples MHOLDUP_STORES of these on foot.
 	{
 		{ 1315.5000, -1279.0000, 13.5500 }, { 2421.0000, -1509.0000, 24.0000 }, { 1833.0000, -1842.0000, 13.5800 },
@@ -221,7 +221,7 @@ static const Float:MissionRoute[MISSION_COUNT][MISSION_MAX_ROUTE_POOL][3] =
 		{ 2426.0000, -1969.0000, 13.5500 }, { 1930.0000, -1773.0000, 13.5500 }, { 2447.0000, -1959.0000, 13.5500 },
 		{ 2109.0000, -1806.0000, 13.5500 }
 	},
-	// MISSION_AIRPORT_ROBBERY — bespoke box mechanic; the route CPs are unused. One
+	// MISSION_AIRPORT_ROBBERY - bespoke box mechanic; the route CPs are unused. One
 	// placeholder point (the mission never walks a race route). Kept valid for the array.
 	{
 		{ 1685.0000, -2333.0000, 13.5000 }, { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 },
@@ -229,85 +229,85 @@ static const Float:MissionRoute[MISSION_COUNT][MISSION_MAX_ROUTE_POOL][3] =
 		{ 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 },
 		{ 0.0, 0.0, 0.0 }
 	},
-	// ---- M6 (stage 4) — the final ~12 missions' route pools (append). -----------
-	// MISSION_COURIER_DELIVERY — in-city delivery destinations (§6.2 "always in the city").
+	// ---- M6 (stage 4) - the final ~12 missions' route pools (append). -----------
+	// MISSION_COURIER_DELIVERY - in-city delivery destinations (§6.2 "always in the city").
 	{
 		{ 1479.5000, -1755.9000, 12.5500 }, { 2178.5000, -1160.5000, 25.0000 }, { 1930.0000, -1780.0000, 13.3800 },
 		{ 2494.0000, -1690.0000, 13.3200 }, { 1170.0000, -1300.0000, 13.5000 }, { 655.0000,  -1275.0000, 13.5800 },
 		{ 2100.0000, -1170.0000, 24.9000 }, { 1560.0000, -1000.0000, 24.0000 }, { 1830.0000, -1950.0000, 13.4000 },
 		{ 2600.0000, -1310.0000, 25.7000 }
 	},
-	// MISSION_HOUSE_DELIVERY — residential drop points across LS (stand-ins for houses).
+	// MISSION_HOUSE_DELIVERY - residential drop points across LS (stand-ins for houses).
 	{
 		{ 1298.0000, -730.0000, 92.0000 }, { 2496.0000, -1690.0000, 13.3200 }, { 1560.0000, -1360.0000, 13.5000 },
 		{ 2145.0000, -1015.0000, 62.7000 }, { 1360.0000, -1520.0000, 13.5000 }, { 660.0000,  -1860.0000, 5.5000 },
 		{ 2760.0000, -1620.0000, 12.2000 }, { 1470.0000, -1180.0000, 23.9000 }, { 1230.0000, -1360.0000, 13.5000 },
 		{ 2410.0000, -1490.0000, 24.0000 }
 	},
-	// MISSION_ILLEGAL_IMMIGRANT — outskirts pickup then city return legs (last = drop).
+	// MISSION_ILLEGAL_IMMIGRANT - outskirts pickup then city return legs (last = drop).
 	{
 		{ 2748.0000, -1330.0000, 21.5000 }, { 2540.0000, -1310.0000, 25.7000 }, { 2280.0000, -1200.0000, 25.0000 },
 		{ 2050.0000, -1170.0000, 24.9000 }, { 1830.0000, -1140.0000, 24.0000 }, { 1560.0000, -1360.0000, 13.5000 },
 		{ 1360.0000, -1520.0000, 13.5000 }, { 1170.0000, -1300.0000, 13.5000 }, { 970.0000,  -1230.0000, 16.5000 },
 		{ 655.0000,  -1275.0000, 13.5800 }
 	},
-	// MISSION_LAWN_MOWING — mow checkpoints around the LV golf course (Prickle Pine).
+	// MISSION_LAWN_MOWING - mow checkpoints around the LV golf course (Prickle Pine).
 	{
 		{ 1237.0000, 1834.0000, 8.5000 }, { 1200.0000, 1870.0000, 9.0000 }, { 1160.0000, 1900.0000, 9.5000 },
 		{ 1120.0000, 1860.0000, 9.5000 }, { 1090.0000, 1820.0000, 9.5000 }, { 1130.0000, 1790.0000, 9.5000 },
 		{ 1180.0000, 1770.0000, 9.0000 }, { 1230.0000, 1790.0000, 8.5000 }, { 1270.0000, 1830.0000, 8.5000 },
 		{ 1250.0000, 1880.0000, 8.5000 }
 	},
-	// MISSION_PAPERBOY — house-front on-foot delivery checkpoints around Vinewood/LS.
+	// MISSION_PAPERBOY - house-front on-foot delivery checkpoints around Vinewood/LS.
 	{
 		{ 845.2500, -1042.0000, 22.5000 }, { 890.0000,  -1010.0000, 26.0000 }, { 930.0000,  -1050.0000, 26.0000 },
 		{ 810.0000, -1080.0000, 25.0000 }, { 770.0000,  -1030.0000, 24.5000 }, { 880.0000,  -1120.0000, 25.5000 },
 		{ 950.0000, -1120.0000, 26.0000 }, { 1000.0000, -1050.0000, 26.0000 }, { 820.0000,  -960.0000,  40.0000 },
 		{ 760.0000, -1120.0000, 24.5000 }
 	},
-	// MISSION_PICKPOCKET — bespoke target-based; route CPs unused (placeholder point).
+	// MISSION_PICKPOCKET - bespoke target-based; route CPs unused (placeholder point).
 	{
 		{ 2450.0000, -1970.0000, 13.5500 }, { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 },
 		{ 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 },
 		{ 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 },
 		{ 0.0, 0.0, 0.0 }
 	},
-	// MISSION_SEXUAL_ENCOUNTER — bespoke target-based; route CPs unused (placeholder).
+	// MISSION_SEXUAL_ENCOUNTER - bespoke target-based; route CPs unused (placeholder).
 	{
 		{ 2093.0000, -1785.0000, 13.5500 }, { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 },
 		{ 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 },
 		{ 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 },
 		{ 0.0, 0.0, 0.0 }
 	},
-	// MISSION_TRACTOR — bespoke /farmjob hand-off; route CPs unused (placeholder point).
+	// MISSION_TRACTOR - bespoke /farmjob hand-off; route CPs unused (placeholder point).
 	{
 		{ FARM_X, FARM_Y, FARM_Z }, { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 },
 		{ 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 },
 		{ 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 },
 		{ 0.0, 0.0, 0.0 }
 	},
-	// MISSION_FLOWER_DELIVERY — bespoke target-based; route CPs unused (placeholder).
+	// MISSION_FLOWER_DELIVERY - bespoke target-based; route CPs unused (placeholder).
 	{
 		{ 2179.0000, -1160.0000, 25.0000 }, { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 },
 		{ 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 },
 		{ 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 },
 		{ 0.0, 0.0, 0.0 }
 	},
-	// MISSION_RACE_CHALLENGE — bespoke race route (from g_RaceReg); CPs unused here.
+	// MISSION_RACE_CHALLENGE - bespoke race route (from g_RaceReg); CPs unused here.
 	{
 		{ 1960.0000, -1400.0000, 13.5000 }, { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 },
 		{ 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 },
 		{ 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 },
 		{ 0.0, 0.0, 0.0 }
 	},
-	// MISSION_ROUTINE_PATROL — 5 sequential patrol checkpoints across LS (§6.14).
+	// MISSION_ROUTINE_PATROL - 5 sequential patrol checkpoints across LS (§6.14).
 	{
 		{ 1582.3750, -1635.0000, 13.5600 }, { 1360.0000, -1520.0000, 13.5000 }, { 2100.0000, -1170.0000, 24.9000 },
 		{ 2494.0000, -1690.0000, 13.3200 }, { 1930.0000, -1780.0000, 13.3800 }, { 655.0000,  -1275.0000, 13.5800 },
 		{ 2600.0000, -1310.0000, 25.7000 }, { 1170.0000, -1300.0000, 13.5000 }, { 1830.0000, -1950.0000, 13.4000 },
 		{ 2178.5000, -1160.5000, 25.0000 }
 	},
-	// MISSION_DOMESTIC_DISTURBANCE — bespoke single-house destination; CPs unused.
+	// MISSION_DOMESTIC_DISTURBANCE - bespoke single-house destination; CPs unused.
 	{
 		{ 1582.3750, -1635.0000, 13.5600 }, { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 },
 		{ 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 },
@@ -320,7 +320,7 @@ static const Float:MissionRoute[MISSION_COUNT][MISSION_MAX_ROUTE_POOL][3] =
 // Drug Delivery accepts any LAND vehicle (checked generically), so it has no set.
 static const MissionTruckModels[] =
 {
-	// Truck Delivery — the 14 supported delivery-truck models (§6.18 VERIFIED).
+	// Truck Delivery - the 14 supported delivery-truck models (§6.18 VERIFIED).
 	499,	// Benson
 	498,	// Boxville
 	524,	// Cement Truck
@@ -339,7 +339,7 @@ static const MissionTruckModels[] =
 
 static const MissionFoodModels[] =
 {
-	// Food Delivery — Mr.Whoopee, Hotdog, Pizzaboy (§6.6 VERIFIED).
+	// Food Delivery - Mr.Whoopee, Hotdog, Pizzaboy (§6.6 VERIFIED).
 	423,	// Mr Whoopee
 	588,	// Hotdog
 	448		// Pizzaboy
@@ -347,8 +347,8 @@ static const MissionFoodModels[] =
 
 #define MISSION_TRASHMASTER_MODEL	408		// Trashmaster (Trash Pickup gate, §6.17)
 
-// Airport Robbery (§6.1) — accepted haulers: trucks, vans and the garbage truck.
-// "Truck, van, or garbage truck" (VERIFIED) — we accept the delivery-truck set,
+// Airport Robbery (§6.1) - accepted haulers: trucks, vans and the garbage truck.
+// "Truck, van, or garbage truck" (VERIFIED) - we accept the delivery-truck set,
 // common vans (Boxville/Mule/Yankee/Benson/Burrito/Pony) and the Trashmaster.
 static const MissionAirportModels[] =
 {
@@ -386,10 +386,10 @@ static bool:g_MissionTargetHit[MAX_PLAYERS][MAX_PLAYERS];
 
 // ---- Race Challenge registry (§6.13) ----------------------------------------
 // A race is DATA: name, category (land/bike/boat), a checkpoint route, a par time
-// (real-seconds — beat it for a podium bonus), and a completion fee-exempt "first
+// (real-seconds - beat it for a podium bonus), and a completion fee-exempt "first
 // attempt free" flag handled per-player. The site lists 28 races; we ship a
 // representative set spanning the categories. ADD MORE by appending rows here +
-// growing g_RaceCount — no framework change needed.
+// growing g_RaceCount - no framework change needed.
 // Pawn enum array members are single-dimension only, so the route is FLATTENED to
 // MRACE_MAX_CHECKPOINTS*3 floats: checkpoint c's coords are indices c*3+0 (X), +1
 // (Y), +2 (Z). Access via the Mission_RaceCP* helpers below.
@@ -398,23 +398,23 @@ enum e_RaceReg
 	rName[40],					// display name (dialog + HUD)
 	rCategory,					// MRACE_CATEGORY_LAND / _BIKE / _BOAT (vehicle gate)
 	rCheckpoints,				// number of checkpoints in this race route
-	rParSecs,					// real-seconds par — finish under it for the podium bonus
+	rParSecs,					// real-seconds par - finish under it for the podium bonus
 	Float:rRoute[MRACE_MAX_CHECKPOINTS * 3]	// flattened checkpoint coords (c*3 + {0,1,2})
 }
 
-// The shipped race set (representative of the 28 — see report). Land / Bike / Boat.
+// The shipped race set (representative of the 28 - see report). Land / Bike / Boat.
 static const g_RaceReg[][e_RaceReg] =
 {
-	// Los Santos Circuit — a short city land circuit (§6.13 "Los Santos Circuit 3km").
+	// Los Santos Circuit - a short city land circuit (§6.13 "Los Santos Circuit 3km").
 	{ "Los Santos Circuit", MRACE_CATEGORY_LAND, 5, 150,
 		{ 1960.0, -1400.0, 13.5,   2200.0, -1150.0, 25.0,   2490.0, -1690.0, 13.3,   1930.0, -1780.0, 13.4,   1560.0, -1360.0, 13.5,   0.0,0.0,0.0,   0.0,0.0,0.0,   0.0,0.0,0.0 } },
-	// San Andreas Tour — a long cross-country land run (§6.13 "27.5km land").
+	// San Andreas Tour - a long cross-country land run (§6.13 "27.5km land").
 	{ "San Andreas Tour", MRACE_CATEGORY_LAND, 6, 300,
 		{ 1960.0, -1400.0, 13.5,   1170.0, -1300.0, 13.5,   655.0, -1275.0, 13.6,   1080.0, -2020.0, 13.0,   2170.0, -2280.0, 13.5,   2749.0, -2454.0, 13.6,   0.0,0.0,0.0,   0.0,0.0,0.0 } },
-	// Los Santos Biker Run — bikes only (§6.13 "LV Biker Endurance 9km bikes").
+	// Los Santos Biker Run - bikes only (§6.13 "LV Biker Endurance 9km bikes").
 	{ "Los Santos Biker Run", MRACE_CATEGORY_BIKE, 5, 170,
 		{ 1960.0, -1400.0, 13.5,   1830.0, -1140.0, 24.0,   2100.0, -1170.0, 24.9,   2600.0, -1310.0, 25.7,   2494.0, -1690.0, 13.3,   0.0,0.0,0.0,   0.0,0.0,0.0,   0.0,0.0,0.0 } },
-	// Coastal Boat Sprint — boats only (§6.13 "Boating With Jaws" boat category).
+	// Coastal Boat Sprint - boats only (§6.13 "Boating With Jaws" boat category).
 	{ "Coastal Boat Sprint", MRACE_CATEGORY_BOAT, 4, 200,
 		{ 660.0, -1860.0, 0.0,   1080.0, -2450.0, 0.0,   1930.0, -2640.0, 0.0,   2760.0, -2450.0, 0.0,   0.0,0.0,0.0,   0.0,0.0,0.0,   0.0,0.0,0.0,   0.0,0.0,0.0 } }
 };
@@ -429,7 +429,7 @@ static Mission_NowGameHour()
 	return (g_GameDayCounter * MISSION_HOURS_PER_DAY) + GameHour;
 
 // Is a cop within `range` of the player (same interior/VW)? The generic form the
-// M5/M6 smuggling missions reuse — no name-based logic, pure team + proximity.
+// M5/M6 smuggling missions reuse - no name-based logic, pure team + proximity.
 static Mission_IsCopInSightRange(playerid, Float:range)
 {
 	new Float:x, Float:y, Float:z;
@@ -490,7 +490,7 @@ static Mission_VehicleOK(playerid, missionId)
 		}
 		case MISSION_VEHICLE_THEFT:
 		{
-			// Deliver whatever car you stole — any land vehicle qualifies (§6.19).
+			// Deliver whatever car you stole - any land vehicle qualifies (§6.19).
 			return Mission_IsLandVehicle(model);
 		}
 		case MISSION_AIRPORT_ROBBERY:
@@ -569,7 +569,7 @@ static Mission_PlaceRaceCP(playerid)
 	return 1;
 }
 
-// Live HUD line — checkpoint N/M + earnings so far (design §6 "monitor status").
+// Live HUD line - checkpoint N/M + earnings so far (design §6 "monitor status").
 static Mission_ShowHUD(playerid)
 {
 	new missionId = PlayerInfo[playerid][pOnMission];
@@ -586,10 +586,10 @@ static Mission_ShowHUD(playerid)
 static Mission_ClearState(playerid)
 {
 	// Airport Robbery owns bespoke session state (box pickups, phase, deadline,
-	// its own checkpoint) — tear it down BEFORE pOnMission is reset (§6.1).
+	// its own checkpoint) - tear it down BEFORE pOnMission is reset (§6.1).
 	if(PlayerInfo[playerid][pOnMission] == MISSION_AIRPORT_ROBBERY)
 		Mission_AirportCleanup(playerid);
-	// Domestic Disturbance uses a standard SetPlayerCheckpoint (single destination) —
+	// Domestic Disturbance uses a standard SetPlayerCheckpoint (single destination) -
 	// disable it on teardown so the marker never lingers (§6.3).
 	if(PlayerInfo[playerid][pOnMission] == MISSION_DOMESTIC_DISTURBANCE && IsPlayerConnected(playerid))
 		DisablePlayerCheckpoint(playerid);
@@ -611,7 +611,7 @@ static Mission_ClearState(playerid)
 		PlayerInfo[playerid][pMissionRouteX][i] = 0.0;
 		PlayerInfo[playerid][pMissionRouteY][i] = 0.0;
 		PlayerInfo[playerid][pMissionRouteZ][i] = 0.0;
-		g_VehTheftDelivered[playerid][i] = -1;	// M5 Vehicle Theft dedup — clear on any mission end
+		g_VehTheftDelivered[playerid][i] = -1;	// M5 Vehicle Theft dedup - clear on any mission end
 	}
 	// Clear the pre-owned snapshot so it does not leak into a later run.
 	for(new v = 0; v <= MAX_VEHICLES; v++) g_VehTheftPreOwned[playerid][v] = false;
@@ -669,7 +669,7 @@ FUNCTION Mission_OnCooldown(playerid, missionId)
 	new stamp = PlayerInfo[playerid][pMissionCooldown][missionId];
 	if(stamp <= 0) return 0;
 	new elapsed = Mission_NowGameHour() - stamp;
-	if(elapsed < 0) return 0;	// clock somehow behind the stamp — treat as ready
+	if(elapsed < 0) return 0;	// clock somehow behind the stamp - treat as ready
 	return (elapsed < MissionReg[missionId][mCooldownHrs]);
 }
 
@@ -705,7 +705,7 @@ FUNCTION Mission_Start(playerid, missionId)
 	if(IsPlayerSpawnProtected(playerid)) return SendClientMessage(playerid, COLOR_ERROR, "You cannot start a mission while spawn-protected. Wait a moment.");
 
 	// Civ/cop entry gate. Flower Delivery (§6.5) is the one CIVILIAN-typed row open to
-	// BOTH cops and civilians (VERIFIED) — exempt it from the "cops can't take civ jobs" rule.
+	// BOTH cops and civilians (VERIFIED) - exempt it from the "cops can't take civ jobs" rule.
 	if(MissionReg[missionId][mType] == MISSION_TYPE_COP && !IsCop(playerid))
 		return SendClientMessage(playerid, COLOR_ERROR, "That mission is for law enforcement only.");
 	if(MissionReg[missionId][mType] == MISSION_TYPE_CIVILIAN && IsCop(playerid) && missionId != MISSION_FLOWER_DELIVERY)
@@ -720,7 +720,7 @@ FUNCTION Mission_Start(playerid, missionId)
 	if(Mission_OnCooldown(playerid, missionId))
 	{
 		new err[128];
-		format(err, sizeof(err), "%s is on cooldown — try again in %d game hour(s).", MissionReg[missionId][mName], Mission_CooldownLeft(playerid, missionId));
+		format(err, sizeof(err), "%s is on cooldown - try again in %d game hour(s).", MissionReg[missionId][mName], Mission_CooldownLeft(playerid, missionId));
 		return SendClientMessage(playerid, COLOR_ERROR, err);
 	}
 
@@ -734,7 +734,7 @@ FUNCTION Mission_Start(playerid, missionId)
 			case MISSION_TRUCK_DELIVERY: format(err, sizeof(err), "You must be driving a delivery truck (Benson, Mule, Linerunner, Tanker, ...) to start a Truck Delivery.");
 			case MISSION_TRASH_PICKUP: format(err, sizeof(err), "You must be driving a Trashmaster to start a Trash Pickup.");
 			case MISSION_FOOD_DELIVERY: format(err, sizeof(err), "You must be driving a food vehicle (Mr.Whoopee, Hotdog, or Pizzaboy) to start a Food Delivery.");
-			case MISSION_VEHICLE_THEFT: format(err, sizeof(err), "You must be driving a (stolen) land vehicle to deliver it — steal a car first, then start the mission.");
+			case MISSION_VEHICLE_THEFT: format(err, sizeof(err), "You must be driving a (stolen) land vehicle to deliver it - steal a car first, then start the mission.");
 			case MISSION_AIRPORT_ROBBERY: format(err, sizeof(err), "You must be in a truck, van or garbage truck at the airport to start the Airport Robbery.");
 			case MISSION_COURIER_DELIVERY: format(err, sizeof(err), "You must be driving a land vehicle to pick up the courier cargo.");
 			case MISSION_HOUSE_DELIVERY: format(err, sizeof(err), "You must be driving a land vehicle to load the house deliveries.");
@@ -748,7 +748,7 @@ FUNCTION Mission_Start(playerid, missionId)
 		return SendClientMessage(playerid, COLOR_ERROR, err);
 	}
 
-	// All gates passed — start it. Bind the mission vehicle (for the exit abort).
+	// All gates passed - start it. Bind the mission vehicle (for the exit abort).
 	PlayerInfo[playerid][pOnMission] = missionId;
 	PlayerInfo[playerid][pMissionCheckpoint] = 0;
 	PlayerInfo[playerid][pMissionData] = 0;
@@ -770,7 +770,7 @@ FUNCTION Mission_Start(playerid, missionId)
 	else PlayerInfo[playerid][pMissionVehicle] = MissionReg[missionId][mNeedsVehicle] ? GetPlayerVehicleID(playerid) : -1;
 
 	// Airport Robbery is a BESPOKE box-collection mechanic, not a race-CP route
-	// (§6.1 — MMB / /box). Hand off to its custom starter and skip the route build.
+	// (§6.1 - MMB / /box). Hand off to its custom starter and skip the route build.
 	if(missionId == MISSION_AIRPORT_ROBBERY)
 		return Mission_AirportStart(playerid);
 
@@ -782,10 +782,10 @@ FUNCTION Mission_Start(playerid, missionId)
 		// slot (the cooldown was validated above; stamp it now so it throttles as designed).
 		case MISSION_TRACTOR:
 		{
-			PlayerInfo[playerid][pOnMission] = -1;	// detach — the farm job runs independently
+			PlayerInfo[playerid][pOnMission] = -1;	// detach - the farm job runs independently
 			PlayerInfo[playerid][pMissionVehicle] = -1;
 			Mission_SetCooldown(playerid, MISSION_TRACTOR);
-			SendClientMessage(playerid, COLOR_SERVER_INFO, ""COL_GREEN"* Tractor Mission "COL_WHITE"— running CrazyBob's Farm crop route. Drive the field checkpoints; "COL_YELLOW"/cancelfarmjob"COL_WHITE" to stop.");
+			SendClientMessage(playerid, COLOR_SERVER_INFO, ""COL_GREEN"* Tractor Mission "COL_WHITE"- running CrazyBob's Farm crop route. Drive the field checkpoints; "COL_YELLOW"/cancelfarmjob"COL_WHITE" to stop.");
 			CallLocalFunction("Farm_StartTractorJob", "d", playerid);
 			return 1;
 		}
@@ -807,34 +807,34 @@ FUNCTION Mission_Start(playerid, missionId)
 	SendClientMessage(playerid, COLOR_SERVER_INFO, string);
 	SendClientMessage(playerid, COLOR_SERVER_INFO, "Follow the "COL_YELLOW"race checkpoint"COL_WHITE" markers. "COL_YELLOW"/quitmission"COL_WHITE" to abandon.");
 
-	// Drug Delivery is smuggling — warn about the cop-sight wanted mechanic.
+	// Drug Delivery is smuggling - warn about the cop-sight wanted mechanic.
 	if(missionId == MISSION_DRUG_DELIVERY)
-		SendClientMessage(playerid, COLOR_ERROR, ""COL_RED"Careful — every drop within sight of a cop adds "COL_WHITE"+2 wanted"COL_RED". Stay clear of the police.");
-	// Vehicle Theft — warn about the last-car WL10 rule (§6.19 CRITICAL warning).
+		SendClientMessage(playerid, COLOR_ERROR, ""COL_RED"Careful - every drop within sight of a cop adds "COL_WHITE"+2 wanted"COL_RED". Stay clear of the police.");
+	// Vehicle Theft - warn about the last-car WL10 rule (§6.19 CRITICAL warning).
 	if(missionId == MISSION_VEHICLE_THEFT)
 	{
-		SendClientMessage(playerid, COLOR_ERROR, ""COL_RED"Steal each marked-type car and deliver it to the chop-shop. "COL_WHITE"Delivering the "COL_YELLOW"LAST"COL_WHITE" car instantly makes you "COL_RED"Most Wanted (WL10)"COL_WHITE" — save your fastest car for last.");
+		SendClientMessage(playerid, COLOR_ERROR, ""COL_RED"Steal each marked-type car and deliver it to the chop-shop. "COL_WHITE"Delivering the "COL_YELLOW"LAST"COL_WHITE" car instantly makes you "COL_RED"Most Wanted (WL10)"COL_WHITE" - save your fastest car for last.");
 	}
-	// Holdup Mission — warn about the escalating warrant across 3 stores (§6.7).
+	// Holdup Mission - warn about the escalating warrant across 3 stores (§6.7).
 	if(missionId == MISSION_HOLDUP_MISSION)
 	{
 		new msg[160];
-		format(msg, sizeof(msg), ""COL_RED"Rob "COL_WHITE"%d"COL_RED" stores on foot (min "COL_GREEN"$%d"COL_RED" each). Each holdup adds "COL_WHITE"+%d wanted"COL_RED" — expect heavy police attention.", MHOLDUP_STORES, MHOLDUP_MIN_PER_STORE, MHOLDUP_WANTED_PER_CP);
+		format(msg, sizeof(msg), ""COL_RED"Rob "COL_WHITE"%d"COL_RED" stores on foot (min "COL_GREEN"$%d"COL_RED" each). Each holdup adds "COL_WHITE"+%d wanted"COL_RED" - expect heavy police attention.", MHOLDUP_STORES, MHOLDUP_MIN_PER_STORE, MHOLDUP_WANTED_PER_CP);
 		SendClientMessage(playerid, COLOR_ERROR, msg);
 	}
 	// ---- M6 (stage 4) route-mission start warnings ------------------------------
-	// Courier Delivery — smuggling warrant on pickup (§6.2), applied right now at start.
+	// Courier Delivery - smuggling warrant on pickup (§6.2), applied right now at start.
 	if(missionId == MISSION_COURIER_DELIVERY)
 	{
 		GivePlayerWanted(playerid, MCOURIER_WANTED_START, "Courier smuggling (pickup)");
-		SendClientMessage(playerid, COLOR_ERROR, ""COL_RED"You picked up smuggled cargo — you have a "COL_WHITE"smuggling warrant"COL_RED". Police will try to intercept. Deliver into the city.");
+		SendClientMessage(playerid, COLOR_ERROR, ""COL_RED"You picked up smuggled cargo - you have a "COL_WHITE"smuggling warrant"COL_RED". Police will try to intercept. Deliver into the city.");
 	}
-	// House Delivery — some cargo is illegal (§6.8): +wanted on an illegal drop near a cop.
+	// House Delivery - some cargo is illegal (§6.8): +wanted on an illegal drop near a cop.
 	if(missionId == MISSION_HOUSE_DELIVERY)
-		SendClientMessage(playerid, COLOR_ERROR, ""COL_RED"Some of these deliveries are "COL_WHITE"illegal goods"COL_RED" — making an illegal drop within sight of a cop raises your wanted level.");
-	// Illegal Immigrant — wanted issued ON COMPLETION, not pickup (§6.9). Night hides cops.
+		SendClientMessage(playerid, COLOR_ERROR, ""COL_RED"Some of these deliveries are "COL_WHITE"illegal goods"COL_RED" - making an illegal drop within sight of a cop raises your wanted level.");
+	// Illegal Immigrant - wanted issued ON COMPLETION, not pickup (§6.9). Night hides cops.
 	if(missionId == MISSION_ILLEGAL_IMMIGRANT)
-		SendClientMessage(playerid, COLOR_ERROR, ""COL_RED"Stay clear of police while transporting — you only receive a wanted level "COL_WHITE"on completion"COL_RED". Cops see less at night.");
+		SendClientMessage(playerid, COLOR_ERROR, ""COL_RED"Stay clear of police while transporting - you only receive a wanted level "COL_WHITE"on completion"COL_RED". Cops see less at night.");
 	return 1;
 }
 
@@ -848,7 +848,7 @@ FUNCTION Mission_NextCheckpoint(playerid)
 	return 1;
 }
 
-// Final checkpoint reached — pay the completion bonus, stamp the cooldown, end.
+// Final checkpoint reached - pay the completion bonus, stamp the cooldown, end.
 FUNCTION Mission_Complete(playerid)
 {
 	new missionId = PlayerInfo[playerid][pOnMission];
@@ -860,12 +860,12 @@ FUNCTION Mission_Complete(playerid)
 	PlayerInfo[playerid][pMissionData] += bonus;
 	PlayerInfo[playerid][pScore] += 1;	// +1 completion score (on top of per-cp scores)
 
-	// Illegal Immigrant Transport (§6.9) — the wanted level is issued ON COMPLETION
+	// Illegal Immigrant Transport (§6.9) - the wanted level is issued ON COMPLETION
 	// (successful drop-off), NOT on pickup (VERIFIED). Apply it here, before cleanup.
 	if(missionId == MISSION_ILLEGAL_IMMIGRANT)
 	{
 		GivePlayerWanted(playerid, MIMMIG_WANTED_COMPLETE, "Transported illegal immigrants");
-		SendClientMessage(playerid, COLOR_ERROR, ""COL_RED"Delivery done — but transporting illegals earned you a "COL_WHITE"+"#MIMMIG_WANTED_COMPLETE" wanted level"COL_RED".");
+		SendClientMessage(playerid, COLOR_ERROR, ""COL_RED"Delivery done - but transporting illegals earned you a "COL_WHITE"+"#MIMMIG_WANTED_COMPLETE" wanted level"COL_RED".");
 	}
 
 	new total = PlayerInfo[playerid][pMissionData];
@@ -884,7 +884,7 @@ FUNCTION Mission_Complete(playerid)
 }
 
 // Cancel + clean up for ANY reason (death, disconnect, vehicle-exit, /quitmission,
-// off-route, jail). No payout is clawed back — per-checkpoint cash already banked
+// off-route, jail). No payout is clawed back - per-checkpoint cash already banked
 // is cash-in-hand and stays. No cooldown is stamped (only completion cools down).
 FUNCTION Mission_Abort(playerid, const reason[])
 {
@@ -911,7 +911,7 @@ FUNCTION Mission_OnCheckpoint(playerid)
 	new missionId = PlayerInfo[playerid][pOnMission];
 	if(missionId == -1) return 0;
 
-	// Race Challenge (§6.13) rides the race-CP callback too — its scoring is bespoke
+	// Race Challenge (§6.13) rides the race-CP callback too - its scoring is bespoke
 	// (par-time / podium), so dispatch and return before the delivery-route logic.
 	if(missionId == MISSION_RACE_CHALLENGE)
 		return Mission_RaceOnCheckpoint(playerid);
@@ -920,7 +920,7 @@ FUNCTION Mission_OnCheckpoint(playerid)
 	// (§6.19 "5 randomly-assigned vehicles"), so it is NOT bound to one vehicle. The
 	// drop is scored only if the player is driving a land vehicle that is not the car
 	// they just delivered, and the delivered car must NOT be one they already owned
-	// before the mission (Veh_IsOwnedBy is reused — you cannot chop your own car).
+	// before the mission (Veh_IsOwnedBy is reused - you cannot chop your own car).
 	if(missionId == MISSION_VEHICLE_THEFT)
 	{
 		if(!IsPlayerInAnyVehicle(playerid) || GetPlayerState(playerid) != PLAYER_STATE_DRIVER)
@@ -928,15 +928,15 @@ FUNCTION Mission_OnCheckpoint(playerid)
 		new veh = GetPlayerVehicleID(playerid);
 		if(!Mission_IsLandVehicle(GetVehicleModel(veh)))
 			return SendClientMessage(playerid, COLOR_ERROR, "Only land vehicles can be delivered to the chop-shop.");
-		// §6.19 — cannot chop a car you already owned before the mission started.
+		// §6.19 - cannot chop a car you already owned before the mission started.
 		if(g_VehTheftPreOwned[playerid][veh])
-			return SendClientMessage(playerid, COLOR_ERROR, "You can't chop a car you already owned — steal a DIFFERENT vehicle to deliver.");
+			return SendClientMessage(playerid, COLOR_ERROR, "You can't chop a car you already owned - steal a DIFFERENT vehicle to deliver.");
 		// Reject any car already delivered this run (full-set scan, not just the last
-		// one — blocks the 2-car-alternation farm across all 5 drops).
+		// one - blocks the 2-car-alternation farm across all 5 drops).
 		for(new i = 0; i < PlayerInfo[playerid][pMissionCheckpoint]; i++)
 		{
 			if(g_VehTheftDelivered[playerid][i] == veh)
-				return SendClientMessage(playerid, COLOR_ERROR, "You already delivered this car — bring a DIFFERENT stolen vehicle.");
+				return SendClientMessage(playerid, COLOR_ERROR, "You already delivered this car - bring a DIFFERENT stolen vehicle.");
 		}
 		// Record this delivery in the set (pMissionCheckpoint is incremented AFTER this
 		// block, so it correctly indexes 0..len-1 as the write slot here).
@@ -957,7 +957,7 @@ FUNCTION Mission_OnCheckpoint(playerid)
 	new bool:isFinal = (PlayerInfo[playerid][pMissionCheckpoint] >= PlayerInfo[playerid][pMissionRouteLen]);
 	new pay = MissionReg[missionId][mCpPay];
 
-	// Mission-specific per-checkpoint PAY adjustment (small switch — extension point).
+	// Mission-specific per-checkpoint PAY adjustment (small switch - extension point).
 	switch(missionId)
 	{
 		case MISSION_HOLDUP_MISSION:
@@ -973,11 +973,11 @@ FUNCTION Mission_OnCheckpoint(playerid)
 	PlayerInfo[playerid][pScore] += 1;	// +1 score per checkpoint (§6 Score Guide)
 
 	new string[160];
-	format(string, sizeof(string), ""COL_GREEN"* Checkpoint "COL_WHITE"%d"COL_GREEN"/"COL_WHITE"%d"COL_GREEN" — "COL_WHITE"+$%d"COL_GREEN" (run total $%d).",
+	format(string, sizeof(string), ""COL_GREEN"* Checkpoint "COL_WHITE"%d"COL_GREEN"/"COL_WHITE"%d"COL_GREEN" - "COL_WHITE"+$%d"COL_GREEN" (run total $%d).",
 		PlayerInfo[playerid][pMissionCheckpoint], PlayerInfo[playerid][pMissionRouteLen], pay, PlayerInfo[playerid][pMissionData]);
 	SendClientMessage(playerid, COLOR_SERVER_INFO, string);
 
-	// Mission-specific per-checkpoint effects (small switch — the extension point).
+	// Mission-specific per-checkpoint effects (small switch - the extension point).
 	switch(missionId)
 	{
 		case MISSION_DRUG_DELIVERY:
@@ -991,17 +991,17 @@ FUNCTION Mission_OnCheckpoint(playerid)
 		{
 			// §6.19 CRITICAL: the LAST car forces instant WL10 (Most Wanted). Prior cars
 			// raise wanted moderately. Delivering the final (5th) car IS "entering the
-			// last vehicle on the list" — we apply the max wanted on that final drop.
+			// last vehicle on the list" - we apply the max wanted on that final drop.
 			if(isFinal)
 			{
-				SetPlayerWanted(playerid, MAX_WANTED, "Grand theft auto — Vehicle Theft final car");
-				SendClientMessage(playerid, COLOR_ERROR, ""COL_RED"* LAST CAR DELIVERED — you are now "COL_WHITE"MOST WANTED (WL10)"COL_RED"! Every cop is coming for you.");
+				SetPlayerWanted(playerid, MAX_WANTED, "Grand theft auto - Vehicle Theft final car");
+				SendClientMessage(playerid, COLOR_ERROR, ""COL_RED"* LAST CAR DELIVERED - you are now "COL_WHITE"MOST WANTED (WL10)"COL_RED"! Every cop is coming for you.");
 			}
 			else GivePlayerWanted(playerid, MissionReg[missionId][mWantedPerCp], "Vehicle theft delivery");
 		}
 		case MISSION_HOLDUP_MISSION:
 		{
-			// +7 wanted per store holdup → cumulative high warrant across 3 (§6.7 / §5.2).
+			// +7 wanted per store holdup -> cumulative high warrant across 3 (§6.7 / §5.2).
 			GivePlayerWanted(playerid, MissionReg[missionId][mWantedPerCp], "Store holdup (mission)");
 			// Record a holdup on the robbery history so the crowbar is confiscated on a
 			// later arrest (robbery.inc owns the bitmask; reached via CallLocalFunction).
@@ -1009,24 +1009,24 @@ FUNCTION Mission_OnCheckpoint(playerid)
 		}
 		case MISSION_HOUSE_DELIVERY:
 		{
-			// §6.8 — some deliveries carry illegal cargo. A random subset of drops are
+			// §6.8 - some deliveries carry illegal cargo. A random subset of drops are
 			// "illegal"; making one within sight of a cop raises wanted (no warrant unless
 			// seen). Roll per-drop so each run's risk varies.
 			if(random(100) < MHOUSEDEL_ILLEGAL_PCT && Mission_IsCopInSight(playerid))
 			{
 				GivePlayerWanted(playerid, MHOUSEDEL_WANTED_PER_CP, "Illegal house delivery seen by police");
-				SendClientMessage(playerid, COLOR_ERROR, ""COL_RED"That parcel was contraband and a cop saw the drop — "COL_WHITE"+"#MHOUSEDEL_WANTED_PER_CP" wanted"COL_RED".");
+				SendClientMessage(playerid, COLOR_ERROR, ""COL_RED"That parcel was contraband and a cop saw the drop - "COL_WHITE"+"#MHOUSEDEL_WANTED_PER_CP" wanted"COL_RED".");
 			}
 		}
 		case MISSION_ILLEGAL_IMMIGRANT:
 		{
-			// §6.9 — wanted is issued ON COMPLETION (the final drop), NOT on pickup. The
+			// §6.9 - wanted is issued ON COMPLETION (the final drop), NOT on pickup. The
 			// final-drop warrant is applied in Mission_Complete's switch. Mid-route: a
 			// stealth penalty only if a cop sees you AND it is day (night hides cops).
 			if(!isFinal && !Mission_IsNight() && Mission_IsCopInSightRange(playerid, MIMMIG_COPSIGHT_DAY))
 			{
 				GivePlayerWanted(playerid, MIMMIG_WANTED_ENROUTE, "Spotted transporting illegal immigrants");
-				SendClientMessage(playerid, COLOR_ERROR, ""COL_RED"A cop spotted your cargo in daylight — "COL_WHITE"+"#MIMMIG_WANTED_ENROUTE" wanted"COL_RED". Move at night to stay unseen.");
+				SendClientMessage(playerid, COLOR_ERROR, ""COL_RED"A cop spotted your cargo in daylight - "COL_WHITE"+"#MIMMIG_WANTED_ENROUTE" wanted"COL_RED". Move at night to stay unseen.");
 			}
 		}
 	}
@@ -1040,13 +1040,13 @@ FUNCTION Mission_OnCheckpoint(playerid)
 }
 
 //==============================================================================
-//	Airport Robbery — bespoke box-collection mechanic (§6.1)
+//	Airport Robbery - bespoke box-collection mechanic (§6.1)
 //==============================================================================
 //	NOT a race-CP route. On start: WL7, a collect timer, and MAIRPORT_BOX_COUNT box
 //	pickups scatter around the airport apron. The robber exits the truck/van and
-//	grabs boxes on foot (MMB / /box) — each box banks nothing yet but raises the
+//	grabs boxes on foot (MMB / /box) - each box banks nothing yet but raises the
 //	delivery payout. When the collect timer expires, a hideout checkpoint appears;
-//	drive the loot there within the deliver window to be paid (boxes → payout). The
+//	drive the loot there within the deliver window to be paid (boxes -> payout). The
 //	whole state lives in the pAirport* session fields + the per-player box arrays.
 //==============================================================================
 
@@ -1056,7 +1056,7 @@ static STREAMER_TAG_PICKUP:g_AirportBox[MAX_PLAYERS][MAIRPORT_BOX_COUNT];
 static bool:g_AirportBoxTaken[MAX_PLAYERS][MAIRPORT_BOX_COUNT];
 static Float:g_AirportBoxPos[MAX_PLAYERS][MAIRPORT_BOX_COUNT][3];
 
-// The airport apron centre the boxes scatter around (LS International — near the
+// The airport apron centre the boxes scatter around (LS International - near the
 // mission start marker). Boxes spawn in a MAIRPORT_BOX_SPREAD ring around this.
 #define MAIRPORT_APRON_X		(1685.0)
 #define MAIRPORT_APRON_Y		(-2333.0)
@@ -1113,14 +1113,14 @@ FUNCTION Mission_AirportStart(playerid)
 		g_AirportBoxTaken[playerid][i] = false;
 	}
 
-	// Wanted while collecting (§6.1) — WL7.
+	// Wanted while collecting (§6.1) - WL7.
 	GivePlayerWanted(playerid, MAIRPORT_WANTED_START, "Airport robbery");
 
 	new msg[192];
-	format(msg, sizeof(msg), ""COL_GREEN"* Airport Robbery started! "COL_WHITE"Get out and grab boxes with "COL_YELLOW"/box"COL_WHITE" (or MMB) — you have "COL_YELLOW"%d seconds"COL_WHITE". The more boxes, the bigger the payout ("COL_GREEN"$%d"COL_WHITE"/box).",
+	format(msg, sizeof(msg), ""COL_GREEN"* Airport Robbery started! "COL_WHITE"Get out and grab boxes with "COL_YELLOW"/box"COL_WHITE" (or MMB) - you have "COL_YELLOW"%d seconds"COL_WHITE". The more boxes, the bigger the payout ("COL_GREEN"$%d"COL_WHITE"/box).",
 		MAIRPORT_COLLECT_SECS, MAIRPORT_PAY_PER_BOX);
 	SendClientMessage(playerid, COLOR_SERVER_INFO, msg);
-	SendClientMessage(playerid, COLOR_ERROR, ""COL_RED"You are WANTED while collecting — cops will intervene. "COL_YELLOW"/quitmission"COL_WHITE" to bail out.");
+	SendClientMessage(playerid, COLOR_ERROR, ""COL_RED"You are WANTED while collecting - cops will intervene. "COL_YELLOW"/quitmission"COL_WHITE" to bail out.");
 	GameTextForPlayer(playerid, "~r~Airport Robbery~n~~w~collect the boxes!", 4000, 5);
 
 	// Nearby cops get a heads-up.
@@ -1159,7 +1159,7 @@ FUNCTION Mission_AirportCollectBox(playerid)
 	}
 	if(best == -1)
 	{
-		SendClientMessage(playerid, COLOR_ERROR, "There is no box within reach — walk onto a box marker first.");
+		SendClientMessage(playerid, COLOR_ERROR, "There is no box within reach - walk onto a box marker first.");
 		return 0;
 	}
 
@@ -1200,7 +1200,7 @@ static Mission_AirportBeginDeliver(playerid)
 	GameTextForPlayer(playerid, "~y~Drive to the hideout!", 4000, 5);
 }
 
-// Pay out the airport run on hideout delivery (boxes → payout, §6.1), stamp the
+// Pay out the airport run on hideout delivery (boxes -> payout, §6.1), stamp the
 // cooldown, and clean up. No boxes = a token failure (nothing to fence).
 static Mission_AirportDeliver(playerid)
 {
@@ -1216,7 +1216,7 @@ static Mission_AirportDeliver(playerid)
 
 	new msg[192];
 	if(pay > 0) format(msg, sizeof(msg), ""COL_GREEN"* Airport Robbery COMPLETE! "COL_WHITE"You fenced "COL_YELLOW"%d"COL_WHITE" box(es) for "COL_GREEN"$%d"COL_WHITE" (incl. "COL_GREEN"$%d"COL_WHITE" bonus). +1 score.", boxes, pay, MAIRPORT_BONUS);
-	else format(msg, sizeof(msg), ""COL_RED"* You reached the hideout with no boxes "COL_WHITE"— nothing to fence. +1 score.");
+	else format(msg, sizeof(msg), ""COL_RED"* You reached the hideout with no boxes "COL_WHITE"- nothing to fence. +1 score.");
 	SendClientMessage(playerid, COLOR_SERVER_INFO, msg);
 	GameTextForPlayer(playerid, "~g~Robbery complete!", 4000, 4);
 
@@ -1235,9 +1235,9 @@ FUNCTION Mission_AirportTick(playerid)
 
 	if(phase == AIRPHASE_COLLECT)
 	{
-		// Collect window expired → move to the deliver phase.
+		// Collect window expired -> move to the deliver phase.
 		if(left <= 0) { Mission_AirportBeginDeliver(playerid); return 1; }
-		// All boxes grabbed early → skip straight to delivery.
+		// All boxes grabbed early -> skip straight to delivery.
 		if(PlayerInfo[playerid][pAirportBoxes] >= MAIRPORT_BOX_COUNT) { Mission_AirportBeginDeliver(playerid); return 1; }
 
 		new gt[96];
@@ -1249,12 +1249,12 @@ FUNCTION Mission_AirportTick(playerid)
 	// Deliver phase.
 	if(left <= 0)
 	{
-		// Blew the deliver window — the loot is lost (no payout, no cooldown stamp so
+		// Blew the deliver window - the loot is lost (no payout, no cooldown stamp so
 		// the player may retry once the mission CD elapses; abort message via Abort).
 		Mission_Abort(playerid, "you ran out of time to reach the hideout");
 		return 1;
 	}
-	// Reached the hideout (on foot or by vehicle — the truck may be abandoned)?
+	// Reached the hideout (on foot or by vehicle - the truck may be abandoned)?
 	if(IsPlayerInRangeOfPoint(playerid, MAIRPORT_HIDEOUT_CP_SIZE, MAIRPORT_HIDEOUT_X, MAIRPORT_HIDEOUT_Y, MAIRPORT_HIDEOUT_Z))
 	{
 		Mission_AirportDeliver(playerid);
@@ -1267,7 +1267,7 @@ FUNCTION Mission_AirportTick(playerid)
 }
 
 //==============================================================================
-//	M6 (stage 4) — Paperboy: ON FOOT, 4-MINUTE REAL-TIME limit (§6.11)
+//	M6 (stage 4) - Paperboy: ON FOOT, 4-MINUTE REAL-TIME limit (§6.11)
 //==============================================================================
 //	A race-CP route on foot, but the run is bounded by a REAL-TIME deadline
 //	(gettime) on the shared tick, NOT the game-hour cooldown clock. Each drop pays
@@ -1283,13 +1283,13 @@ FUNCTION Mission_PaperboyStart(playerid)
 	PlayerInfo[playerid][pMissionDeadline] = gettime() + MPAPERBOY_TIME_SECS;	// 4-min real-time
 
 	new msg[192];
-	format(msg, sizeof(msg), ""COL_GREEN"* Paperboy started! "COL_WHITE"Toss papers at the house checkpoints ON FOOT — "COL_GREEN"$%d"COL_WHITE"/delivery. You have "COL_YELLOW"%d seconds"COL_WHITE" (real time)!", MPAPERBOY_CP_PAY, MPAPERBOY_TIME_SECS);
+	format(msg, sizeof(msg), ""COL_GREEN"* Paperboy started! "COL_WHITE"Toss papers at the house checkpoints ON FOOT - "COL_GREEN"$%d"COL_WHITE"/delivery. You have "COL_YELLOW"%d seconds"COL_WHITE" (real time)!", MPAPERBOY_CP_PAY, MPAPERBOY_TIME_SECS);
 	SendClientMessage(playerid, COLOR_SERVER_INFO, msg);
 	SendClientMessage(playerid, COLOR_SERVER_INFO, "Deliver as many as you can before the timer runs out. "COL_YELLOW"/quitmission"COL_WHITE" to stop.");
 	return 1;
 }
 
-// Paperboy tick — real-time deadline. Ends the run when the 4-minute timer expires,
+// Paperboy tick - real-time deadline. Ends the run when the 4-minute timer expires,
 // paying the completion bonus for whatever was delivered (via Mission_Complete).
 static Mission_PaperboyTick(playerid)
 {
@@ -1314,7 +1314,7 @@ static Mission_PaperboyTick(playerid)
 }
 
 //==============================================================================
-//	M6 (stage 4) — target-based missions: Flower Delivery / Pickpocket / Sexual
+//	M6 (stage 4) - target-based missions: Flower Delivery / Pickpocket / Sexual
 //	Encounter (§6.5 / §6.12 / §6.15)
 //==============================================================================
 //	No race route. A game-hour WINDOW runs from start; the player acts on nearby
@@ -1350,7 +1350,7 @@ FUNCTION Mission_TargetStart(playerid, missionId)
 	return 1;
 }
 
-// The game-hour window for a target mission has elapsed → abort (§6.5/§6.12/§6.15).
+// The game-hour window for a target mission has elapsed -> abort (§6.5/§6.12/§6.15).
 static Mission_TargetWindowHrs(missionId)
 {
 	switch(missionId)
@@ -1380,16 +1380,16 @@ static Mission_NearestTarget(playerid, Float:range)
 	return best;
 }
 
-// /flowers — hand flowers to the nearest not-yet-served player (Flower Delivery §6.5).
+// /flowers - hand flowers to the nearest not-yet-served player (Flower Delivery §6.5).
 FUNCTION Mission_FlowerDeliver(playerid)
 {
 	if(PlayerInfo[playerid][pOnMission] != MISSION_FLOWER_DELIVERY)
 		return SendClientMessage(playerid, COLOR_ERROR, "You are not on a Flower Delivery. Start one at the Flower Delivery checkpoint or a Church.");
 	if(gettime() < PlayerInfo[playerid][pMissionTargetCd])
-		return SendClientMessage(playerid, COLOR_ERROR, "Slow down — you just handed out flowers.");
+		return SendClientMessage(playerid, COLOR_ERROR, "Slow down - you just handed out flowers.");
 	new t = Mission_NearestTarget(playerid, MFLOWER_RANGE);
 	if(t == -1) return SendClientMessage(playerid, COLOR_ERROR, "There is no fresh player nearby to give flowers to.");
-	if(g_MissionTargetHit[playerid][t]) return SendClientMessage(playerid, COLOR_ERROR, "You already gave that player flowers — find someone new.");
+	if(g_MissionTargetHit[playerid][t]) return SendClientMessage(playerid, COLOR_ERROR, "You already gave that player flowers - find someone new.");
 
 	g_MissionTargetHit[playerid][t] = true;
 	PlayerInfo[playerid][pMissionCheckpoint]++;
@@ -1407,7 +1407,7 @@ FUNCTION Mission_FlowerDeliver(playerid)
 	return 1;
 }
 
-// /pickpocket — steal from the nearest not-yet-hit non-cop (Pickpocket mission §6.12).
+// /pickpocket - steal from the nearest not-yet-hit non-cop (Pickpocket mission §6.12).
 FUNCTION Mission_PickpocketHit(playerid)
 {
 	if(PlayerInfo[playerid][pOnMission] != MISSION_PICKPOCKET)
@@ -1415,9 +1415,9 @@ FUNCTION Mission_PickpocketHit(playerid)
 	if(gettime() < PlayerInfo[playerid][pMissionTargetCd])
 		return SendClientMessage(playerid, COLOR_ERROR, "Wait a moment before your next attempt.");
 	new t = Mission_NearestTarget(playerid, MPICKPOCKET_RANGE);
-	if(t == -1) return SendClientMessage(playerid, COLOR_ERROR, "There is no target within reach — get close to a player.");
+	if(t == -1) return SendClientMessage(playerid, COLOR_ERROR, "There is no target within reach - get close to a player.");
 	if(IsCop(t)) return SendClientMessage(playerid, COLOR_ERROR, "You cannot pickpocket a police officer.");
-	if(g_MissionTargetHit[playerid][t]) return SendClientMessage(playerid, COLOR_ERROR, "You already picked that player's pocket — pick a different mark.");
+	if(g_MissionTargetHit[playerid][t]) return SendClientMessage(playerid, COLOR_ERROR, "You already picked that player's pocket - pick a different mark.");
 
 	PlayerInfo[playerid][pMissionTargetCd] = gettime() + MPICKPOCKET_CD_SECS;
 
@@ -1425,13 +1425,13 @@ FUNCTION Mission_PickpocketHit(playerid)
 	new success = (PlayerInfo[playerid][pSkill] == SKILL_PICKPOCKET) ? MPICKPOCKET_SKILL_SUCCESS : MPICKPOCKET_BASE_SUCCESS;
 	if(random(100) >= success)
 	{
-		SendClientMessage(playerid, COLOR_ERROR, ""COL_RED"You fumbled it — the mark noticed and pulled away.");
+		SendClientMessage(playerid, COLOR_ERROR, ""COL_RED"You fumbled it - the mark noticed and pulled away.");
 		SendClientMessage(t, COLOR_ERROR, ""COL_RED"Someone just tried to pick your pocket!");
 		return 1;
 	}
 	new pct = (PlayerInfo[playerid][pSkill] == SKILL_PICKPOCKET) ? MPICKPOCKET_SKILL_PCT : MPICKPOCKET_BASE_PCT;
 	new take = (PlayerInfo[t][pMoney] * pct) / 100;
-	if(take <= 0) { SendClientMessage(playerid, COLOR_ERROR, "That mark had no cash on hand — try another."); return 1; }
+	if(take <= 0) { SendClientMessage(playerid, COLOR_ERROR, "That mark had no cash on hand - try another."); return 1; }
 
 	g_MissionTargetHit[playerid][t] = true;
 	Bank_TakeCash(t, take);
@@ -1450,7 +1450,7 @@ FUNCTION Mission_PickpocketHit(playerid)
 	return 1;
 }
 
-// /encounter — a Sexual Encounter attempt on the nearest not-yet-hit player (§6.15).
+// /encounter - a Sexual Encounter attempt on the nearest not-yet-hit player (§6.15).
 FUNCTION Mission_EncounterHit(playerid)
 {
 	if(PlayerInfo[playerid][pOnMission] != MISSION_SEXUAL_ENCOUNTER)
@@ -1459,7 +1459,7 @@ FUNCTION Mission_EncounterHit(playerid)
 		return SendClientMessage(playerid, COLOR_ERROR, "Wait a moment before your next encounter.");
 	new t = Mission_NearestTarget(playerid, MSEX_RANGE);
 	if(t == -1) return SendClientMessage(playerid, COLOR_ERROR, "There is no willing player nearby.");
-	if(g_MissionTargetHit[playerid][t]) return SendClientMessage(playerid, COLOR_ERROR, "You already had an encounter with that player — find someone new.");
+	if(g_MissionTargetHit[playerid][t]) return SendClientMessage(playerid, COLOR_ERROR, "You already had an encounter with that player - find someone new.");
 
 	PlayerInfo[playerid][pMissionTargetCd] = gettime() + MSEX_CD_SECS;
 
@@ -1485,7 +1485,7 @@ FUNCTION Mission_EncounterHit(playerid)
 }
 
 // Shared completion for a target mission: pay the completion bonus, stamp cooldown, end.
-// FUNCTION (auto-forwarded) — the target-hit handlers above call it before its definition.
+// FUNCTION (auto-forwarded) - the target-hit handlers above call it before its definition.
 FUNCTION Mission_TargetComplete(playerid, missionId)
 {
 	new bonus = MissionReg[missionId][mBonus];
@@ -1506,13 +1506,13 @@ FUNCTION Mission_TargetComplete(playerid, missionId)
 }
 
 //==============================================================================
-//	M6 (stage 4) — Race Challenges (§6.13): /challenge race framework
+//	M6 (stage 4) - Race Challenges (§6.13): /challenge race framework
 //==============================================================================
 //	Data-driven races (g_RaceReg). A picker dialog lists the shipped races; on
 //	select, a race-CP route runs against a par time. First attempt at a given race
 //	is free (per-mission cooldown = 0 first time); later attempts cost a fee. +1
 //	score for finishing, +2 (bonus) for a podium (par-beat). Add races by appending
-//	g_RaceReg rows — no framework change.
+//	g_RaceReg rows - no framework change.
 //==============================================================================
 
 // Does the player's vehicle match the race category? (Bikes / boats / land.)
@@ -1545,11 +1545,11 @@ static Mission_IsBike(model)
 	return 0;
 }
 
-// Open the race picker dialog (/challenge — the Race Challenge launcher).
+// Open the race picker dialog (/challenge - the Race Challenge launcher).
 FUNCTION Mission_RaceLauncher(playerid)
 {
 	// Reset the tentative mission slot (Mission_Start set pOnMission = MISSION_RACE_CHALLENGE
-	// before handing here) — the actual race is chosen in the dialog, so detach for now.
+	// before handing here) - the actual race is chosen in the dialog, so detach for now.
 	PlayerInfo[playerid][pOnMission] = -1;
 
 	new caption[1024], row[160];
@@ -1580,20 +1580,20 @@ FUNCTION Mission_RaceOnDialog(playerid, response, listitem)
 }
 
 // Begin race `raceId`. First attempt is free; a repeat costs MRACE_RETRY_FEE (the
-// per-mission game-hour cooldown doubles as the "have you run before" gate — if the
-// stamp is non-zero the player has raced this session type before → charge the fee).
-// FUNCTION (auto-forwarded) — Mission_RaceOnDialog, defined above, calls it.
+// per-mission game-hour cooldown doubles as the "have you run before" gate - if the
+// stamp is non-zero the player has raced this session type before -> charge the fee).
+// FUNCTION (auto-forwarded) - Mission_RaceOnDialog, defined above, calls it.
 FUNCTION Mission_RaceStart(playerid, raceId)
 {
 	if(Mission_IsOnMission(playerid))
 		return SendClientMessage(playerid, COLOR_ERROR, "Finish or /quitmission your current mission first.");
-	// Per-run cooldown (§6.13 — "1 game-hr cooldown between race runs"). The same stamp
+	// Per-run cooldown (§6.13 - "1 game-hr cooldown between race runs"). The same stamp
 	// doubles as the first-free / retry-fee flag below; here it gates repeat starts so
 	// the race cannot be farmed as a guaranteed-profit money faucet.
 	if(Mission_OnCooldown(playerid, MISSION_RACE_CHALLENGE))
 	{
 		new cderr[128];
-		format(cderr, sizeof(cderr), "Race Challenge is on cooldown — try again in %d game hour(s).", Mission_CooldownLeft(playerid, MISSION_RACE_CHALLENGE));
+		format(cderr, sizeof(cderr), "Race Challenge is on cooldown - try again in %d game hour(s).", Mission_CooldownLeft(playerid, MISSION_RACE_CHALLENGE));
 		return SendClientMessage(playerid, COLOR_ERROR, cderr);
 	}
 	if(!Mission_RaceVehicleOK(playerid, g_RaceReg[raceId][rCategory]))
@@ -1601,19 +1601,19 @@ FUNCTION Mission_RaceStart(playerid, raceId)
 		new err[128];
 		switch(g_RaceReg[raceId][rCategory])
 		{
-			case MRACE_CATEGORY_BIKE: format(err, sizeof(err), "This is a BIKES-only race — get on a bike.");
-			case MRACE_CATEGORY_BOAT: format(err, sizeof(err), "This is a BOATS-only race — get in a boat.");
-			default: format(err, sizeof(err), "This is a LAND-vehicle race — get in a car.");
+			case MRACE_CATEGORY_BIKE: format(err, sizeof(err), "This is a BIKES-only race - get on a bike.");
+			case MRACE_CATEGORY_BOAT: format(err, sizeof(err), "This is a BOATS-only race - get in a boat.");
+			default: format(err, sizeof(err), "This is a LAND-vehicle race - get in a car.");
 		}
 		return SendClientMessage(playerid, COLOR_ERROR, err);
 	}
 	// First attempt free (§6.13). We treat a set MISSION_RACE_CHALLENGE cooldown stamp
-	// as "has raced before" → charge the retry fee.
+	// as "has raced before" -> charge the retry fee.
 	new bool:firstTime = (PlayerInfo[playerid][pMissionCooldown][MISSION_RACE_CHALLENGE] == 0);
 	if(!firstTime)
 	{
 		if(Bank_GetCash(playerid) < MRACE_RETRY_FEE)
-			return SendClientMessage(playerid, COLOR_ERROR, "You need $5,000 cash-in-hand for the race entry fee. First race is free — later runs cost $5,000.");
+			return SendClientMessage(playerid, COLOR_ERROR, "You need $5,000 cash-in-hand for the race entry fee. First race is free - later runs cost $5,000.");
 		Bank_TakeCash(playerid, MRACE_RETRY_FEE);
 	}
 
@@ -1654,7 +1654,7 @@ FUNCTION Mission_RaceOnCheckpoint(playerid)
 		GameTextForPlayer(playerid, gt, 2000, 4);
 		return 1;
 	}
-	// Finished — score + pay. Podium (par-beat) earns the extra bonus (§6.13 +2 / Top-10).
+	// Finished - score + pay. Podium (par-beat) earns the extra bonus (§6.13 +2 / Top-10).
 	new elapsed = gettime() - PlayerInfo[playerid][pMissionDeadline];
 	new raceId = PlayerInfo[playerid][pMissionRaceId];
 	new bool:podium = (elapsed <= g_RaceReg[raceId][rParSecs]);
@@ -1676,9 +1676,9 @@ FUNCTION Mission_RaceOnCheckpoint(playerid)
 }
 
 //==============================================================================
-//	M6 (stage 4) — Domestic Disturbance (COP, §6.3): drive PD → a player-owned house
+//	M6 (stage 4) - Domestic Disturbance (COP, §6.3): drive PD -> a player-owned house
 //==============================================================================
-//	A single destination (a random player-owned house — reuses M5 housing coords via
+//	A single destination (a random player-owned house - reuses M5 housing coords via
 //	House_RandomOwnedCoords). A real-time par: reach the house under MDOMESTIC_PAR_SECS
 //	for the full speed bonus; the bonus decays to the base as time passes; a timeout
 //	abandons the call. Bespoke single SetPlayerCheckpoint (not a multi-drop route).
@@ -1692,10 +1692,10 @@ FUNCTION Mission_DomesticStart(playerid)
 	// Direct call (housing.inc is included before missions.inc), so the float refs work.
 	if(!House_RandomOwnedCoords(hx, hy, hz))
 	{
-		// No owned houses on the server yet — fall back to a fixed residential point so
+		// No owned houses on the server yet - fall back to a fixed residential point so
 		// the mission is still runnable (design allows this until houses exist).
 		hx = 2145.0; hy = -1015.0; hz = 62.7;
-		SendClientMessage(playerid, COLOR_SERVER_INFO, ""COL_WHITE"(No player-owned houses yet — dispatching you to a residential address.)");
+		SendClientMessage(playerid, COLOR_SERVER_INFO, ""COL_WHITE"(No player-owned houses yet - dispatching you to a residential address.)");
 	}
 	PlayerInfo[playerid][pMissionDestX] = hx;
 	PlayerInfo[playerid][pMissionDestY] = hy;
@@ -1704,12 +1704,12 @@ FUNCTION Mission_DomesticStart(playerid)
 	PlayerInfo[playerid][pMissionData] = gettime();		// reuse pMissionData as the START time for the speed bonus
 	SetPlayerCheckpoint(playerid, hx, hy, hz, MDOMESTIC_CP_SIZE);
 
-	SendClientMessage(playerid, COLOR_SERVER_INFO, ""COL_GREEN"* Domestic Disturbance! "COL_WHITE"A call came in — drive to the marked house "COL_YELLOW"as fast as you can"COL_WHITE". The faster you arrive, the bigger the bonus.");
+	SendClientMessage(playerid, COLOR_SERVER_INFO, ""COL_GREEN"* Domestic Disturbance! "COL_WHITE"A call came in - drive to the marked house "COL_YELLOW"as fast as you can"COL_WHITE". The faster you arrive, the bigger the bonus.");
 	GameTextForPlayer(playerid, "~b~Domestic Disturbance~n~~w~respond to the house!", 4000, 5);
 	return 1;
 }
 
-// Domestic Disturbance arrival — pay a speed-scaled bonus (§6.3 "faster = bigger").
+// Domestic Disturbance arrival - pay a speed-scaled bonus (§6.3 "faster = bigger").
 static Mission_DomesticArrive(playerid)
 {
 	new elapsed = gettime() - PlayerInfo[playerid][pMissionData];	// pMissionData = start time
@@ -1755,7 +1755,7 @@ FUNCTION Mission_OnDisconnect(playerid)
 	// Clear active-mission state WITHOUT the connected-player message paths.
 	if(PlayerInfo[playerid][pOnMission] != -1)
 	{
-		// Airport Robbery leaves streamed box pickups behind — destroy them.
+		// Airport Robbery leaves streamed box pickups behind - destroy them.
 		if(PlayerInfo[playerid][pOnMission] == MISSION_AIRPORT_ROBBERY)
 			Mission_AirportCleanup(playerid);
 		PlayerInfo[playerid][pOnMission] = -1;
@@ -1783,9 +1783,9 @@ FUNCTION Mission_OnPlayerStateChange(playerid, newstate, oldstate)
 
 	// Airport Robbery EXPECTS the player to leave the vehicle on foot to grab boxes
 	// during the collect phase (§6.1); Vehicle Theft swaps between 5 DIFFERENT cars
-	// (§6.19) — both would false-abort on the leave-vehicle rule, so exempt them.
+	// (§6.19) - both would false-abort on the leave-vehicle rule, so exempt them.
 	// Domestic Disturbance (§6.3) completes by reaching the house on the tick; a cop
-	// stepping out at the destination must not false-abort it — exempt it too.
+	// stepping out at the destination must not false-abort it - exempt it too.
 	if(missionId == MISSION_AIRPORT_ROBBERY || missionId == MISSION_VEHICLE_THEFT || missionId == MISSION_DOMESTIC_DISTURBANCE) return 0;
 
 	// Left the driver seat (walked out / got knocked out of the vehicle).
@@ -1811,19 +1811,19 @@ FUNCTION Mission_OnTick()
 		new mid = PlayerInfo[playerid][pOnMission];
 
 		// Airport Robbery runs its own bespoke box tick (collect/deliver phases +
-		// deadlines), not the race-CP off-route guard — dispatch and skip the route logic.
+		// deadlines), not the race-CP off-route guard - dispatch and skip the route logic.
 		if(mid == MISSION_AIRPORT_ROBBERY)
 		{
 			Mission_AirportTick(playerid);
 			continue;
 		}
-		// Paperboy (§6.11) — 4-minute REAL-TIME deadline on the shared tick.
+		// Paperboy (§6.11) - 4-minute REAL-TIME deadline on the shared tick.
 		if(mid == MISSION_PAPERBOY)
 		{
 			Mission_PaperboyTick(playerid);
 			continue;
 		}
-		// Domestic Disturbance (§6.3) — single-house destination + timeout, no route CP.
+		// Domestic Disturbance (§6.3) - single-house destination + timeout, no route CP.
 		if(mid == MISSION_DOMESTIC_DISTURBANCE)
 		{
 			new left = PlayerInfo[playerid][pMissionDeadline] - gettime();
@@ -1832,7 +1832,7 @@ FUNCTION Mission_OnTick()
 				Mission_DomesticArrive(playerid);
 			continue;
 		}
-		// Target-based missions (Flower/Pickpocket/Sexual) — game-hour window expiry.
+		// Target-based missions (Flower/Pickpocket/Sexual) - game-hour window expiry.
 		if(mid == MISSION_FLOWER_DELIVERY || mid == MISSION_PICKPOCKET || mid == MISSION_SEXUAL_ENCOUNTER)
 		{
 			new elapsed = Mission_NowGameHour() - PlayerInfo[playerid][pMissionStartHour];
@@ -1840,7 +1840,7 @@ FUNCTION Mission_OnTick()
 				Mission_Abort(playerid, "you ran out of time to reach the target");
 			continue;
 		}
-		// Race Challenge (§6.13) — no time limit and no off-route abort (races legitimately
+		// Race Challenge (§6.13) - no time limit and no off-route abort (races legitimately
 		// span long distances between checkpoints); the player quits via /quitmission.
 		if(mid == MISSION_RACE_CHALLENGE) continue;
 
@@ -1855,7 +1855,7 @@ FUNCTION Mission_OnTick()
 }
 
 //==============================================================================
-//	Cooldown persistence — one packed column (LSplayers.MissionCooldowns)
+//	Cooldown persistence - one packed column (LSplayers.MissionCooldowns)
 //==============================================================================
 
 // Persist the cooldown stamps as a '|'-delimited list (mirrors SkinsSelected).
@@ -1901,11 +1901,11 @@ FUNCTION Mission_LoadCooldowns(playerid, const packed[])
 }
 
 //==============================================================================
-//	The launcher — /missions (/mission /work /jobs) : list + cooldowns dialog
+//	The launcher - /missions (/mission /work /jobs) : list + cooldowns dialog
 //==============================================================================
 
 // Render the job list with per-mission availability (ready / cooldown / wrong
-// vehicle). CB-style dialog entry point (design §6 — "/mission" launcher).
+// vehicle). CB-style dialog entry point (design §6 - "/mission" launcher).
 static Mission_ShowLauncher(playerid)
 {
 	new caption[2400], row[176];
@@ -1913,7 +1913,7 @@ static Mission_ShowLauncher(playerid)
 	for(new m = 0; m < MISSION_COUNT; m++)
 	{
 		new status[48], payLabel[56];
-		// Flower Delivery (§6.5) is open to BOTH cops and civilians — never show it as
+		// Flower Delivery (§6.5) is open to BOTH cops and civilians - never show it as
 		// role-locked. All other rows use the plain civ/cop entry gate.
 		if(MissionReg[m][mType] == MISSION_TYPE_COP && !IsCop(playerid)) format(status, sizeof(status), "{888888}cops only");
 		else if(MissionReg[m][mType] == MISSION_TYPE_CIVILIAN && IsCop(playerid) && m != MISSION_FLOWER_DELIVERY) format(status, sizeof(status), "{888888}civilians only");
@@ -1964,7 +1964,7 @@ CMD:missions(playerid, params[])
 		{
 			new left = PlayerInfo[playerid][pAirportDeadline] - gettime();
 			if(left < 0) left = 0;
-			format(string, sizeof(string), ""COL_WHITE"Active: "COL_GREEN"Airport Robbery"COL_WHITE" — %s, boxes "COL_YELLOW"%d"COL_WHITE", "COL_YELLOW"%ds"COL_WHITE" left. "COL_YELLOW"/box"COL_WHITE" to grab, "COL_YELLOW"/quitmission"COL_WHITE" to bail.",
+			format(string, sizeof(string), ""COL_WHITE"Active: "COL_GREEN"Airport Robbery"COL_WHITE" - %s, boxes "COL_YELLOW"%d"COL_WHITE", "COL_YELLOW"%ds"COL_WHITE" left. "COL_YELLOW"/box"COL_WHITE" to grab, "COL_YELLOW"/quitmission"COL_WHITE" to bail.",
 				(PlayerInfo[playerid][pAirportPhase] == AIRPHASE_COLLECT) ? ("collecting") : ("delivering"), PlayerInfo[playerid][pAirportBoxes], left);
 			return SendClientMessage(playerid, COLOR_SERVER_INFO, string);
 		}
@@ -1975,40 +1975,40 @@ CMD:missions(playerid, params[])
 			{
 				new left = PlayerInfo[playerid][pMissionDeadline] - gettime();
 				if(left < 0) left = 0;
-				format(string, sizeof(string), ""COL_WHITE"Active: "COL_GREEN"Paperboy"COL_WHITE" — delivered "COL_YELLOW"%d"COL_WHITE", "COL_YELLOW"%ds"COL_WHITE" left (real time). Toss papers at the house checkpoints on foot.", PlayerInfo[playerid][pMissionCheckpoint], left);
+				format(string, sizeof(string), ""COL_WHITE"Active: "COL_GREEN"Paperboy"COL_WHITE" - delivered "COL_YELLOW"%d"COL_WHITE", "COL_YELLOW"%ds"COL_WHITE" left (real time). Toss papers at the house checkpoints on foot.", PlayerInfo[playerid][pMissionCheckpoint], left);
 				return SendClientMessage(playerid, COLOR_SERVER_INFO, string);
 			}
 			case MISSION_FLOWER_DELIVERY:
 			{
-				format(string, sizeof(string), ""COL_WHITE"Active: "COL_GREEN"Flower Delivery"COL_WHITE" — "COL_YELLOW"%d"COL_WHITE"/"COL_YELLOW"%d"COL_WHITE" players. Use "COL_YELLOW"/flowers"COL_WHITE" near a player.", PlayerInfo[playerid][pMissionCheckpoint], MFLOWER_DELIVERIES);
+				format(string, sizeof(string), ""COL_WHITE"Active: "COL_GREEN"Flower Delivery"COL_WHITE" - "COL_YELLOW"%d"COL_WHITE"/"COL_YELLOW"%d"COL_WHITE" players. Use "COL_YELLOW"/flowers"COL_WHITE" near a player.", PlayerInfo[playerid][pMissionCheckpoint], MFLOWER_DELIVERIES);
 				return SendClientMessage(playerid, COLOR_SERVER_INFO, string);
 			}
 			case MISSION_PICKPOCKET:
 			{
-				format(string, sizeof(string), ""COL_WHITE"Active: "COL_GREEN"Pickpocket"COL_WHITE" — stolen "COL_GREEN"$%d"COL_WHITE"/$%d. Use "COL_YELLOW"/pickpocket"COL_WHITE" near a player.", PlayerInfo[playerid][pMissionData], MPICKPOCKET_TARGET);
+				format(string, sizeof(string), ""COL_WHITE"Active: "COL_GREEN"Pickpocket"COL_WHITE" - stolen "COL_GREEN"$%d"COL_WHITE"/$%d. Use "COL_YELLOW"/pickpocket"COL_WHITE" near a player.", PlayerInfo[playerid][pMissionData], MPICKPOCKET_TARGET);
 				return SendClientMessage(playerid, COLOR_SERVER_INFO, string);
 			}
 			case MISSION_SEXUAL_ENCOUNTER:
 			{
-				format(string, sizeof(string), ""COL_WHITE"Active: "COL_GREEN"Sexual Encounter"COL_WHITE" — "COL_YELLOW"%d"COL_WHITE"/"COL_YELLOW"%d"COL_WHITE". Use "COL_YELLOW"/encounter"COL_WHITE" near a player.", PlayerInfo[playerid][pMissionCheckpoint], MSEX_ENCOUNTERS);
+				format(string, sizeof(string), ""COL_WHITE"Active: "COL_GREEN"Sexual Encounter"COL_WHITE" - "COL_YELLOW"%d"COL_WHITE"/"COL_YELLOW"%d"COL_WHITE". Use "COL_YELLOW"/encounter"COL_WHITE" near a player.", PlayerInfo[playerid][pMissionCheckpoint], MSEX_ENCOUNTERS);
 				return SendClientMessage(playerid, COLOR_SERVER_INFO, string);
 			}
 			case MISSION_RACE_CHALLENGE:
 			{
 				new elapsed = gettime() - PlayerInfo[playerid][pMissionDeadline];
-				format(string, sizeof(string), ""COL_WHITE"Active: "COL_GREEN"Race — %s"COL_WHITE" — CP "COL_YELLOW"%d"COL_WHITE"/"COL_YELLOW"%d"COL_WHITE", "COL_YELLOW"%ds"COL_WHITE" elapsed. "COL_YELLOW"/quitmission"COL_WHITE" to bail.", g_RaceReg[PlayerInfo[playerid][pMissionRaceId]][rName], PlayerInfo[playerid][pMissionCheckpoint], PlayerInfo[playerid][pMissionRouteLen], elapsed);
+				format(string, sizeof(string), ""COL_WHITE"Active: "COL_GREEN"Race - %s"COL_WHITE" - CP "COL_YELLOW"%d"COL_WHITE"/"COL_YELLOW"%d"COL_WHITE", "COL_YELLOW"%ds"COL_WHITE" elapsed. "COL_YELLOW"/quitmission"COL_WHITE" to bail.", g_RaceReg[PlayerInfo[playerid][pMissionRaceId]][rName], PlayerInfo[playerid][pMissionCheckpoint], PlayerInfo[playerid][pMissionRouteLen], elapsed);
 				return SendClientMessage(playerid, COLOR_SERVER_INFO, string);
 			}
 			case MISSION_DOMESTIC_DISTURBANCE:
 			{
 				new left = PlayerInfo[playerid][pMissionDeadline] - gettime();
 				if(left < 0) left = 0;
-				format(string, sizeof(string), ""COL_WHITE"Active: "COL_GREEN"Domestic Disturbance"COL_WHITE" — reach the marked house! "COL_YELLOW"%ds"COL_WHITE" before the call is abandoned.", left);
+				format(string, sizeof(string), ""COL_WHITE"Active: "COL_GREEN"Domestic Disturbance"COL_WHITE" - reach the marked house! "COL_YELLOW"%ds"COL_WHITE" before the call is abandoned.", left);
 				return SendClientMessage(playerid, COLOR_SERVER_INFO, string);
 			}
 		}
 		Mission_ShowHUD(playerid);
-		format(string, sizeof(string), ""COL_WHITE"Active mission: "COL_GREEN"%s"COL_WHITE" — checkpoint "COL_YELLOW"%d"COL_WHITE"/"COL_YELLOW"%d"COL_WHITE", earned "COL_GREEN"$%d"COL_WHITE". "COL_YELLOW"/quitmission"COL_WHITE" to abandon.",
+		format(string, sizeof(string), ""COL_WHITE"Active mission: "COL_GREEN"%s"COL_WHITE" - checkpoint "COL_YELLOW"%d"COL_WHITE"/"COL_YELLOW"%d"COL_WHITE", earned "COL_GREEN"$%d"COL_WHITE". "COL_YELLOW"/quitmission"COL_WHITE" to abandon.",
 			MissionReg[missionId][mName], PlayerInfo[playerid][pMissionCheckpoint], PlayerInfo[playerid][pMissionRouteLen], PlayerInfo[playerid][pMissionData]);
 		return SendClientMessage(playerid, COLOR_SERVER_INFO, string);
 	}
@@ -2016,7 +2016,7 @@ CMD:missions(playerid, params[])
 }
 alias:missions("mission", "work", "jobs", "mis")
 
-// /challenge (§6.13) — open the Race Challenge picker (all players). Also startable
+// /challenge (§6.13) - open the Race Challenge picker (all players). Also startable
 // from the /missions launcher row, but /challenge is the CB-canonical command.
 CMD:challenge(playerid, params[])
 {
@@ -2034,14 +2034,14 @@ CMD:challenge(playerid, params[])
 }
 alias:challenge("challenges", "race")
 
-// /flowers (§6.5) — hand flowers to the nearest player during a Flower Delivery.
+// /flowers (§6.5) - hand flowers to the nearest player during a Flower Delivery.
 CMD:flowers(playerid, params[])
 {
 	#pragma unused params
 	return Mission_FlowerDeliver(playerid);
 }
 
-// /pickpocket (§6.12) — pickpocket the nearest player during a Pickpocket mission.
+// /pickpocket (§6.12) - pickpocket the nearest player during a Pickpocket mission.
 CMD:pickpocket(playerid, params[])
 {
 	#pragma unused params
@@ -2049,14 +2049,14 @@ CMD:pickpocket(playerid, params[])
 }
 alias:pickpocket("pp")
 
-// /encounter (§6.15) — a Sexual Encounter attempt on the nearest player.
+// /encounter (§6.15) - a Sexual Encounter attempt on the nearest player.
 CMD:encounter(playerid, params[])
 {
 	#pragma unused params
 	return Mission_EncounterHit(playerid);
 }
 
-// /box (§6.1) — collect the nearest airport-robbery box in reach on foot. Also
+// /box (§6.1) - collect the nearest airport-robbery box in reach on foot. Also
 // triggered by the Middle Mouse Button (KEY_ACTION) in OnPlayerKeyStateChange.
 CMD:box(playerid, params[])
 {
@@ -2064,7 +2064,7 @@ CMD:box(playerid, params[])
 	if(PlayerInfo[playerid][pOnMission] != MISSION_AIRPORT_ROBBERY)
 		return SendClientMessage(playerid, COLOR_ERROR, "You are not on an Airport Robbery. Start one at the airport in a truck/van/garbage truck.");
 	if(PlayerInfo[playerid][pAirportPhase] != AIRPHASE_COLLECT)
-		return SendClientMessage(playerid, COLOR_ERROR, "The collection phase is over — drive the loot to the hideout.");
+		return SendClientMessage(playerid, COLOR_ERROR, "The collection phase is over - drive the loot to the hideout.");
 	Mission_AirportCollectBox(playerid);
 	return 1;
 }

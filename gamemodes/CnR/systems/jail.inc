@@ -2,11 +2,11 @@
 
 	Jail system for Cops And Robbers script
 	Scripted by Arose Niazi.
-	Milestone 3 (stage 2) — design §3.2 (jail: sentence, bail, bribe, appeal,
+	Milestone 3 (stage 2) - design §3.2 (jail: sentence, bail, bribe, appeal,
 	escape, breakout) + §2.4 (arrest clears wanted).
 
 	This owns the cop-jail state (distinct from the M2 admin-jail; admin-jail
-	always takes precedence — see Jail_IsBusy / the spawn re-jail order in
+	always takes precedence - see Jail_IsBusy / the spawn re-jail order in
 	CnR.pwn). Sends an arrested/re-jailed suspect to the real LSPD (Pershing
 	Square) cell interior in an isolated virtual world, disarms them, arms a
 	release timer with a visible countdown, and spawns them back outside on
@@ -96,7 +96,7 @@ static Jail_Place(playerid)
 }
 
 // Persist the current jail row (absolute JailUntil + bail/reason/chained).
-// This is the single per-player LSplayers disconnect/state UPDATE — M4 (stage 1)
+// This is the single per-player LSplayers disconnect/state UPDATE - M4 (stage 1)
 // folded the bank/tax/insurance columns in here (BankMoney/TaxOwed/LifeInsurance/
 // HealthInsExpiry) rather than adding a second competing UPDATE. Any subsystem
 // that mutates those fields (bank.inc) just writes PlayerInfo and this save picks
@@ -114,7 +114,7 @@ FUNCTION Jail_SavePlayer(playerid)
 		PlayerInfo[playerid][pJailed] ? 1 : 0, PlayerInfo[playerid][pJailUntil], PlayerInfo[playerid][pJailBail],
 		PlayerInfo[playerid][pJailReason], PlayerInfo[playerid][pEscapeChained] ? 1 : 0, PlayerInfo[playerid][pLottoNumber],
 		PlayerInfo[playerid][pCrowbarEquipped] ? 1 : 0, PlayerInfo[playerid][pRobberyHistory], PlayerInfo[playerid][pHouseSpawn], PlayerInfo[playerid][pFightStyle],
-		// M6 (stage 2) — fishing & farming persistence (design §9.2/§9.3/§11.2).
+		// M6 (stage 2) - fishing & farming persistence (design §9.2/§9.3/§11.2).
 		PlayerInfo[playerid][pFishPermits], PlayerInfo[playerid][pHuntPermits], PlayerInfo[playerid][pDrugSeeds],
 		PlayerInfo[playerid][pHasFishingRod] ? 1 : 0, PlayerInfo[playerid][pHasFishCooler] ? 1 : 0, PlayerInfo[playerid][pHasFishSalesPermit] ? 1 : 0,
 		PlayerInfo[playerid][pCoolerCount], PlayerInfo[playerid][pCoolerWeight], PlayerInfo[playerid][pCoolerValue],
@@ -123,7 +123,7 @@ FUNCTION Jail_SavePlayer(playerid)
 	return 1;
 }
 
-// Per-second countdown tick (visible timer) — fires the release when it lapses.
+// Per-second countdown tick (visible timer) - fires the release when it lapses.
 FUNCTION Jail_CountdownTick(playerid)
 {
 	if(!IsPlayerConnected(playerid) || !PlayerInfo[playerid][pJailed]) return 0;
@@ -156,7 +156,7 @@ static Jail_ArmTimer(playerid)
 }
 
 // Core entry: jail a suspect for a computed sentence. Clears their wanted level
-// (arrest/takedown/escape recapture all pass through here) and pauses nothing —
+// (arrest/takedown/escape recapture all pass through here) and pauses nothing -
 // they are out of the pursuit loop. `serious` bumps the seriousCrime count.
 FUNCTION Jail_SendToJail(suspectid, wantedAtArrest, const reason[], serious)
 {
@@ -182,13 +182,13 @@ FUNCTION Jail_SendToJail(suspectid, wantedAtArrest, const reason[], serious)
 
 	Jail_Place(suspectid);
 	Jail_ArmTimer(suspectid);
-	// M5 (stage 2) — arrest confiscates the crowbar if the suspect's RobberyHistory
-	// carries a robbery flag (§5.7). This is the ARREST path — it always confiscates
+	// M5 (stage 2) - arrest confiscates the crowbar if the suspect's RobberyHistory
+	// carries a robbery flag (§5.7). This is the ARREST path - it always confiscates
 	// (the "killed by a cop keeps the crowbar" exception lives in the death path).
 	// robbery.inc is included after jail.inc, so reach it via CallLocalFunction; it
 	// aborts any running safe-crack, clears the flag, and calls Jail_SavePlayer.
 	CallLocalFunction("Robbery_OnArrest", "d", suspectid);
-	// M5 (stage 4) — a jailed kidnapper releases any victim they were holding (§4.4).
+	// M5 (stage 4) - a jailed kidnapper releases any victim they were holding (§4.4).
 	// kidnap.inc is included after jail.inc, so reach it via CallLocalFunction.
 	CallLocalFunction("Kidnap_OnArrest", "d", suspectid);
 
@@ -268,7 +268,7 @@ FUNCTION Jail_OnPlayerSpawn(playerid)
 		SendClientMessage(playerid, COLOR_ERROR, string);
 		return 1;
 	}
-	// Sentence lapsed while offline — clear the stale row.
+	// Sentence lapsed while offline - clear the stale row.
 	if(PlayerInfo[playerid][pJailUntil] != 0 || PlayerInfo[playerid][pJailed])
 	{
 		PlayerInfo[playerid][pJailed] = false;
@@ -298,10 +298,10 @@ FUNCTION Jail_OnDisconnect(playerid)
 }
 
 //==============================================================================
-//	Ways out — jailed-player commands (design §3.2)
+//	Ways out - jailed-player commands (design §3.2)
 //==============================================================================
 
-// 1) /bail (/pb /paybail) — pay bail to leave early.
+// 1) /bail (/pb /paybail) - pay bail to leave early.
 CMD:bail(playerid, params[])
 {
 	#pragma unused params
@@ -321,7 +321,7 @@ CMD:bail(playerid, params[])
 	new bailPaid = PlayerInfo[playerid][pJailBail];
 	PlayerInfo[playerid][pMoney] -= bailPaid;
 	UpdateMoney(playerid);
-	// M7 — bail feeds the GOVERNMENT stock pool (§10.2, factor 0.1). Captured before
+	// M7 - bail feeds the GOVERNMENT stock pool (§10.2, factor 0.1). Captured before
 	// Jail_Release zeroes pJailBail.
 	StockMarket_UpdateEarnings(E_STOCK_GOVERNMENT, bailPaid, STOCK_FACTOR_GOV);
 	Jail_Release(playerid, "bail paid", true);
@@ -329,7 +329,7 @@ CMD:bail(playerid, params[])
 }
 alias:bail("pb", "paybail")
 
-// 2) /appeal — jury of online players votes /innocent (release) or /guilty.
+// 2) /appeal - jury of online players votes /innocent (release) or /guilty.
 CMD:appeal(playerid, params[])
 {
 	#pragma unused params
@@ -340,7 +340,7 @@ CMD:appeal(playerid, params[])
 	if(Jail_SecsLeft(playerid) < APPEAL_MIN_LEFT_SECS)
 	{
 		new string[96];
-		format(string, sizeof(string), "You cannot appeal with under %d seconds left — just serve it.", APPEAL_MIN_LEFT_SECS);
+		format(string, sizeof(string), "You cannot appeal with under %d seconds left - just serve it.", APPEAL_MIN_LEFT_SECS);
 		return SendClientMessage(playerid, COLOR_ERROR, string);
 	}
 
@@ -420,16 +420,16 @@ CMD:innocent(playerid)
 CMD:guilty(playerid)
 	return Appeal_Vote(playerid, false);
 
-// 3) /bribe [amount] — offer cash to a nearby cop who /accept or /refuse (cop
+// 3) /bribe [amount] - offer cash to a nearby cop who /accept or /refuse (cop
 //    side lives in cmds/cop.inc). Most Wanted cannot bribe (they arrive here
 //    with wanted already cleared, but the block is on the escape-chained/serious
-//    path — spec: WL10 can't bribe → we block escape-chained, matching the
+//    path - spec: WL10 can't bribe -> we block escape-chained, matching the
 //    "already escaped/most-wanted" intent, plus a live cop must be near).
 CMD:bribe(playerid, params[])
 {
 	if(!Jail_IsJailed(playerid)) return SendClientMessage(playerid, COLOR_ERROR, "You are not in jail.");
 	if(PlayerInfo[playerid][pEscapeChained])
-		return SendClientMessage(playerid, COLOR_ERROR, "You escaped once — you are chained and cannot bribe.");
+		return SendClientMessage(playerid, COLOR_ERROR, "You escaped once - you are chained and cannot bribe.");
 	new amount;
 	if(sscanf(params, "d", amount))
 	{
@@ -444,7 +444,7 @@ CMD:bribe(playerid, params[])
 		return SendClientMessage(playerid, COLOR_ERROR, err);
 	}
 	if(PlayerInfo[playerid][pMoney] < amount) return SendClientMessage(playerid, COLOR_ERROR, "You cannot afford that bribe.");
-	if(PlayerInfo[playerid][pBribeTo] != -1) return SendClientMessage(playerid, COLOR_ERROR, "You already have a bribe pending — wait for the cop to respond.");
+	if(PlayerInfo[playerid][pBribeTo] != -1) return SendClientMessage(playerid, COLOR_ERROR, "You already have a bribe pending - wait for the cop to respond.");
 
 	// Find the nearest online cop (jail has cops walking the block; range is
 	// generous since the jailed player is teleported into the isolated cell VW).
@@ -470,17 +470,17 @@ CMD:bribe(playerid, params[])
 	return 1;
 }
 
-// 4) /escape (/esc) — instant WL10 + escape state; re-caught escapees are chained.
+// 4) /escape (/esc) - instant WL10 + escape state; re-caught escapees are chained.
 CMD:escape(playerid, params[])
 {
 	#pragma unused params
 	if(!Jail_IsJailed(playerid)) return SendClientMessage(playerid, COLOR_ERROR, "You are not in jail.");
 	if(PlayerInfo[playerid][pEscapeChained])
-		return SendClientMessage(playerid, COLOR_ERROR, "You are chained to your cell — you cannot escape again this sentence.");
+		return SendClientMessage(playerid, COLOR_ERROR, "You are chained to your cell - you cannot escape again this sentence.");
 
 	// Mark the escape state, free them outside, and light them up at WL10.
 	PlayerInfo[playerid][pEscapeChained] = true;
-	Jail_Release(playerid, "", true);	// no "free to go" message — it's a break-out
+	Jail_Release(playerid, "", true);	// no "free to go" message - it's a break-out
 	SetPlayerWanted(playerid, ESCAPE_WL, "Jail Escape");
 
 	new string[144];
@@ -490,12 +490,12 @@ CMD:escape(playerid, params[])
 		if(!IsPlayerConnected(i) || IsPlayerNPC(i)) continue;
 		if(IsCop(i)) SendClientMessage(i, COLOR_WANTED_DARKORANGE, string);
 	}
-	SendClientMessage(playerid, COLOR_ERROR, "You escaped jail — you are Most Wanted. If re-caught you will be chained.");
+	SendClientMessage(playerid, COLOR_ERROR, "You escaped jail - you are Most Wanted. If re-caught you will be chained.");
 	return 1;
 }
 alias:escape("esc")
 
-// 5) /breakout (/bo) — free another jailed player you are close to. The rescuer
+// 5) /breakout (/bo) - free another jailed player you are close to. The rescuer
 //    must be a free civilian near the PD; the freed player keeps their wanted
 //    status but leaves the cell (chained, so they can't re-escape).
 CMD:breakout(playerid, params[])

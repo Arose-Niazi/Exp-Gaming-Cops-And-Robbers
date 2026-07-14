@@ -2,27 +2,27 @@
 
 	Clothes & accessories system for Cops And Robbers script
 	Scripted by Arose Niazi.
-	Milestone 6 (stage 1) — design §9.7 (clothes — crowbar slot goes live) + §5.7
+	Milestone 6 (stage 1) - design §9.7 (clothes - crowbar slot goes live) + §5.7
 	(the crowbar) + crazybobs-site-full §Clothes & Accessories.
 
 	/clotheswear (/clothes /cw) is the full clothes menu. It replaces the M5 partial
-	/clotheswear (which only offered the crowbar buy — that command lived in
+	/clotheswear (which only offered the crowbar buy - that command lived in
 	systems/robbery.inc and is superseded here). The menu offers:
 
-	  1. Skins   — buy+wear a civilian skin (writes pSkinsSelected[] = owned, sets the
+	  1. Skins   - buy+wear a civilian skin (writes pSkinsSelected[] = owned, sets the
 	               worn skin via pClassID/pSkin; owned skins re-worn free). Ties into
 	               the 240-skin pSkinsSelected system (players/peds.inc). Restricted to
 	               skins on the player's own TEAM so the cop/civ balance is untouched.
-	  2. Crowbar — the $40,000 clothing accessory (§5.7). UNIFIED with the M5 crowbar:
+	  2. Crowbar - the $40,000 clothing accessory (§5.7). UNIFIED with the M5 crowbar:
 	               buys/removes via systems/robbery.inc's Robbery_BuyCrowbar /
 	               Robbery_RemoveCrowbar publics (one implementation, one price, one
 	               pCrowbarEquipped flag). /buycrowbar and /crowbar are also served here.
-	  3. Drug Bag— a $15,000 accessory that doubles the Drug Dealer carry cap
-	               (pHasDrugBag → 5000g vs 2500g, §4.3/§16 #2).
+	  3. Drug Bag- a $15,000 accessory that doubles the Drug Dealer carry cap
+	               (pHasDrugBag -> 5000g vs 2500g, §4.3/§16 #2).
 
 	CB's six clothing chains (ZIP/Binco/ProLaps/Sub Urban/Victim/Didier Sachs) are
 	represented as clothes-shop MARKERS (proximity gate) rather than 240 individual
-	branded garments — the skin buy IS the outfit change (design §9.7: "buying an
+	branded garments - the skin buy IS the outfit change (design §9.7: "buying an
 	outfit writes pSkinsSelected"). The crowbar vendor proximity that M5 deferred goes
 	live here too (Truck Stop / Zero's RC Shop are folded into the shop markers).
 
@@ -44,7 +44,7 @@
 */
 
 //==============================================================================
-//	Clothes-shop markers (the six CB chains + crowbar vendors) — §9.7/§5.7
+//	Clothes-shop markers (the six CB chains + crowbar vendors) - §9.7/§5.7
 //==============================================================================
 
 // Clothes shop / crowbar-vendor locations. The six CB chains (ZIP/Binco/ProLaps/
@@ -53,7 +53,7 @@
 // coords are reachable while CITY_ == LS; SF/LV rows are kept for later.
 static const Float:g_ClothesShops[][3] =
 {
-	{ 207.741,   -110.240, 1005.132 },	// Binco (Los Santos) — interior handled by proximity, world-0 doorway
+	{ 207.741,   -110.240, 1005.132 },	// Binco (Los Santos) - interior handled by proximity, world-0 doorway
 	{ 161.393,   -93.087,  1001.804 },	// ProLaps (Los Santos)
 	{ 498.897,   -76.514,  998.755 },	// Victim (Los Santos)
 	{ 466.360,   -80.129,  998.777 },	// Sub Urban (Los Santos)
@@ -87,7 +87,7 @@ FUNCTION Clothes_Cleanup()
 
 // Is the player standing at a clothes shop / crowbar vendor? Returns 1/0. If NO shop
 // is close (interiors are entered via the enex system so the door coords may be an
-// interior), we still allow the menu from anywhere with a note — clothes shops are
+// interior), we still allow the menu from anywhere with a note - clothes shops are
 // cosmetic, and the crowbar/drug-bag purchases are gated by price, not location.
 static Clothes_AtShop(playerid)
 {
@@ -98,7 +98,7 @@ static Clothes_AtShop(playerid)
 }
 
 //==============================================================================
-//	Skins submenu — buy + wear from the 240-skin pSkinsSelected system (§9.7)
+//	Skins submenu - buy + wear from the 240-skin pSkinsSelected system (§9.7)
 //==============================================================================
 
 // Build + show the skins list for the player's TEAM. Owned skins (pSkinsSelected)
@@ -121,7 +121,7 @@ static Clothes_ShowSkins(playerid)
 		count++;
 	}
 	if(count == 0) return SendClientMessage(playerid, COLOR_ERROR, "There are no outfits available for your team.");
-	ShowPlayerDialog(playerid, CLOTHES_SKINS_DIALOG, DIALOG_STYLE_LIST, ""COL_WHITE"Clothes — Outfits (your team)", list, "Wear", "Back");
+	ShowPlayerDialog(playerid, CLOTHES_SKINS_DIALOG, DIALOG_STYLE_LIST, ""COL_WHITE"Clothes - Outfits (your team)", list, "Wear", "Back");
 	return 1;
 }
 
@@ -145,7 +145,7 @@ static Clothes_SkinIndexForRow(playerid, listitem)
 static Clothes_SaveSkins(playerid)
 {
 	if(!PlayerInfo[playerid][pLoggedIn]) return 0;
-	new packed[1555], part[8];	// MAX_PEDS ints, up to "1|" each — mirrors the 1555-char load buffer
+	new packed[1555], part[8];	// MAX_PEDS ints, up to "1|" each - mirrors the 1555-char load buffer
 	for(new i = 0; i < MAX_PEDS; i++)
 	{
 		format(part, sizeof(part), (i == 0) ? "%d" : "|%d", PlayerInfo[playerid][pSkinsSelected][i] ? 1 : 0);
@@ -178,7 +178,7 @@ static Clothes_WearSkin(playerid, ped)
 }
 
 //==============================================================================
-//	Top menu — /clotheswear (/clothes /cw) (§9.7)
+//	Top menu - /clotheswear (/clothes /cw) (§9.7)
 //==============================================================================
 
 // Row order MUST match the switch in Clothes_OnDialogResponse (top menu case).
@@ -189,7 +189,7 @@ static Clothes_ShowMenu(playerid)
 		""COL_WHITE"Outfits\tbuy / wear a skin\n"\
 		""COL_WHITE"Crowbar\t%s\n"\
 		""COL_WHITE"Drug Bag\t%s",
-		PlayerInfo[playerid][pCrowbarEquipped] ? (""COL_GREEN"equipped — remove") : (""COL_YELLOW"$40,000"),
+		PlayerInfo[playerid][pCrowbarEquipped] ? (""COL_GREEN"equipped - remove") : (""COL_YELLOW"$40,000"),
 		PlayerInfo[playerid][pHasDrugBag] ? (""COL_GREEN"owned") : (""COL_YELLOW"$15,000"));
 	ShowPlayerDialog(playerid, CLOTHES_MENU_DIALOG, DIALOG_STYLE_TABLIST, ""COL_WHITE"Clothes & Accessories\t ", list, "Select", "Cancel");
 	return 1;
@@ -200,7 +200,7 @@ CMD:clotheswear(playerid, params[])
 	#pragma unused params
 	if(!PlayerInfo[playerid][pLoggedIn]) return SendClientMessage(playerid, COLOR_ERROR, "You must be logged in.");
 	if(IsPlayerInAnyVehicle(playerid)) return SendClientMessage(playerid, COLOR_ERROR, "Get out of your vehicle to browse the clothes shop.");
-	// Proximity is a soft gate — if the player is not at a shop marker we still open
+	// Proximity is a soft gate - if the player is not at a shop marker we still open
 	// the menu but note it (clothes are cosmetic; the priced items self-gate) (§9.7).
 	if(!Clothes_AtShop(playerid))
 		SendClientMessage(playerid, COLOR_SERVER_INFO, ""COL_YELLOW"* Tip: "COL_WHITE"visit a clothes shop or crowbar vendor (see the map icons) to try things on.");
@@ -208,7 +208,7 @@ CMD:clotheswear(playerid, params[])
 }
 alias:clotheswear("clothes", "cw")
 
-// /buycrowbar — direct crowbar buy ($40,000, §5.7). Now gated to a shop/vendor (the
+// /buycrowbar - direct crowbar buy ($40,000, §5.7). Now gated to a shop/vendor (the
 // M5 vendor-proximity that was deferred goes live here). Unified with the clothes
 // menu + robbery.inc's Robbery_BuyCrowbar (one buy path).
 CMD:buycrowbar(playerid, params[])
@@ -216,11 +216,11 @@ CMD:buycrowbar(playerid, params[])
 	#pragma unused params
 	if(!PlayerInfo[playerid][pLoggedIn]) return SendClientMessage(playerid, COLOR_ERROR, "You must be logged in.");
 	if(!Clothes_AtShop(playerid))
-		return SendClientMessage(playerid, COLOR_ERROR, "Crowbars are sold at clothes shops, Truck Stops and Zero's RC Shop — stand at a vendor (map icons).");
+		return SendClientMessage(playerid, COLOR_ERROR, "Crowbars are sold at clothes shops, Truck Stops and Zero's RC Shop - stand at a vendor (map icons).");
 	return Robbery_BuyCrowbar(playerid);
 }
 
-// /crowbar — put the crowbar away (§5.7). Delegates to robbery.inc (the effect owner).
+// /crowbar - put the crowbar away (§5.7). Delegates to robbery.inc (the effect owner).
 CMD:crowbar(playerid, params[])
 {
 	#pragma unused params
@@ -228,7 +228,7 @@ CMD:crowbar(playerid, params[])
 }
 
 //==============================================================================
-//	Drug bag accessory — doubles the Drug Dealer carry cap (§4.3/§16 #2)
+//	Drug bag accessory - doubles the Drug Dealer carry cap (§4.3/§16 #2)
 //==============================================================================
 
 static Clothes_BuyDrugBag(playerid)
@@ -237,12 +237,12 @@ static Clothes_BuyDrugBag(playerid)
 	if(PlayerInfo[playerid][pMoney] < DRUGBAG_PRICE)
 	{
 		new err[128];
-		format(err, sizeof(err), "A drug bag costs "COL_GREEN"$%d"COL_WHITE" cash — you cannot afford it.", DRUGBAG_PRICE);
+		format(err, sizeof(err), "A drug bag costs "COL_GREEN"$%d"COL_WHITE" cash - you cannot afford it.", DRUGBAG_PRICE);
 		return SendClientMessage(playerid, COLOR_ERROR, err);
 	}
 	if(!Bank_TakeCash(playerid, DRUGBAG_PRICE)) return SendClientMessage(playerid, COLOR_ERROR, "Payment failed.");
 	PlayerInfo[playerid][pHasDrugBag] = true;
-	Drug_SavePlayer(playerid);	// persists HasDrugBag (+Skill/Drugs) — no competing query
+	Drug_SavePlayer(playerid);	// persists HasDrugBag (+Skill/Drugs) - no competing query
 
 	new msg[176];
 	if(PlayerInfo[playerid][pSkill] == SKILL_DRUGDEALER)
@@ -267,7 +267,7 @@ FUNCTION Clothes_OnDialogResponse(playerid, dialogid, response, listitem)
 			switch(listitem)
 			{
 				case 0: Clothes_ShowSkins(playerid);					// Outfits
-				case 1:												// Crowbar (buy or remove — unified §5.7)
+				case 1:												// Crowbar (buy or remove - unified §5.7)
 				{
 					if(PlayerInfo[playerid][pCrowbarEquipped]) Robbery_RemoveCrowbar(playerid);
 					else Robbery_BuyCrowbar(playerid);
@@ -278,23 +278,23 @@ FUNCTION Clothes_OnDialogResponse(playerid, dialogid, response, listitem)
 		}
 		case CLOTHES_SKINS_DIALOG:
 		{
-			if(!response) { Clothes_ShowMenu(playerid); return 1; }	// Back → top menu
+			if(!response) { Clothes_ShowMenu(playerid); return 1; }	// Back -> top menu
 			new ped = Clothes_SkinIndexForRow(playerid, listitem);
 			if(ped == -1) return 1;
 
-			// Already owned → just wear it (free).
+			// Already owned -> just wear it (free).
 			if(PlayerInfo[playerid][pSkinsSelected][ped] != 0)
 				return Clothes_WearSkin(playerid, ped);
 
-			// Not owned → buy it, mark it owned (pSkinsSelected), then wear it.
+			// Not owned -> buy it, mark it owned (pSkinsSelected), then wear it.
 			if(PlayerInfo[playerid][pMoney] < CLOTHES_SKIN_PRICE)
 			{
 				new err[128];
-				format(err, sizeof(err), "That outfit costs "COL_GREEN"$%d"COL_WHITE" cash — you cannot afford it.", CLOTHES_SKIN_PRICE);
+				format(err, sizeof(err), "That outfit costs "COL_GREEN"$%d"COL_WHITE" cash - you cannot afford it.", CLOTHES_SKIN_PRICE);
 				return SendClientMessage(playerid, COLOR_ERROR, err);
 			}
 			if(!Bank_TakeCash(playerid, CLOTHES_SKIN_PRICE)) return SendClientMessage(playerid, COLOR_ERROR, "Payment failed.");
-			PlayerInfo[playerid][pSkinsSelected][ped] = 1;	// unlock (owned) — §9.7 "purchase = unlock+equip"
+			PlayerInfo[playerid][pSkinsSelected][ped] = 1;	// unlock (owned) - §9.7 "purchase = unlock+equip"
 			Clothes_SaveSkins(playerid);					// persist the new ownership
 			Clothes_WearSkin(playerid, ped);
 			return 1;

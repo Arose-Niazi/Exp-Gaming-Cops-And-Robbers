@@ -2,7 +2,7 @@
 
 	Wanted-level system for Cops And Robbers script
 	Scripted by Arose Niazi.
-	Milestone 3 (stage 1) — design §2 (the spine of the whole gamemode).
+	Milestone 3 (stage 1) - design §2 (the spine of the whole gamemode).
 
 	This is the core dependency the cop/arrest/jail stage (§3) builds on. It owns
 	the wanted state, the name-colour + radar-blip contract, decay (paused during
@@ -12,7 +12,7 @@
 	Credits:
 		crime-cop-loop.md §2-3 for the mechanic grounding.
 
-	Public API (FUNCTION publics — cross-module, stage 2 calls these):
+	Public API (FUNCTION publics - cross-module, stage 2 calls these):
 		GivePlayerWanted(playerid, amount, const reason[])   : stack, clamp 0..10 (§2.2)
 		SetPlayerWanted(playerid, level, const reason[])      : absolute set (§2.2)
 		GetPlayerWanted(playerid)                             : current level (§2.2)
@@ -82,7 +82,7 @@ FUNCTION Wanted_ApplyColour(playerid)
 }
 
 //==============================================================================
-//	Crime announcement (design §2.2 — player + nearby cops)
+//	Crime announcement (design §2.2 - player + nearby cops)
 //==============================================================================
 
 // Announce a committed crime to the offender and to every cop within radar
@@ -92,14 +92,14 @@ static Wanted_AnnounceCrime(playerid, const reason[], amount)
 	if(isNull(reason)) return 0;
 
 	new string[160];
-	format(string, sizeof(string), ""COL_RED"* Crime: %s "COL_WHITE"(+%d wanted — level %d/%d).", reason, amount, PlayerInfo[playerid][pWanted], MAX_WANTED);
+	format(string, sizeof(string), ""COL_RED"* Crime: %s "COL_WHITE"(+%d wanted - level %d/%d).", reason, amount, PlayerInfo[playerid][pWanted], MAX_WANTED);
 	SendClientMessage(playerid, COLOR_ERROR, string);
 
 	// Nearby cops get a heads-up with the suspect's name/id and location.
 	new Float:x, Float:y, Float:z, zoneName[MAX_ZONE_NAME];
 	GetPlayerPos(playerid, x, y, z);
 	format(zoneName, sizeof(zoneName), "%s", PlayerInfo[playerid][pZoneName]);
-	format(string, sizeof(string), ""COL_ORANGE"[CRIME] "COL_WHITE"%s (%d) — %s "COL_YELLOW"(WL %d) "COL_WHITE"near %s.", PlayerInfo[playerid][pUserName], playerid, reason, PlayerInfo[playerid][pWanted], isNull(zoneName) ? ("unknown") : (zoneName));
+	format(string, sizeof(string), ""COL_ORANGE"[CRIME] "COL_WHITE"%s (%d) - %s "COL_YELLOW"(WL %d) "COL_WHITE"near %s.", PlayerInfo[playerid][pUserName], playerid, reason, PlayerInfo[playerid][pWanted], isNull(zoneName) ? ("unknown") : (zoneName));
 	for(new i = 0; i < MAX_PLAYERS; i++)
 	{
 		if(!IsPlayerConnected(i) || IsPlayerNPC(i) || i == playerid) continue;
@@ -123,8 +123,8 @@ static Wanted_ReportTier(playerid, oldTier)
 	{
 		case WANTED_TIER_INNOCENT:   SendClientMessage(playerid, COLOR_SERVER_INFO, "You are no longer wanted. Your name is "COL_WHITE"white"COL_SERVER_INFO" again.");
 		case WANTED_TIER_SUSPECT:    SendClientMessage(playerid, COLOR_WANTED_YELLOW, "You are now a "COL_YELLOW"Suspect"COL_WHITE" (cops can ticket you).");
-		case WANTED_TIER_WARRANT:    SendClientMessage(playerid, COLOR_WANTED_ORANGE, "A "COL_ORANGE"Warrant"COL_WHITE" has been issued — cops can now arrest you on foot.");
-		case WANTED_TIER_MOSTWANTED: SendClientMessage(playerid, COLOR_WANTED_DARKORANGE, ""COL_RED"MOST WANTED"COL_WHITE" — cops may arrest OR take you down with lethal force.");
+		case WANTED_TIER_WARRANT:    SendClientMessage(playerid, COLOR_WANTED_ORANGE, "A "COL_ORANGE"Warrant"COL_WHITE" has been issued - cops can now arrest you on foot.");
+		case WANTED_TIER_MOSTWANTED: SendClientMessage(playerid, COLOR_WANTED_DARKORANGE, ""COL_RED"MOST WANTED"COL_WHITE" - cops may arrest OR take you down with lethal force.");
 	}
 	return 1;
 }
@@ -154,7 +154,7 @@ FUNCTION SetPlayerWanted(playerid, level, const reason[])
 	return 1;
 }
 
-// Stacking add — the crime path every handler uses. Suppressed inside DM zones,
+// Stacking add - the crime path every handler uses. Suppressed inside DM zones,
 // safe (police) property and during spawn protection (§2.5).
 FUNCTION GivePlayerWanted(playerid, amount, const reason[])
 {
@@ -211,7 +211,7 @@ FUNCTION ClearWanted(playerid, const reason[])
 	return ClearPlayerWanted(playerid, reason);
 
 //==============================================================================
-//	Visual contact (decay pause) — stage 2's /vc drives this
+//	Visual contact (decay pause) - stage 2's /vc drives this
 //==============================================================================
 
 // A cop reports visual contact on a suspect: freeze the suspect's decay for
@@ -242,7 +242,7 @@ FUNCTION IsPlayerSpawnProtected(playerid)
 	return (PlayerInfo[playerid][pSpawnProtectUntil] != 0 && gettime() < PlayerInfo[playerid][pSpawnProtectUntil]);
 
 //==============================================================================
-//	Decay tick — hooked from GameModeClock() (1-second timer, design §2.4)
+//	Decay tick - hooked from GameModeClock() (1-second timer, design §2.4)
 //==============================================================================
 
 // Runs once per real second (no new global timer). Decays each wanted player by
@@ -259,7 +259,7 @@ FUNCTION Wanted_OnGameModeClockTick()
 		if(PlayerInfo[playerid][pVCFreezeUntil] != 0)
 		{
 			if(gettime() < PlayerInfo[playerid][pVCFreezeUntil]) continue;
-			// The hold expired — clear it and resume decay.
+			// The hold expired - clear it and resume decay.
 			PlayerInfo[playerid][pVCFreezeUntil] = 0;
 			PlayerInfo[playerid][pVCByCop] = -1;
 		}
@@ -276,7 +276,7 @@ FUNCTION Wanted_OnGameModeClockTick()
 }
 
 //==============================================================================
-//	Persistence hooks (design §2.1 — LSplayers.Wanted)
+//	Persistence hooks (design §2.1 - LSplayers.Wanted)
 //==============================================================================
 
 // Apply the loaded wanted level on spawn (colour + blip + HUD stars).
@@ -301,7 +301,7 @@ FUNCTION Wanted_SavePlayer(playerid)
 //	Crime events wired now (design §2.3)
 //==============================================================================
 
-// Minimal death feed — no death message system existed, so this adds one.
+// Minimal death feed - no death message system existed, so this adds one.
 // Fire reasons (37 Flamethrower / 42 Molotov / 44 WEAPON_FIRE / 43 heat-seek
 // edge) and other invalid reason ids map to a sane "grilled"/generic verb from
 // the roster instead of leaking a raw id (design §7.11 fire "grilled" fix).
@@ -346,7 +346,7 @@ static Wanted_DeathFeed(playerid, killerid, reason)
 	return 1;
 }
 
-// Death handler — killer gains wanted scaled by the victim's team (killing a
+// Death handler - killer gains wanted scaled by the victim's team (killing a
 // cop is worth more), and we build a sane death-feed line (folds in the fire
 // "grilled" fix). Called from OnPlayerDeath in CnR.pwn.
 FUNCTION Wanted_OnPlayerDeath(playerid, killerid, reason)
@@ -372,7 +372,7 @@ FUNCTION Wanted_OnPlayerDeath(playerid, killerid, reason)
 	return 1;
 }
 
-// Vehicle-jack detection — a civilian taking the driver seat of a vehicle that
+// Vehicle-jack detection - a civilian taking the driver seat of a vehicle that
 // another (different) player was driving/occupying is a car-jack (§2.3). Called
 // from OnPlayerStateChange in CnR.pwn (driver-seat theft of an occupied
 // vehicle). Drive-by is handled in OnPlayerWeaponShot -> Wanted_OnDriveBy.
@@ -397,7 +397,7 @@ FUNCTION Wanted_OnPlayerStateChange(playerid, newstate, oldstate)
 	return 1;
 }
 
-// Drive-by shooting — folds the drive-by into attack+wanted (design §2.3, open
+// Drive-by shooting - folds the drive-by into attack+wanted (design §2.3, open
 // Q9 resolved: distinct crime, small wanted). Called from OnPlayerWeaponShot
 // when the shooter is a passenger/driver firing at a valid target.
 FUNCTION Wanted_OnPlayerWeaponShot(playerid, hittype, hitid)

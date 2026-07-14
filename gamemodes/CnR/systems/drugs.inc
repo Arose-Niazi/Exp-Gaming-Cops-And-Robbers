@@ -2,8 +2,8 @@
 
 	Drug system for Cops And Robbers script
 	Scripted by Arose Niazi.
-	Milestone 3 (stage 3) — design §4.3 (/takedrugs, buzz stages, overdose, bad
-	drugs) + the STD-drain stall (§4.2 — drugs buy time until cured).
+	Milestone 3 (stage 3) - design §4.3 (/takedrugs, buzz stages, overdose, bad
+	drugs) + the STD-drain stall (§4.2 - drugs buy time until cured).
 
 	Owns the drug consumption side of the crime/drug/STD triangle. Drugs heal
 	over time (a small heal every DRUG_HEAL_TICK_SECS while buzzed), stall the STD
@@ -20,7 +20,7 @@
 	Public API (called by cmds/crimes.inc + CnR.pwn):
 		DrugCarryCap(playerid)                   : carry cap in grams (skill-gated)
 		Drug_GiveGrams(playerid, grams)          : add grams (clamped to the cap)
-		Drug_OnGameModeClockTick()               : hook from GameModeClock() (1s) — heal/OD
+		Drug_OnGameModeClockTick()               : hook from GameModeClock() (1s) - heal/OD
 		Drug_ClearOverdose(playerid, const r[])  : cancel an overdose (adrenaline, M4)
 		Drug_OnPlayerDeath(playerid)             : reset buzz/OD on death
 		Drug_SavePlayer(playerid)                : persist (disconnect)
@@ -30,7 +30,7 @@
 */
 
 //==============================================================================
-//	Carry cap (design §4.3 — skill-gated, base cap today)
+//	Carry cap (design §4.3 - skill-gated, base cap today)
 //==============================================================================
 
 // Drug Dealer holds 5000g, everyone else 500g. pSkill is set at City Hall in
@@ -60,7 +60,7 @@ FUNCTION Drug_GiveGrams(playerid, grams)
 }
 
 //==============================================================================
-//	Buzz stage helper (design §4.3 — Low/Medium/High/Very High)
+//	Buzz stage helper (design §4.3 - Low/Medium/High/Very High)
 //==============================================================================
 
 // Map an intake amount to a buzz stage (more grams = higher buzz = faster heal).
@@ -88,7 +88,7 @@ static Drug_BuzzName(stage)
 }
 
 //==============================================================================
-//	Consumption core (design §4.3) — used by /takedrugs and click-mode
+//	Consumption core (design §4.3) - used by /takedrugs and click-mode
 //==============================================================================
 
 // Consume `grams` of drugs. Enforces the max-single (overdose) rule, rolls for
@@ -127,7 +127,7 @@ FUNCTION Drug_Consume(playerid, grams)
 		PlayerInfo[playerid][pDrugOverdose] = true;
 		PlayerInfo[playerid][pDrugBuzzStage] = BUZZ_NONE;
 		PlayerInfo[playerid][pDrugEffectUntil] = 0;
-		format(string, sizeof(string), ""COL_RED"* OVERDOSE! "COL_WHITE"You took %dg at once (max %dg). You are dying slowly — an Adrenaline pill (/ad) can save you.", grams, DRUG_MAX_SINGLE);
+		format(string, sizeof(string), ""COL_RED"* OVERDOSE! "COL_WHITE"You took %dg at once (max %dg). You are dying slowly - an Adrenaline pill (/ad) can save you.", grams, DRUG_MAX_SINGLE);
 		SendClientMessage(playerid, COLOR_DRUG, string);
 		return 1;
 	}
@@ -140,13 +140,13 @@ FUNCTION Drug_Consume(playerid, grams)
 	if(newStage > PlayerInfo[playerid][pDrugBuzzStage]) PlayerInfo[playerid][pDrugBuzzStage] = newStage;
 	PlayerInfo[playerid][pDrugHealCounter] = 0;
 
-	format(string, sizeof(string), ""COL_DRUG"* You took %dg. "COL_WHITE"Buzz: "COL_DRUG"%s"COL_WHITE" — you heal over time. Stash: %dg.", grams, Drug_BuzzName(PlayerInfo[playerid][pDrugBuzzStage]), PlayerInfo[playerid][pDrugs]);
+	format(string, sizeof(string), ""COL_DRUG"* You took %dg. "COL_WHITE"Buzz: "COL_DRUG"%s"COL_WHITE" - you heal over time. Stash: %dg.", grams, Drug_BuzzName(PlayerInfo[playerid][pDrugBuzzStage]), PlayerInfo[playerid][pDrugs]);
 	SendClientMessage(playerid, COLOR_DRUG, string);
 	return 1;
 }
 
 //==============================================================================
-//	Overdose cancel (design §4.3 — adrenaline pill, wired in M4)
+//	Overdose cancel (design §4.3 - adrenaline pill, wired in M4)
 //==============================================================================
 
 FUNCTION Drug_ClearOverdose(playerid, const reason[])
@@ -163,7 +163,7 @@ FUNCTION Drug_ClearOverdose(playerid, const reason[])
 }
 
 //==============================================================================
-//	Heal / overdose tick — hooked from GameModeClock() (1-second, design §4.3)
+//	Heal / overdose tick - hooked from GameModeClock() (1-second, design §4.3)
 //==============================================================================
 
 FUNCTION Drug_OnGameModeClockTick()
@@ -173,7 +173,7 @@ FUNCTION Drug_OnGameModeClockTick()
 		if(!IsPlayerConnected(playerid) || IsPlayerNPC(playerid)) continue;
 		if(!PlayerInfo[playerid][pLoggedIn] || !PlayerInfo[playerid][pSpawned]) continue;
 
-		// Overdose slow-death (§4.3) — bleeds HP until an adrenaline pill cancels it.
+		// Overdose slow-death (§4.3) - bleeds HP until an adrenaline pill cancels it.
 		if(PlayerInfo[playerid][pDrugOverdose])
 		{
 			new Float:hp;
@@ -181,7 +181,7 @@ FUNCTION Drug_OnGameModeClockTick()
 			hp -= DRUG_OD_DMG_PER_SEC;
 			if(hp <= 0.0)
 			{
-				SetPlayerHealth(playerid, 0.0);	// OD death — OnPlayerDeath resets the flag
+				SetPlayerHealth(playerid, 0.0);	// OD death - OnPlayerDeath resets the flag
 				SendClientMessage(playerid, COLOR_DRUG, ""COL_RED"* You overdosed and died."COL_WHITE" Never take more than 60g at once.");
 			}
 			else SetPlayerHealth(playerid, hp);
@@ -192,7 +192,7 @@ FUNCTION Drug_OnGameModeClockTick()
 		if(PlayerInfo[playerid][pDrugEffectUntil] == 0) continue;
 		if(gettime() >= PlayerInfo[playerid][pDrugEffectUntil])
 		{
-			// Buzz just ended — clear the stage.
+			// Buzz just ended - clear the stage.
 			PlayerInfo[playerid][pDrugEffectUntil] = 0;
 			PlayerInfo[playerid][pDrugBuzzStage] = BUZZ_NONE;
 			PlayerInfo[playerid][pDrugHealCounter] = 0;
@@ -235,7 +235,7 @@ FUNCTION Drug_SavePlayer(playerid)
 {
 	if(!PlayerInfo[playerid][pLoggedIn]) return 0;
 	new string[128];
-	// M6 (stage 1) — Skill (set at City Hall via /skill) and HasDrugBag (bought via
+	// M6 (stage 1) - Skill (set at City Hall via /skill) and HasDrugBag (bought via
 	// /clotheswear, doubles the Drug Dealer carry cap) live in the crime/drug domain,
 	// so they persist through this same crime/drug UPDATE (no competing query).
 	mysql_format(g_SQL, string, sizeof(string), "UPDATE "TABLE_PLAYERS_C" SET Drugs=%d, Skill=%d, HasDrugBag=%d WHERE aID=%d LIMIT 1", PlayerInfo[playerid][pDrugs], PlayerInfo[playerid][pSkill], PlayerInfo[playerid][pHasDrugBag] ? 1 : 0, PlayerInfo[playerid][pID]);
