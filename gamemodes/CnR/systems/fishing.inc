@@ -433,7 +433,7 @@ FUNCTION Fishing_OnDialogResponse(playerid, dialogid, response, listitem)
 		case 0:	// Fishing Rod
 		{
 			if(PlayerInfo[playerid][pHasFishingRod]) return SendClientMessage(playerid, COLOR_ERROR, "You already own a fishing rod.");
-			price = FISHING_ROD_PRICE;
+			price = StockMarket_BuyPrice(FISHING_ROD_PRICE, E_STOCK_SUPA_SAVE);	// M7 — 24/7 items × SUPA_SAVE (§10.2)
 			if(!Bank_TakeCash(playerid, price)) return SendClientMessage(playerid, COLOR_ERROR, "You cannot afford a fishing rod.");
 			PlayerInfo[playerid][pHasFishingRod] = true;
 			format(msg, sizeof(msg), ""COL_GREEN"* Bought a fishing rod "COL_WHITE"($%d) — faster reel-in + higher catch chance.", price);
@@ -441,7 +441,7 @@ FUNCTION Fishing_OnDialogResponse(playerid, dialogid, response, listitem)
 		case 1:	// Fish Cooler
 		{
 			if(PlayerInfo[playerid][pHasFishCooler]) return SendClientMessage(playerid, COLOR_ERROR, "You already own a fish cooler.");
-			price = FISH_COOLER_PRICE;
+			price = StockMarket_BuyPrice(FISH_COOLER_PRICE, E_STOCK_SUPA_SAVE);	// M7 — 24/7 items × SUPA_SAVE (§10.2)
 			if(!Bank_TakeCash(playerid, price)) return SendClientMessage(playerid, COLOR_ERROR, "You cannot afford a fish cooler.");
 			PlayerInfo[playerid][pHasFishCooler] = true;
 			format(msg, sizeof(msg), ""COL_GREEN"* Bought a fish cooler "COL_WHITE"($%d) — now holds %d fish.", price, FISH_COOLER_CAP);
@@ -449,7 +449,7 @@ FUNCTION Fishing_OnDialogResponse(playerid, dialogid, response, listitem)
 		case 2:	// Fish Sales Permit
 		{
 			if(PlayerInfo[playerid][pHasFishSalesPermit]) return SendClientMessage(playerid, COLOR_ERROR, "You already own a fish sales permit.");
-			price = FISH_SALES_PERMIT_PRICE;
+			price = StockMarket_BuyPrice(FISH_SALES_PERMIT_PRICE, E_STOCK_SUPA_SAVE);	// M7 — 24/7 items × SUPA_SAVE (§10.2)
 			if(!Bank_TakeCash(playerid, price)) return SendClientMessage(playerid, COLOR_ERROR, "You cannot afford a fish sales permit.");
 			PlayerInfo[playerid][pHasFishSalesPermit] = true;
 			format(msg, sizeof(msg), ""COL_GREEN"* Bought a fish sales permit "COL_WHITE"($%d) — you can sell fish to players.", price);
@@ -458,6 +458,7 @@ FUNCTION Fishing_OnDialogResponse(playerid, dialogid, response, listitem)
 		{
 			new add = (listitem == 3) ? 5 : (listitem == 4) ? 10 : 25;
 			price = (listitem == 3) ? FISH_PERMIT_BUNDLE_5 : (listitem == 4) ? FISH_PERMIT_BUNDLE_10 : FISH_PERMIT_BUNDLE_25;
+			price = StockMarket_BuyPrice(price, E_STOCK_SUPA_SAVE);	// M7 — 24/7 items × SUPA_SAVE (§10.2)
 			if(PlayerInfo[playerid][pFishPermits] >= FISH_PERMIT_MAX) return SendClientMessage(playerid, COLOR_ERROR, "You already hold the maximum fishing permits (50).");
 			if(!Bank_TakeCash(playerid, price)) return SendClientMessage(playerid, COLOR_ERROR, "You cannot afford that permit bundle.");
 			PlayerInfo[playerid][pFishPermits] += add;
@@ -468,6 +469,7 @@ FUNCTION Fishing_OnDialogResponse(playerid, dialogid, response, listitem)
 		{
 			new add = (listitem == 6) ? 5 : 10;
 			price = (listitem == 6) ? HUNT_PERMIT_BUNDLE_5 : HUNT_PERMIT_BUNDLE_10;
+			price = StockMarket_BuyPrice(price, E_STOCK_SUPA_SAVE);	// M7 — 24/7 items × SUPA_SAVE (§10.2)
 			if(PlayerInfo[playerid][pHuntPermits] >= HUNT_PERMIT_MAX) return SendClientMessage(playerid, COLOR_ERROR, "You already hold the maximum hunting permits (20).");
 			if(!Bank_TakeCash(playerid, price)) return SendClientMessage(playerid, COLOR_ERROR, "You cannot afford that permit bundle.");
 			PlayerInfo[playerid][pHuntPermits] += add;
@@ -476,7 +478,7 @@ FUNCTION Fishing_OnDialogResponse(playerid, dialogid, response, listitem)
 		}
 		case 8:	// Drug Seeds x5
 		{
-			price = DRUG_SEED_BUNDLE_5;
+			price = StockMarket_BuyPrice(DRUG_SEED_BUNDLE_5, E_STOCK_SUPA_SAVE);	// M7 — 24/7 items × SUPA_SAVE (§10.2)
 			if(PlayerInfo[playerid][pDrugSeeds] >= DRUG_SEED_MAX) return SendClientMessage(playerid, COLOR_ERROR, "You already hold the maximum drug seeds (10).");
 			if(!Bank_TakeCash(playerid, price)) return SendClientMessage(playerid, COLOR_ERROR, "You cannot afford that.");
 			PlayerInfo[playerid][pDrugSeeds] += 5;
@@ -485,6 +487,9 @@ FUNCTION Fishing_OnDialogResponse(playerid, dialogid, response, listitem)
 		}
 		default: return 1;
 	}
+	// M7 — buying at the shop feeds the SUPA_SAVE (24/7) pool (demand pushes the
+	// price up, §10.2). `price` here is the actual (market-scaled) amount charged.
+	StockMarket_UpdateEarnings(E_STOCK_SUPA_SAVE, price, STOCK_FACTOR_SHOP);
 	Jail_SavePlayer(playerid);	// persist the purchase
 	SendClientMessage(playerid, COLOR_SERVER_INFO, msg);
 	return 1;

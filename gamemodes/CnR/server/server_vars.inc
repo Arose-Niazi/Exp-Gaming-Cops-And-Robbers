@@ -25,7 +25,12 @@ enum sInfo {
 	// in the DB as a DATETIME string but tracked in-code as a unix timestamp.
 	sBankRobLastLS,
 	sBankRobLastSF,
-	sBankRobLastLV
+	sBankRobLastLV,
+	// M7 — global prime rate (server_data.PrimeRate DOUBLE, §10.1/§11.4). The master
+	// economy multiplier; moves on the daily stock tick. Stored as a DOUBLE in the DB
+	// but tracked as a Float in-code (mul by 1000 on save so the int cache getter can
+	// read it back exactly — see OnServerDataLoad / SavePrimeRate).
+	Float:sPrimeRate
 };
 new ServerInfo[sInfo];
 
@@ -46,6 +51,11 @@ FUNCTION OnServerDataLoad()
 		cache_get_value_int(0, "BankRobUnixLS", ServerInfo[sBankRobLastLS]);
 		cache_get_value_int(0, "BankRobUnixSF", ServerInfo[sBankRobLastSF]);
 		cache_get_value_int(0, "BankRobUnixLV", ServerInfo[sBankRobLastLV]);
+		// M7 — prime rate (DOUBLE). Default 1.0; clamp to the code range in case a bad
+		// value was persisted. A migrated row without the column reads 0.0 → fixed up.
+		cache_get_value_float(0, "PrimeRate", ServerInfo[sPrimeRate]);
+		if(ServerInfo[sPrimeRate] < PRIME_RATE_MIN || ServerInfo[sPrimeRate] > PRIME_RATE_MAX)
+			ServerInfo[sPrimeRate] = 1.0;
 	}
 	else
 	{
@@ -53,7 +63,18 @@ FUNCTION OnServerDataLoad()
 		mysql_format(g_SQL, string, sizeof(string), "INSERT INTO "SERVER_TABLE" (Version) VALUES (%d)",STATS_VERSION);
 		mysql_pquery(g_SQL, string);
 		ServerInfo[sLottoJackpot] = LOTTO_JACKPOT_BASE;
+		ServerInfo[sPrimeRate] = 1.0;
 	}
+	return 1;
+}
+
+// M7 — persist the global prime rate (server_data.PrimeRate). Called on the daily
+// stock tick after the rate moves (§10.3). Written as a DOUBLE literal via %f.
+FUNCTION SavePrimeRate()
+{
+	new string[128];
+	mysql_format(g_SQL, string, sizeof(string), "UPDATE "SERVER_TABLE" SET PrimeRate=%f WHERE Version=%d", ServerInfo[sPrimeRate], STATS_VERSION);
+	mysql_pquery(g_SQL, string);
 	return 1;
 }
 

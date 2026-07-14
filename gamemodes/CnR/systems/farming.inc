@@ -517,13 +517,16 @@ CMD:buyseeds(playerid, params[])
 		return SendClientMessage(playerid, COLOR_ERROR, "Buy seeds at a Drug Refill Point or a Bait Shop ("COL_GREEN"/baitshop"COL_WHITE").");
 	if(PlayerInfo[playerid][pDrugSeeds] >= DRUG_SEED_MAX)
 		return SendClientMessage(playerid, COLOR_ERROR, "You already hold the maximum drug seeds (10).");
-	if(!Bank_TakeCash(playerid, DRUG_SEED_BUNDLE_5))
+	// M7 — seeds are a 24/7 shop item, so the price is SUPA_SAVE-scaled (§10.2).
+	new price = StockMarket_BuyPrice(DRUG_SEED_BUNDLE_5, E_STOCK_SUPA_SAVE);
+	if(!Bank_TakeCash(playerid, price))
 		return SendClientMessage(playerid, COLOR_ERROR, "You cannot afford a 5-pack of seeds.");
 	PlayerInfo[playerid][pDrugSeeds] += 5;
 	if(PlayerInfo[playerid][pDrugSeeds] > DRUG_SEED_MAX) PlayerInfo[playerid][pDrugSeeds] = DRUG_SEED_MAX;
+	StockMarket_UpdateEarnings(E_STOCK_SUPA_SAVE, price, STOCK_FACTOR_SHOP);	// buy demand feeds the pool
 	Jail_SavePlayer(playerid);
 	new msg[128];
-	format(msg, sizeof(msg), ""COL_GREEN"* Bought 5 drug seeds "COL_WHITE"($%d). You now hold %d/%d.", DRUG_SEED_BUNDLE_5, PlayerInfo[playerid][pDrugSeeds], DRUG_SEED_MAX);
+	format(msg, sizeof(msg), ""COL_GREEN"* Bought 5 drug seeds "COL_WHITE"($%d). You now hold %d/%d.", price, PlayerInfo[playerid][pDrugSeeds], DRUG_SEED_MAX);
 	SendClientMessage(playerid, COLOR_SERVER_INFO, msg);
 	return 1;
 }

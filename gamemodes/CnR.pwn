@@ -145,6 +145,11 @@ new g_MysqlRaceCheck[MAX_PLAYERS];
 new Text:ConnectTD[2];
 
 #if defined WINDOWS_COMPILER
+	// ---- M7 : stock-market CORE (config + E_STOCK_* enum + PRIME_RATE_* + the
+	// StockMarket_* price/pool state/functions). Included FIRST so server_vars.inc
+	// (prime-rate clamp) and every price site (housing/fishing/farming/shop) can
+	// reference the enum + multiplier. The heavy machinery is systems/stocks.inc.
+	#include "CnR\systems\economy_stub"
 	#include "CnR\server\server_vars"
 	#include "CnR\players\player_vars"
 	#include "CnR\server\misc"
@@ -208,11 +213,15 @@ new Text:ConnectTD[2];
 	#include "CnR\systems\fightstyle"
 	#include "CnR\systems\clothes"
 	// ---- M6 (stage 2) : fishing & farming (§9.2/§9.3) ----
-	// economy_stub first (StockMarket_UpdateEarnings no-op the sell paths call);
-	// fishing/farming call Bank_*, Drug_*, Jail_*, GivePlayerWanted, IsCop (all above).
-	#include "CnR\systems\economy_stub"
+	// The StockMarket_* core (economy_stub) is now included EARLY (top of this branch)
+	// so fishing/farming's StockMarket_UpdateEarnings/PriceMult call sites resolve.
 	#include "CnR\systems\fishing"
 	#include "CnR\systems\farming"
+	// ---- M7 : stock market + full economy (the finale, §9.4/§10) ----
+	// The core lives in economy_stub (included early); THIS is the machinery (init,
+	// async CRUD, the daily tick, dividends, reports, trading commands). After
+	// bank/jail (trading money via Bank_*, holdings persisted with the shared UPDATE).
+	#include "CnR\systems\stocks"
 	#include "CnR\cmds\player"
 	// ---- M6 (stage 3) : DM/sniper/duel arenas, DJ radio (§9.6/§8.1) ----
 	// (after teleport.inc — arenas reuse StripParachute; after bank/jail/missions/
@@ -220,6 +229,8 @@ new Text:ConnectTD[2];
 	#include "CnR\systems\arenas"
 	#include "CnR\cmds\dj"
 #else
+	// ---- M7 : stock-market CORE — see the WINDOWS_COMPILER branch note above.
+	#include "CnR/systems/economy_stub"
 	#include "CnR/server/server_vars"
 	#include "CnR/players/player_vars"
 	#include "CnR/server/misc"
@@ -283,11 +294,15 @@ new Text:ConnectTD[2];
 	#include "CnR/systems/fightstyle"
 	#include "CnR/systems/clothes"
 	// ---- M6 (stage 2) : fishing & farming (§9.2/§9.3) ----
-	// economy_stub first (StockMarket_UpdateEarnings no-op the sell paths call);
-	// fishing/farming call Bank_*, Drug_*, Jail_*, GivePlayerWanted, IsCop (all above).
-	#include "CnR/systems/economy_stub"
+	// The StockMarket_* core (economy_stub) is now included EARLY (top of this branch)
+	// so fishing/farming's StockMarket_UpdateEarnings/PriceMult call sites resolve.
 	#include "CnR/systems/fishing"
 	#include "CnR/systems/farming"
+	// ---- M7 : stock market + full economy (the finale, §9.4/§10) ----
+	// The core lives in economy_stub (included early); THIS is the machinery (init,
+	// async CRUD, the daily tick, dividends, reports, trading commands). After
+	// bank/jail (trading money via Bank_*, holdings persisted with the shared UPDATE).
+	#include "CnR/systems/stocks"
 	#include "CnR/cmds/player"
 	// ---- M6 (stage 3) : DM/sniper/duel arenas, DJ radio (§9.6/§8.1) ----
 	// (after teleport.inc — arenas reuse StripParachute; after bank/jail/missions/
@@ -328,6 +343,7 @@ public OnGameModeInit()
 	Clothes_Init();	// M6 (stage 1) — create clothes-shop + crowbar-vendor map icons (§9.7/§5.7)
 	Fishing_Init();	// M6 (stage 2) — create Bait Shop / fishing-spot / fish-market map icons (§9.2)
 	Farm_Init();	// M6 (stage 2) — load the plants table (async) + create refill-point/farm map icons (§9.3)
+	Stocks_Init();	// M7 — load the stocks table (async); seed the 21-stock roster on first boot (§9.4/§11.3)
 	mysql_log(ERROR | WARNING);
 	EnableStuntBonusForAll(false); //Disabling stunt bonus.
 	DisableInteriorEnterExits();  // will disable all interior enter/exits in the game.
@@ -1106,6 +1122,10 @@ FUNCTION GameModeClock()
 	// M6 (stage 2) — guard for the once-per-game-day bonus-fish announce (§9.2). Same
 	// pattern as the lotto guard; reset on the game-week rollover below.
 	static lastBonusFishDay = -1;
+	// M7 — guard for the once-per-game-day STOCK MARKET tick (§10.3). Same pattern as
+	// the lotto guard: the tick fires exactly once per game-day at the day rollover
+	// (GameHour==0) and never double-fires. Reset on the game-week rollover below.
+	static lastMarketDay = -1;
 	GameMinute ++;
 	if(GameMinute == 60)
 	{
@@ -1158,6 +1178,15 @@ FUNCTION GameModeClock()
 			// M5 (stage 3) — house rent charge + 2-week inactivity decay on the same
 			// game-day rollover (NO new global timer, §3.2/§3.4).
 			House_OnGameDay();
+			// M7 — the STOCK MARKET tick fires on the game-day rollover (GameHour just
+			// wrapped to 0, §10.3): recompute every price from pool+drift, pay dividends,
+			// check bankruptcy, move the prime rate and write a report row. Guarded by
+			// lastMarketDay so it fires exactly once per game-day (mirrors the lotto guard).
+			if(lastMarketDay != GameDay)
+			{
+				lastMarketDay = GameDay;
+				Stocks_Tick();
+			}
 
 			if(GameDay == 7)
 			{
@@ -1170,6 +1199,8 @@ FUNCTION GameModeClock()
 				lastLottoDay = -1;
 				// M6 (stage 2) — reset the bonus-fish guard on the same rollover.
 				lastBonusFishDay = -1;
+				// M7 — reset the stock-market tick guard on the same rollover (§10.3).
+				lastMarketDay = -1;
 			}
 			format(string, sizeof(string), "%s",WeekDays[GameDay]);
 			TextDrawSetString(DaysOfWeek, string);

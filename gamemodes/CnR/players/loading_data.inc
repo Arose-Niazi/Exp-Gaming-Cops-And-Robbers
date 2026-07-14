@@ -132,6 +132,9 @@ FUNCTION LoadUserData(playerid)
 	cache_get_value_int(0, "CoolerWeight",PlayerInfo[playerid][pCoolerWeight]);
 	cache_get_value_int(0, "CoolerValue",PlayerInfo[playerid][pCoolerValue]);
 	CallLocalFunction("Farm_OnPlayerLogin", "d", playerid);
+	// M7 — load this player's stock holdings from stock_holdings (async, race-guarded).
+	// stocks.inc is included after this module, so it is reached via CallLocalFunction.
+	CallLocalFunction("Stocks_OnPlayerLogin", "d", playerid);
 	// M4 (stage 3) — mission cooldowns: one packed '|'-delimited column of per-mission
 	// game-hour completion stamps (§6). Parse into the per-mission stamp array.
 	new missionCd[255];	// widened 128->255 in M6 stage 4 for the 19-mission roster

@@ -127,6 +127,8 @@ CMD:arrest(playerid, params[])
 	PlayerInfo[playerid][pScore] += ARREST_SCORE;
 	PlayerInfo[playerid][pMoney] += bonus;
 	UpdateMoney(playerid);
+	// M7 — arrest cash feeds the GOVERNMENT stock pool (§10.2, factor 0.1).
+	StockMarket_UpdateEarnings(E_STOCK_GOVERNMENT, bonus, STOCK_FACTOR_GOV);
 	if(PlayerInfo[playerid][pCopRank] < 10) PlayerInfo[playerid][pCopRank]++;
 	if(PlayerInfo[playerid][pRefillPoints] < REFILL_POINTS_MAX) PlayerInfo[playerid][pRefillPoints]++;
 
@@ -179,6 +181,8 @@ CMD:ticket(playerid, params[])
 	PlayerInfo[targetid][pTicketExpiry] = gettime() + TICKET_PAY_SECS;
 	PlayerInfo[playerid][pScore] += TICKET_SCORE;
 	PlayerInfo[playerid][pMoney] += TICKET_FINE;
+	// M7 — ticket fines feed the GOVERNMENT stock pool (§10.2, factor 0.1).
+	StockMarket_UpdateEarnings(E_STOCK_GOVERNMENT, TICKET_FINE, STOCK_FACTOR_GOV);
 	UpdateMoney(playerid);
 	if(PlayerInfo[playerid][pRefillPoints] < REFILL_POINTS_MAX) PlayerInfo[playerid][pRefillPoints]++;
 

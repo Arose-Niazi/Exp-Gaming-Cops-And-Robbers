@@ -339,7 +339,14 @@ enum pInfo
 	bool:pInDuel,						// true once both are teleported into a live duel (mid-duel quit = forfeit)
 
 	// ---- M6 (stage 3) : safe / no-crime zones (design §2.5 / §9.10) ------------
-	bool:pInSafeZone					// inside a hospital/RPC safe zone (no-crime; extends pInPoliceProperty)
+	bool:pInSafeZone,					// inside a hospital/RPC safe zone (no-crime; extends pInPoliceProperty)
+
+	// ---- M7 : stock market (design §9.4/§10, §11.3) ---------------------------
+	// Cached per-account share holdings (one cell per stock, index = E_STOCK_*).
+	// Loaded from stock_holdings on login (Stocks_OnPlayerLogin, race-guarded);
+	// a trade updates the cell + upserts/deletes the row. A holding is 0..STOCK_MAX_OWN.
+	pStocks[MAX_STOCKS],
+	bool:pStocksLoaded					// true once the holdings query has resolved for this slot
 }
 
 // Session-only ignore matrix (bit-packed to save memory): does A ignore B?
@@ -537,6 +544,12 @@ FUNCTION ClearPlayerVariables(playerid)
 	PlayerInfo[playerid][pFishing]=false;
 	PlayerInfo[playerid][pFishX]=PlayerInfo[playerid][pFishY]=PlayerInfo[playerid][pFishZ]=0.0;
 	PlayerInfo[playerid][pPlantCount]=PlayerInfo[playerid][pFarmJobCooldown]=PlayerInfo[playerid][pHuntCooldown]=0;
+
+	// ---- M7 : stock market (design §9.4/§10) — holdings loaded async on login ---
+	// Zero the cached holdings on a fresh connect so a not-yet-loaded slot cannot
+	// read a previous player's holdings; Stocks_OnPlayerLogin fills them from the DB.
+	for(new s = 0; s < MAX_STOCKS; s++) PlayerInfo[playerid][pStocks][s] = 0;
+	PlayerInfo[playerid][pStocksLoaded] = false;
 
 	// ---- M6 (stage 3) : DM/sniper/duel arenas (design §9.6) — session-only -----
 	PlayerInfo[playerid][pArena]=ARENA_NONE;

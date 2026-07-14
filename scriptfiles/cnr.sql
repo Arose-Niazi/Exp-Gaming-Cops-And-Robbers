@@ -237,6 +237,50 @@ CREATE TABLE IF NOT EXISTS `plants` (
 -- Migration note (existing databases): the M6 (stage 2) plants table (design §11.3):
 --   (run the CREATE TABLE above; no ALTER needed — it is a new table.)
 
+-- ---------------------------------------------------------------------------
+-- Stock market (M7 — design §9.4/§10/§11.3, docs/research/economy.md §7)
+-- ---------------------------------------------------------------------------
+-- The 21-stock market. Prices are DOUBLE (the pool/price math is float, §7.2).
+-- One row per company; ID 0..20 mirrors the E_STOCK_* enum (economy_stub.inc).
+-- `Pool` is the running reservoir of net economic activity (fed by
+-- StockMarket_UpdateEarnings); on the daily tick the new Price is derived from
+-- Pool + drift. Seeded on first boot if the table is empty (Stocks_Init).
+CREATE TABLE IF NOT EXISTS `stocks` (
+    `ID`              INT      NOT NULL,                  -- 0..20 (E_STOCK_* index, stable)
+    `Name`            VARCHAR(40) NOT NULL DEFAULT '',    -- display name
+    `Price`           DOUBLE   NOT NULL DEFAULT 1.0,      -- current share price
+    `Pool`            DOUBLE   NOT NULL DEFAULT 0.0,      -- running activity reservoir (>=0)
+    `AvailableShares` INT      NOT NULL DEFAULT 0,        -- shares left to buy from the market
+    `IPOPrice`        DOUBLE   NOT NULL DEFAULT 1.0,      -- initial price (the multiplier baseline)
+    `IPOShares`       INT      NOT NULL DEFAULT 0,        -- initial float (dilution scaling)
+    `MaxShares`       INT      NOT NULL DEFAULT 0,        -- total shares in existence
+    PRIMARY KEY (`ID`)
+) ENGINE=InnoDB;
+
+-- Per-account share holdings. One row per (account, stock) with a non-zero
+-- holding; the row is deleted when the holding hits 0. FK cascades on account
+-- delete. aID = players.aID (global account id).
+CREATE TABLE IF NOT EXISTS `stock_holdings` (
+    `aID`     INT NOT NULL,                              -- players.aID
+    `StockID` INT NOT NULL,                              -- stocks.ID (0..20)
+    `Shares`  INT NOT NULL DEFAULT 0,                    -- shares held (>0; row removed at 0)
+    PRIMARY KEY (`aID`, `StockID`),
+    CONSTRAINT `fk_sh_aID` FOREIGN KEY (`aID`) REFERENCES `players` (`aID`) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- Rolling price history (last STOCK_HISTORY_DAYS periods) for /markethistory and
+-- price-trend views. Written one row per stock per daily tick; `Day` is the
+-- monotonic game-day counter (g_GameDayCounter) so trends survive week rollover.
+CREATE TABLE IF NOT EXISTS `stock_reports` (
+    `StockID` INT    NOT NULL,                           -- stocks.ID
+    `Day`     INT    NOT NULL,                           -- game-day counter at report time
+    `Price`   DOUBLE NOT NULL DEFAULT 1.0,               -- closing price that period
+    PRIMARY KEY (`StockID`, `Day`)
+) ENGINE=InnoDB;
+
+-- Migration note (existing databases): the M7 stock tables (design §11.3):
+--   (run the three CREATE TABLE above; no ALTER needed — they are new tables.)
+
 -- Server-wide statistics (keyed by STATS_VERSION)
 CREATE TABLE IF NOT EXISTS `server_data` (
     `Version`        INT NOT NULL,
@@ -250,6 +294,10 @@ CREATE TABLE IF NOT EXISTS `server_data` (
     `BankRobLastLS`  DATETIME NULL DEFAULT NULL,
     `BankRobLastSF`  DATETIME NULL DEFAULT NULL,
     `BankRobLastLV`  DATETIME NULL DEFAULT NULL,
+    -- M7: global prime rate (design §10.1/§11.4). A master economy multiplier
+    -- that moves on the daily stock tick; higher prime = lower goods, higher
+    -- houses. Clamped in code to [PRIME_RATE_MIN, PRIME_RATE_MAX].
+    `PrimeRate`      DOUBLE NOT NULL DEFAULT 1.0,
     PRIMARY KEY (`Version`)
 ) ENGINE=InnoDB;
 
@@ -263,6 +311,9 @@ CREATE TABLE IF NOT EXISTS `server_data` (
 --     ADD `BankRobLastLS` DATETIME NULL DEFAULT NULL,
 --     ADD `BankRobLastSF` DATETIME NULL DEFAULT NULL,
 --     ADD `BankRobLastLV` DATETIME NULL DEFAULT NULL;
+-- M7 prime-rate column (design §10.1/§11.4):
+--   ALTER TABLE `server_data`
+--     ADD `PrimeRate` DOUBLE NOT NULL DEFAULT 1.0;
 
 -- Streamed interiors / teleports (admin-built via /addinterior)
 CREATE TABLE IF NOT EXISTS `Interiors` (

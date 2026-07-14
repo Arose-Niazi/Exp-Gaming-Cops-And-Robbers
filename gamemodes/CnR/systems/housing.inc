@@ -439,9 +439,15 @@ FUNCTION House_OnKeyEnter(playerid)
 //==============================================================================
 
 // The price this player pays for `house` (police get a discount, §3.1).
+// M7 — the base price is market-scaled: × the House Market stock multiplier ×
+// the global prime rate (design §10.1: housePrice = base * mult(HOUSE_MARKET) *
+// primeRateFactor). Higher prime = pricier houses (economy.md §1.4). Both factors
+// default to 1.0 before the market loads, so behaviour is unchanged pre-M7.
 static House_PriceFor(playerid, house)
 {
-	new price = gHouseInfo[house][hPrice];
+	new Float:mkt = StockMarket_PriceMult(E_STOCK_HOUSE_MARKET) * ServerInfo[sPrimeRate];
+	new price = floatround(float(gHouseInfo[house][hPrice]) * mkt);
+	if(price < 1) price = 1;
 	if(IsCop(playerid)) price -= (price / 100) * HOUSE_POLICE_DISCOUNT;
 	return price;
 }

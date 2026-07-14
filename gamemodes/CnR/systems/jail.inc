@@ -318,8 +318,12 @@ CMD:bail(playerid, params[])
 		format(string, sizeof(string), "You cannot afford bail ($%d). Wait to be released or /parole'd.", PlayerInfo[playerid][pJailBail]);
 		return SendClientMessage(playerid, COLOR_ERROR, string);
 	}
-	PlayerInfo[playerid][pMoney] -= PlayerInfo[playerid][pJailBail];
+	new bailPaid = PlayerInfo[playerid][pJailBail];
+	PlayerInfo[playerid][pMoney] -= bailPaid;
 	UpdateMoney(playerid);
+	// M7 — bail feeds the GOVERNMENT stock pool (§10.2, factor 0.1). Captured before
+	// Jail_Release zeroes pJailBail.
+	StockMarket_UpdateEarnings(E_STOCK_GOVERNMENT, bailPaid, STOCK_FACTOR_GOV);
 	Jail_Release(playerid, "bail paid", true);
 	return 1;
 }
