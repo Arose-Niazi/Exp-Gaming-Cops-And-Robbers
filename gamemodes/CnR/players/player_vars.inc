@@ -233,6 +233,18 @@ enum pInfo
 	bool:pInMoneyRush,			// joined the active money-rush event
 	pMoneyRushEarned,			// cash grabbed during the current money-rush (per-event leaderboard)
 
+	// ---- M5 (stage 2) : full robbery system + crowbar (design §5) -----------
+	bool:pCrowbarEquipped,		// crowbar clothing item equipped (LSplayers.CrowbarEquipped) — shortens robbery/safe time + raises register take (§5.7)
+	pRobberyHistory,			// bitmask of robbery types committed (LSplayers.RobberyHistory, ROB_*) — drives crowbar confiscation on arrest (§5.7)
+	pRobStage,					// safe-type robbery stage (ROBSTAGE_NONE/CRACKING/CARRYING) — bank/casino/special (§5.3-5.6)
+	pRobKind,					// which safe-type robbery is running (ROBKIND_BANK/CASINO/SPECIAL)
+	pRobSite,					// index into the robbery-site table the current robbery belongs to
+	pRobTimer,					// per-player safe-crack countdown timer handle (-1 = none)
+	pRobCrackLeft,				// seconds left on the current safe-crack (counts down on pRobTimer)
+	pRobDeadline,				// gettime() the carry-to-hideout window expires (0 = not carrying)
+	pRobHideout,				// hideout-site index the safe must be delivered to while carrying
+	pShopliftCooldown,			// gettime() the player may /shoplift again (§5.1)
+
 	// ---- M4 (stage 3) : reusable mission framework (design §6) --------------
 	pOnMission,					// active mission id (index into MissionReg[]), or -1 = none
 	pMissionCheckpoint,			// current checkpoint index reached so far (0..route length)
@@ -242,7 +254,31 @@ enum pInfo
 	Float:pMissionRouteX[MISSION_MAX_CHECKPOINTS],	// active route checkpoint coords (X)
 	Float:pMissionRouteY[MISSION_MAX_CHECKPOINTS],	// active route checkpoint coords (Y)
 	Float:pMissionRouteZ[MISSION_MAX_CHECKPOINTS],	// active route checkpoint coords (Z)
-	pMissionCooldown[MISSION_COUNT]		// last-completion game-hour stamp per mission (0 = never) [persisted, packed]
+	pMissionCooldown[MISSION_COUNT],	// last-completion game-hour stamp per mission (0 = never) [persisted, packed]
+
+	// ---- M5 (stage 1) : vehicle ownership — CB-simple model (design §9.12) --
+	pLastVehicle,						// vehicleid this player last drove as DRIVER (INVALID_VEHICLE_ID = none) — /lock//unlock act on it (session only)
+
+	// ---- M5 (stage 3) : housing system (design §9.1/§5.5) ------------------
+	pInsideHouse,						// house index the player is currently inside (-1 = outside) — session only
+	pOwnedHouseCount,					// how many houses this player owns right now (own-cap MAX_OWNED_HOUSES) — recomputed on house load/buy/sell
+	pHouseSpawn,						// house index this player spawns at (/sethousespawn), or -1 = default city spawn (persisted: LSplayers.HouseSpawnID)
+	pHouseRobCooldown,					// gettime() the player may /houserob again (§5.5 per-robber cooldown, session only)
+
+	// ---- M5 (stage 4) : kidnap crime (design §4.4) — all session-only ------
+	pKidnapVictim,						// playerid this player is currently holding kidnapped (-1 = none)
+	pKidnappedBy,						// playerid currently kidnapping this player (-1 = free)
+	pKidnapRansom,						// ransom set on the held victim (≤ KIDNAP_RANSOM_MAX)
+	pKidnapCooldown,					// gettime() the player may /kidnap again (per-kidnapper cooldown)
+	bool:pFakeSkillDriver,				// /fakeskill — kidnapper disguised as a Driver (session flag, §4.4)
+
+	// ---- M5 (stage 4) : Airport Robbery box mechanic (§6.1) — session-only --
+	pAirportPhase,						// AIRPHASE_NONE/COLLECT/DELIVER — the bespoke box-collection state
+	pAirportBoxes,						// boxes collected this run (drives the delivery payout)
+	pAirportDeadline,					// gettime() the current airport phase (collect / deliver) expires
+	pAirportVehicle,					// the truck/van/garbage-truck the airport run is bound to (-1 = none)
+	pAirportSite,						// which airport site index this run belongs to
+	pBoxCollectCooldown					// gettime() the next /box grab is allowed (anti-spam) [OUR DESIGN]
 }
 
 // Session-only ignore matrix (bit-packed to save memory): does A ignore B?
@@ -383,6 +419,39 @@ FUNCTION ClearPlayerVariables(playerid)
 	// Cooldown stamps are loaded from the DB in loading_data; clear the slots on a
 	// fresh connect so a relog into a not-yet-loaded slot cannot read stale data.
 	for(new i=0; i<MISSION_COUNT; i++) PlayerInfo[playerid][pMissionCooldown][i]=0;
+
+	// ---- M5 (stage 1) : vehicle ownership — CB-simple model ----------------
+	PlayerInfo[playerid][pLastVehicle]=INVALID_VEHICLE_ID;
+
+	// ---- M5 (stage 2) : full robbery system + crowbar (design §5) ----------
+	// pCrowbarEquipped + pRobberyHistory are loaded from the DB in loading_data;
+	// zero them on a fresh connect so a not-yet-loaded slot can't read stale data.
+	PlayerInfo[playerid][pCrowbarEquipped]=false;
+	PlayerInfo[playerid][pRobberyHistory]=0;
+	if(PlayerInfo[playerid][pRobTimer] != -1) KillTimer(PlayerInfo[playerid][pRobTimer]);
+	PlayerInfo[playerid][pRobTimer]=-1;
+	PlayerInfo[playerid][pRobStage]=ROBSTAGE_NONE;
+	PlayerInfo[playerid][pRobKind]=PlayerInfo[playerid][pRobSite]=PlayerInfo[playerid][pRobCrackLeft]=0;
+	PlayerInfo[playerid][pRobDeadline]=PlayerInfo[playerid][pRobHideout]=PlayerInfo[playerid][pShopliftCooldown]=0;
+
+	// ---- M5 (stage 3) : housing system (design §9.1/§5.5) ------------------
+	// pHouseSpawn is loaded from the DB in loading_data; zero the session slots on
+	// a fresh connect so a not-yet-loaded slot can't read stale data.
+	PlayerInfo[playerid][pInsideHouse]=-1;
+	PlayerInfo[playerid][pOwnedHouseCount]=0;
+	PlayerInfo[playerid][pHouseSpawn]=-1;
+	PlayerInfo[playerid][pHouseRobCooldown]=0;
+
+	// ---- M5 (stage 4) : kidnap crime (design §4.4) — session-only ----------
+	PlayerInfo[playerid][pKidnapVictim]=PlayerInfo[playerid][pKidnappedBy]=-1;
+	PlayerInfo[playerid][pKidnapRansom]=PlayerInfo[playerid][pKidnapCooldown]=0;
+	PlayerInfo[playerid][pFakeSkillDriver]=false;
+
+	// ---- M5 (stage 4) : Airport Robbery box mechanic (§6.1) — session-only -
+	PlayerInfo[playerid][pAirportPhase]=AIRPHASE_NONE;
+	PlayerInfo[playerid][pAirportBoxes]=PlayerInfo[playerid][pAirportDeadline]=0;
+	PlayerInfo[playerid][pAirportVehicle]=-1;
+	PlayerInfo[playerid][pAirportSite]=PlayerInfo[playerid][pBoxCollectCooldown]=0;
 
 	return 1;
 }

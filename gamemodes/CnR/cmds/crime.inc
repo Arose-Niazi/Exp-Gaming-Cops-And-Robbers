@@ -2,14 +2,14 @@
 
 	Player crime command suite for Cops And Robbers script
 	Scripted by Arose Niazi.
-	Milestone 3 (stage 3) — design §4 (crime commands) + §5 (/jumpkick, /lock,
-	/unlock).
+	Milestone 3 (stage 3) — design §4 (crime commands) + §5 (/jumpkick).
 
 	The civilian side of the core loop: /rob a nearby player's cash (skill-capped),
 	/rape a nearby target (spreads STDs via std.inc), /takedrugs from the held
-	stash (buzz/overdose handled inside drugs.inc), /jumpkick a player in front,
-	and /lock / /unlock the vehicle you are driving. /usecondom equips a carried
-	condom for the next rape defence. Every crime is gated identically — not a cop,
+	stash (buzz/overdose handled inside drugs.inc), and /jumpkick a player in
+	front. /usecondom equips a carried condom for the next rape defence. Vehicle
+	/lock//unlock + ownership moved to systems/vehicle_own.inc in M5 (§9.12). Every
+	crime is gated identically — not a cop,
 	not jailed, not spawn-protected, not in a DM zone, on-foot proximity, and a
 	per-player cooldown — and calls GivePlayerWanted so the wanted/cop/jail loop
 	responds. Builds on the stage-1 wanted API, the stage-2 jail system and the
@@ -24,8 +24,6 @@
 		/usecondom (/uc)       (civ) prime a carried condom (reduces infect chance)
 		/takedrugs (/td) [g]   (civ) consume held drugs (buzz/overdose in drugs.inc)
 		/jumpkick              (civ, on-foot) melee a player directly in front <2m
-		/lock (/lk)            (any, driving) lock the vehicle you are driving
-		/unlock (/ulk)         (any, driving) unlock the vehicle you are driving
 
 	Functions Being Called:
 		misc:    IsCop, UpdateMoney
@@ -39,19 +37,13 @@
 		  §4 testing-grant path is specified, so /takedrugs only spends drugs the
 		  player already carries (0 today until the dealer/shop system lands).
 		- Condom / chastity-belt / cure purchases → /shop + medic economy (M4/M6).
-		- Owned-vehicle + house locking (co-owners, Car Jacker defeat, persistence)
-		  → M5; /lock here only affects the vehicle you are actively driving.
+		- House locking (co-owners, persistence) → M5 housing (§9.1). Vehicle
+		  ownership + /lock//unlock landed in M5 systems/vehicle_own.inc (§9.12).
 */
 
 //==============================================================================
 //	Internal helpers
 //==============================================================================
-
-// Session-only lock state for the driven-vehicle /lock (M5 owns real ownership
-// + persistence). Indexed by vehicleid; reset on nothing today (a re-created
-// vehicle keeps the array clear because CreateVehicle reuses ids rarely and the
-// full ownership model lands in M5).
-static bool:gVehicleLocked[MAX_VEHICLES + 1];
 
 // Shared crime gate — a civilian who can currently commit a crime. Rejects cops,
 // jailed players, spawn-protected players and DM-zone players with a message so
@@ -433,51 +425,3 @@ CMD:jumpkick(playerid, params[])
 	if(!IsCop(playerid)) GivePlayerWanted(playerid, 1, "Jump-kick assault");
 	return 1;
 }
-
-//==============================================================================
-//	/lock (/lk) + /unlock (/ulk) — the vehicle you are driving (design §5)
-//==============================================================================
-
-// M3 scope: lock/unlock the doors of the vehicle you are currently DRIVING for
-// every other player (SetVehicleParamsForPlayer). Full owned-vehicle + house
-// locking (co-owners, Car Jacker defeat, persistence) is deferred to M5.
-static Crime_SetVehicleLock(playerid, bool:locked)
-{
-	if(!IsPlayerInAnyVehicle(playerid))
-		return SendClientMessage(playerid, COLOR_ERROR, "You must be driving a vehicle to do that.");
-	if(GetPlayerState(playerid) != PLAYER_STATE_DRIVER)
-		return SendClientMessage(playerid, COLOR_ERROR, "Only the driver can lock or unlock the vehicle.");
-
-	new vehicleid = GetPlayerVehicleID(playerid);
-	if(vehicleid < 1 || vehicleid > MAX_VEHICLES) return 0;
-
-	gVehicleLocked[vehicleid] = locked;
-
-	// Apply the per-player door lock for everyone except the driver so they can
-	// still drive it (open.mp SetVehicleParamsForPlayer: objective, doors).
-	for(new i = 0; i < MAX_PLAYERS; i++)
-	{
-		if(!IsPlayerConnected(i) || IsPlayerNPC(i)) continue;
-		if(i == playerid) { SetVehicleParamsForPlayer(vehicleid, i, 0, 0); continue; }	// driver's doors open
-		SetVehicleParamsForPlayer(vehicleid, i, 0, locked ? 1 : 0);
-	}
-
-	SendClientMessage(playerid, COLOR_SERVER_INFO, locked ?
-		(""COL_GREEN"* Vehicle locked."COL_WHITE" Others cannot enter it.") :
-		(""COL_GREEN"* Vehicle unlocked."COL_WHITE" Others can enter it again."));
-	return 1;
-}
-
-CMD:lock(playerid, params[])
-{
-	#pragma unused params
-	return Crime_SetVehicleLock(playerid, true);
-}
-alias:lock("lk")
-
-CMD:unlock(playerid, params[])
-{
-	#pragma unused params
-	return Crime_SetVehicleLock(playerid, false);
-}
-alias:unlock("ulk")

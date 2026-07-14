@@ -184,6 +184,8 @@ new Text:ConnectTD[2];
 	#include "CnR\systems\std"
 	#include "CnR\systems\drugs"
 	#include "CnR\cmds\crime"
+	// ---- M5 (stage 1) : vehicle ownership — CB-simple model (§9.12) ----
+	#include "CnR\systems\vehicle_own"
 	// ---- M4 (stage 1) : bank, taxes & insurance (the money core) ----
 	#include "CnR\systems\bank"
 	// ---- M4 (stage 2) : lotto, money events, /ad + /advert, holdup base ----
@@ -191,8 +193,14 @@ new Text:ConnectTD[2];
 	#include "CnR\systems\moneybag"
 	#include "CnR\systems\moneyrush"
 	#include "CnR\systems\holdup"
+	// ---- M5 (stage 3) : housing (before robbery — /houserob calls House_* publics) ----
+	#include "CnR\systems\housing"
+	// ---- M5 (stage 2) : full robbery system + crowbar (after holdup/bank/wanted/jail/housing) ----
+	#include "CnR\systems\robbery"
 	// ---- M4 (stage 3) : reusable mission framework + 4 core missions ----
 	#include "CnR\systems\missions"
+	// ---- M5 (stage 4) : kidnap crime + the 3 M5 robbery missions (§4.4/§6.1/§6.7/§6.19) ----
+	#include "CnR\systems\kidnap"
 	#include "CnR\cmds\player"
 #else
 	#include "CnR/server/server_vars"
@@ -234,6 +242,8 @@ new Text:ConnectTD[2];
 	#include "CnR/systems/std"
 	#include "CnR/systems/drugs"
 	#include "CnR/cmds/crime"
+	// ---- M5 (stage 1) : vehicle ownership — CB-simple model (§9.12) ----
+	#include "CnR/systems/vehicle_own"
 	// ---- M4 (stage 1) : bank, taxes & insurance (the money core) ----
 	#include "CnR/systems/bank"
 	// ---- M4 (stage 2) : lotto, money events, /ad + /advert, holdup base ----
@@ -241,8 +251,14 @@ new Text:ConnectTD[2];
 	#include "CnR/systems/moneybag"
 	#include "CnR/systems/moneyrush"
 	#include "CnR/systems/holdup"
+	// ---- M5 (stage 3) : housing (before robbery — /houserob calls House_* publics) ----
+	#include "CnR/systems/housing"
+	// ---- M5 (stage 2) : full robbery system + crowbar (after holdup/bank/wanted/jail/housing) ----
+	#include "CnR/systems/robbery"
 	// ---- M4 (stage 3) : reusable mission framework + 4 core missions ----
 	#include "CnR/systems/missions"
+	// ---- M5 (stage 4) : kidnap crime + the 3 M5 robbery missions (§4.4/§6.1/§6.7/§6.19) ----
+	#include "CnR/systems/kidnap"
 	#include "CnR/cmds/player"
 #endif
 
@@ -271,6 +287,9 @@ public OnGameModeInit()
 	CreateMap();
 	LoadInterior();
 	AddVehicles();
+	Veh_Init();	// M5 (stage 1) — reset per-vehicle ownership/lock state for a fresh session (§9.12)
+	Robbery_Init();	// M5 (stage 2) — create bank/casino/special robbery checkpoints + bank map icons (§5.3-5.6)
+	House_Init();	// M5 (stage 3) — load all houses (async) + build entrance pickups/labels/map icons (§9.1)
 	mysql_log(ERROR | WARNING);
 	EnableStuntBonusForAll(false); //Disabling stunt bonus.
 	DisableInteriorEnterExits();  // will disable all interior enter/exits in the game.
@@ -283,8 +302,10 @@ public OnGameModeInit()
 	SetWeather(random(21));
 	SendRconCommand("worldtime Sunday 00:00");
 	ServerInfo[sTimer] = SetTimerEx("GameModeClock", 1000, true, "d", 0);
-	new string[75];
-	mysql_format(g_SQL,string,sizeof(string),"SELECT * FROM `server_data` WHERE Version=%d",STATS_VERSION);
+	new string[256];
+	// M5 (stage 2) — pull the bank-robbery cooldown DATETIMEs as unix seconds so the
+	// int cache-getter can read them (aliased BankRobUnix{LS,SF,LV}, §5.3/§5.8).
+	mysql_format(g_SQL,string,sizeof(string),"SELECT *, UNIX_TIMESTAMP(BankRobLastLS) AS BankRobUnixLS, UNIX_TIMESTAMP(BankRobLastSF) AS BankRobUnixSF, UNIX_TIMESTAMP(BankRobLastLV) AS BankRobUnixLV FROM `server_data` WHERE Version=%d",STATS_VERSION);
 	mysql_pquery(g_SQL, string, "OnServerDataLoad","");
 	
 	DaysOfWeek= TextDrawCreate(577.203552, 5.083323, WeekDays[GameDay]);
@@ -338,6 +359,11 @@ public OnGameModeExit()
 	// M4 (stage 2) — destroy any money-bag / money-rush dynamic pickups.
 	Moneybag_Cleanup();
 	Moneyrush_Cleanup();
+	// M5 — destroy robbery-site CPs + bank map icons, house pickups/labels/map icons,
+	// and sweep any active Airport Robbery box pickups.
+	Robbery_Cleanup();
+	House_Cleanup();
+	for(new i = 0; i < MAX_PLAYERS; i++) Mission_AirportCleanup(i);
 	DestroyZones();
 	KillTimer(ServerInfo[sTimer]);
 	DeleteInterior();
@@ -379,6 +405,8 @@ public OnPlayerConnect(playerid)
 		for(new i=0; i<10; i++) SendClientMessage(playerid,-1,"");
 		SetTimerEx("CallForChecking",3000,false,"d",playerid);
 		CreateMenuBox(playerid);
+		// M5 (stage 1) — reflect any already-locked vehicles' doors for this new player (§9.12).
+		Veh_OnConnect(playerid);
 	}
 	format(string,sizeof(string),"[CONNECT] %s (%d).",PlayerInfo[playerid][pUserName],playerid);
 	SendConnectMessage(playerid,string,true);
@@ -421,8 +449,18 @@ public OnPlayerDisconnect(playerid,reason)
 		// M4 (stage 2) — kill any running holdup timer + drop the money-rush seat.
 		Holdup_OnDisconnect(playerid);
 		Moneyrush_OnDisconnect(playerid);
+		// M5 (stage 2) — kill any running safe-crack timer (§5.3-5.6).
+		Robbery_OnDisconnect(playerid);
 		// M4 (stage 3) — persist cooldowns (if logged in) + drop active-mission state.
 		Mission_OnDisconnect(playerid);
+		// M5 (stage 4) — release any kidnap link; a victim who quits still pays the
+		// ransom to the kidnapper (§4.4). Runs before Veh_OnDisconnect (order-agnostic).
+		Kidnap_OnDisconnect(playerid);
+		// M5 (stage 1) — drop this player's vehicle ownership marks + unlock their
+		// locked cars so nothing is left sealed against everyone (§9.12).
+		Veh_OnDisconnect(playerid);
+		// M5 (stage 3) — drop the inside-house session marker + buy-dialog target (§9.1).
+		House_OnDisconnect(playerid);
 
 	}
 	new szDisconnectReason[3][] =
@@ -576,6 +614,11 @@ public OnPlayerSpawn(playerid)
 	}
 	// M3 — spawn protection + re-apply wanted name/blip colour on (re)spawn (§2.1, §2.5).
 	if(!IsPlayerNPC(playerid)) Wanted_OnPlayerSpawn(playerid);
+	// M5 (stage 3) — spawn-at-house: clears the stale inside-house marker and, if the
+	// owner set a house spawn (and is not jailed/admin-jailed), places them inside
+	// their house instead of the city spawn (§9.1).
+	if(!IsPlayerNPC(playerid))
+		House_OnPlayerSpawn(playerid);
 	return 1;
 }
 
@@ -596,8 +639,14 @@ public OnPlayerDeath(playerid,killerid,reason)
 		Bank_OnPlayerDeath(playerid);
 		// M4 (stage 2) — a holdup in progress is aborted on death (§5.2).
 		Holdup_OnPlayerDeath(playerid);
+		// M5 (stage 2) — a safe-type robbery in progress is aborted on death. The
+		// crowbar is NOT confiscated on death — only a lawful arrest confiscates it,
+		// so being killed (by a cop or anyone) keeps the crowbar (§5.7 exception).
+		Robbery_OnPlayerDeath(playerid, killerid);
 		// M4 (stage 3) — an active mission is aborted on death (§6, clean up CP).
 		Mission_OnPlayerDeath(playerid);
+		// M5 (stage 4) — death on either side of a kidnap link releases the victim (§4.4).
+		Kidnap_OnPlayerDeath(playerid, killerid);
 		// Dying wipes the victim's wanted level (arrest/takedown/escape all reset here).
 		ClearPlayerWanted(playerid, "");
 		ZoneHideTD(playerid);
@@ -656,6 +705,16 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 		{
 			Mission_OnDialogResponse(playerid, response, listitem);
 		}
+		// M5 (stage 2) — /clotheswear crowbar buy confirm dialog (§5.7).
+		case CROWBAR_BUY_DIALOG:
+		{
+			Robbery_OnDialogResponse(playerid, dialogid, response, listitem, inputtext);
+		}
+		// M5 (stage 3) — house owner menu + buy confirm + storage input dialogs (§9.1).
+		case HOUSE_MENU_DIALOG, HOUSE_BUY_DIALOG, HOUSE_STORE_DIALOG, HOUSE_WITHDRAW_DIALOG:
+		{
+			House_OnDialogResponse(playerid, dialogid, response, listitem, inputtext);
+		}
 	}
 	return 0;
 }
@@ -688,6 +747,22 @@ public OnPlayerEnterRaceCheckpoint(playerid)
 	return 1;
 }
 
+// M5 (stage 2) — the safe-carry hideout is a standard SetPlayerCheckpoint; the
+// robbery module resolves the delivery here (§5.3/§5.6).
+public OnPlayerEnterCheckpoint(playerid)
+{
+	if(!IsPlayerNPC(playerid)) Robbery_OnPlayerEnterCheckpoint(playerid);
+	return 1;
+}
+
+// M5 (stage 2) — bank/casino/special robbery site checkpoints (Streamer dynamic
+// CPs). The module prints the "type /bankrob" hint; the command re-checks range.
+public OnPlayerEnterDynamicCP(playerid, STREAMER_TAG_CP:checkpointid)
+{
+	if(!IsPlayerNPC(playerid)) Robbery_OnEnterCP(playerid, checkpointid);
+	return 1;
+}
+
 public OnPlayerText(playerid,text[])
 {
 	if(!PlayerInfo[playerid][pLoggedIn] && PlayerInfo[playerid][pRegistered]) { SendClientMessage(playerid,COLOR_ERROR,"You need to login before using chatbox."); return 0; }
@@ -713,8 +788,16 @@ public OnPlayerText(playerid,text[])
 	return 1;	
 }
 
-public OnPlayerKeyStateChange(playerid, newkeys, oldkeys) 
+public OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
 {
+	// M5 (stage 4) — Airport Robbery box-collection: the MMB (sub-mission key,
+	// KEY_ACTION) grabs the nearest box on foot during the collect phase (§6.1). The
+	// /box command is the typed equivalent. No-op unless on the airport run.
+	if(!IsPlayerNPC(playerid) && (newkeys & KEY_ACTION) && !IsPlayerInAnyVehicle(playerid))
+	{
+		if(PlayerInfo[playerid][pOnMission] == MISSION_AIRPORT_ROBBERY && PlayerInfo[playerid][pAirportPhase] == AIRPHASE_COLLECT)
+			Mission_AirportCollectBox(playerid);
+	}
 	if(newkeys & KEY_FIRE)
 	{
 		if (PlayerInfo[playerid][pMenu] > 0 && !IsPlayerInAnyVehicle(playerid))
@@ -731,6 +814,9 @@ public OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
 	}
 	if(!IsPlayerInAnyVehicle(playerid) && (newkeys & KEY_YES))
 	{
+		// M5 (stage 3) — house enter/exit on the YES key (§9.1). If a house door was
+		// handled, skip the elevator checks so the same key press does not double-fire.
+		if(House_OnKeyEnter(playerid)) return 1;
 		Check_SAMP_Elevator(playerid);
 		Check_GRIN_Elevator(playerid);
 	}
@@ -741,12 +827,34 @@ public OnPlayerStateChange(playerid, newstate, oldstate)
 {
 	if(!IsPlayerNPC(playerid))
 	{
-		// M3 — vehicle-jack crime detection (driver-seat theft of an occupied vehicle, §2.3).
+		// M3 — vehicle-jack crime detection (driver-seat theft of an OCCUPIED vehicle,
+		// §2.3, WANTED_CARJACK +3). Runs first so an occupied jack is scored on the
+		// jack path; Veh_OnPlayerStateChange below then handles the UNOCCUPIED /
+		// parked-vehicle GTA path (§9.12) — the two are mutually exclusive.
 		Wanted_OnPlayerStateChange(playerid, newstate, oldstate);
+		// M5 (stage 1) — vehicle ownership / lock enforcement / grand-theft-auto of an
+		// unoccupied owned vehicle (§9.12). Ordered after the jack detector.
+		Veh_OnPlayerStateChange(playerid, newstate, oldstate);
 		// M4 (stage 3) — a vehicle mission auto-cancels when the driver leaves the
 		// bound mission vehicle (§6.17/§6.18 "auto-cancels if the vehicle is lost").
 		Mission_OnPlayerStateChange(playerid, newstate, oldstate);
 	}
+	return 1;
+}
+
+public OnVehicleSpawn(vehicleid)
+{
+	// M5 (stage 1) — a respawned vehicle is pristine again: clear its last driver +
+	// lock so it can be taken freely and nobody keeps stale ownership (§9.12).
+	Veh_OnVehicleReset(vehicleid);
+	return 1;
+}
+
+public OnVehicleDeath(vehicleid, killerid)
+{
+	// M5 (stage 1) — a destroyed vehicle loses its ownership + lock (§9.12).
+	Veh_OnVehicleReset(vehicleid);
+	#pragma unused killerid
 	return 1;
 }
 
@@ -806,6 +914,8 @@ public OnPlayerPickUpDynamicPickup(playerid, pickupid)
 	// M4 (stage 2) — money-bag grab + money-rush cash pickups (design §7).
 	Moneybag_OnPickup(playerid, pickupid);
 	Moneyrush_OnPickup(playerid, pickupid);
+	// M5 (stage 3) — house entrance pickup → for-sale / enter hint (§9.1).
+	House_OnPickup(playerid, pickupid);
 	return 1;
 }
 
@@ -932,6 +1042,9 @@ FUNCTION GameModeClock()
 			g_GameDayCounter++;
 			Bank_OnGameDay(g_GameDayCounter);
 			Tax_OnGameDay(g_GameDayCounter);
+			// M5 (stage 3) — house rent charge + 2-week inactivity decay on the same
+			// game-day rollover (NO new global timer, §3.2/§3.4).
+			House_OnGameDay();
 
 			if(GameDay == 7)
 			{
@@ -968,6 +1081,11 @@ FUNCTION GameModeClock()
 	// M4 (stage 3) — mission off-route / jailed guard on the same tick (§6, no new
 	// timer). Game-hour cooldowns need no tick — they read the clock on demand.
 	Mission_OnTick();
+	// M5 (stage 2) — robbery safe-carry 12-minute hideout deadline on the same tick
+	// (gettime()-deadline check, no new global timer for the window, §5.6).
+	Robbery_OnTick();
+	// M5 (stage 4) — kidnap hideout delivery + escape guard on the same tick (§4.4).
+	Kidnap_OnTick();
 
 	format(string, sizeof(string), "%s, %02d:%02d",WeekDays[GameDay],GameHour,GameMinute);
 

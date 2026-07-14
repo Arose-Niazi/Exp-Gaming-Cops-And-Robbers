@@ -81,6 +81,11 @@ CREATE TABLE IF NOT EXISTS `LSplayers` (
     -- per-mission last-completion GAME-HOUR stamp (g_GameDayCounter*24+GameHour),
     -- one value per registered mission, mirroring the SkinsSelected packing (§6).
     `MissionCooldowns` VARCHAR(128) NOT NULL DEFAULT '',     -- '|'-delimited game-hour completion stamps, one per mission
+    -- M5 (stage 2): robbery system + crowbar (design §5.7/§5.8/§11.2)
+    `CrowbarEquipped` TINYINT(1)    NOT NULL DEFAULT 0,      -- crowbar clothing item equipped (§5.7 — shortens robbery time + raises register take)
+    `RobberyHistory`  INT           NOT NULL DEFAULT 0,      -- bitmask ROB_HOLDUP|ROB_BANK|ROB_CASINO|ROB_HOUSE|ROB_SPECIAL — drives crowbar confiscation on arrest
+    -- M5 (stage 3): housing system (design §9.1/§11.3)
+    `HouseSpawnID`    INT           NOT NULL DEFAULT -1,     -- houses.ID this player spawns at (/sethousespawn), -1 = default city spawn
     PRIMARY KEY (`aID`),
     CONSTRAINT `fk_LSplayers_aID` FOREIGN KEY (`aID`)
         REFERENCES `players` (`aID`) ON DELETE CASCADE
@@ -121,6 +126,14 @@ CREATE TABLE IF NOT EXISTS `LSplayers` (
 -- column holding a game-hour completion stamp per registered mission:
 --   ALTER TABLE `LSplayers`
 --     ADD `MissionCooldowns` VARCHAR(128) NOT NULL DEFAULT '';
+-- M5 (stage 2) robbery system + crowbar columns (design §5.7/§5.8/§11.2):
+--   ALTER TABLE `LSplayers`
+--     ADD `CrowbarEquipped` TINYINT(1) NOT NULL DEFAULT 0,
+--     ADD `RobberyHistory`  INT        NOT NULL DEFAULT 0;
+-- M5 (stage 3) housing spawn-point column (design §9.1/§11.3) — the houses.ID
+-- the player spawns at (/sethousespawn), -1 = default city spawn:
+--   ALTER TABLE `LSplayers`
+--     ADD `HouseSpawnID` INT NOT NULL DEFAULT -1;
 -- (repeat for SFplayers/LVplayers when those cities go live).
 
 -- Per-city persistent vehicles (Los Santos)
@@ -139,6 +152,36 @@ CREATE TABLE IF NOT EXISTS `LSvehicles` (
     PRIMARY KEY (`ID`)
 ) ENGINE=InnoDB;
 
+-- Player-owned houses (M5 stage 3 — design §9.1/§11.3). One row per house; the
+-- entrance (X/Y/Z) carries a pickup + label + map icon, the interior teleports
+-- into a per-house VirtualWorld. OwnerAID = players.aID (0/-1 = unowned). Money +
+-- a simple item count are stored here; the house robbery MOVES StorageMoney into
+-- the robber's hand (no minting). LastVisited drives the 2-week inactivity decay.
+CREATE TABLE IF NOT EXISTS `houses` (
+    `ID`           INT        NOT NULL AUTO_INCREMENT,
+    `OwnerAID`     INT        NOT NULL DEFAULT 0,           -- players.aID of the owner (0 = unowned / for sale)
+    `Price`        INT        NOT NULL DEFAULT 250000,      -- current market price (bumps on each sale)
+    `X`            FLOAT      NOT NULL DEFAULT 0,            -- entrance world position
+    `Y`            FLOAT      NOT NULL DEFAULT 0,
+    `Z`            FLOAT      NOT NULL DEFAULT 0,
+    `Interior`     INT        NOT NULL DEFAULT 0,           -- SA-MP interior id of the inside
+    `VirtualWorld` INT        NOT NULL DEFAULT 0,           -- assigned per-house VW (HOUSE_VW_BASE + index at load)
+    `IntX`         FLOAT      NOT NULL DEFAULT 0,           -- interior spawn position (inside)
+    `IntY`         FLOAT      NOT NULL DEFAULT 0,
+    `IntZ`         FLOAT      NOT NULL DEFAULT 0,
+    `ForSale`      TINYINT(1) NOT NULL DEFAULT 1,           -- 1 = purchasable (unowned or owner-listed)
+    `Rent`         INT        NOT NULL DEFAULT 0,           -- per-game-day rent set by the owner (0 = not for rent)
+    `RenterAID`    INT        NOT NULL DEFAULT 0,           -- players.aID of the current tenant (0 = none) [M5 minimal single-renter]
+    `SuperLock`    TINYINT(1) NOT NULL DEFAULT 0,           -- super-lock upgrade fitted (harder to rob, §5.5)
+    `Locked`       TINYINT(1) NOT NULL DEFAULT 0,           -- owner-set house lock (blocks entry, distinct from vehicle lock, §7)
+    `HasPet`       TINYINT(1) NOT NULL DEFAULT 0,           -- a house pet defends against break-ins (§5.5)
+    `StorageMoney` INT        NOT NULL DEFAULT 0,           -- money stored in the house (dodges wealth tax; lootable in a rob)
+    `StorageItems` INT        NOT NULL DEFAULT 0,           -- simple stored-item count [M5 minimal; full item stash lands M6]
+    `StorageJSON`  TEXT       NULL,                         -- reserved for the full per-item stash (M6, §5.5)
+    `LastVisited`  DATETIME   NULL DEFAULT NULL,            -- last time the owner visited (2-week inactivity decay, §3.2)
+    PRIMARY KEY (`ID`)
+) ENGINE=InnoDB;
+
 -- Server-wide statistics (keyed by STATS_VERSION)
 CREATE TABLE IF NOT EXISTS `server_data` (
     `Version`        INT NOT NULL,
@@ -146,14 +189,25 @@ CREATE TABLE IF NOT EXISTS `server_data` (
     `Times_GPSUsed`  INT NOT NULL DEFAULT 0,
     -- M4 (stage 2): accumulating lotto jackpot (design §9.5/§11.4)
     `LottoJackpot`   INT NOT NULL DEFAULT 1000000,
+    -- M5 (stage 2): per-branch bank-robbery cooldown (design §5.3/§5.8/§11.4) —
+    -- the datetime of the last successful rob on each city branch; the branch is
+    -- "closed" until BankRobLast* + the cooldown window. NULL = never robbed.
+    `BankRobLastLS`  DATETIME NULL DEFAULT NULL,
+    `BankRobLastSF`  DATETIME NULL DEFAULT NULL,
+    `BankRobLastLV`  DATETIME NULL DEFAULT NULL,
     PRIMARY KEY (`Version`)
 ) ENGINE=InnoDB;
 
 -- Migration note (existing databases): the M4 (stage 2) lotto jackpot column
--- (design §11.4). The full §11.4 block also plans PrimeRate + per-branch bank
--- robbery cooldowns; those land with the M5 robbery system.
+-- (design §11.4).
 --   ALTER TABLE `server_data`
 --     ADD `LottoJackpot` INT NOT NULL DEFAULT 1000000;
+-- M5 (stage 2) per-branch bank-robbery cooldown columns (design §5.3/§5.8/§11.4).
+-- Read as unix seconds via UNIX_TIMESTAMP() and written via FROM_UNIXTIME():
+--   ALTER TABLE `server_data`
+--     ADD `BankRobLastLS` DATETIME NULL DEFAULT NULL,
+--     ADD `BankRobLastSF` DATETIME NULL DEFAULT NULL,
+--     ADD `BankRobLastLV` DATETIME NULL DEFAULT NULL;
 
 -- Streamed interiors / teleports (admin-built via /addinterior)
 CREATE TABLE IF NOT EXISTS `Interiors` (

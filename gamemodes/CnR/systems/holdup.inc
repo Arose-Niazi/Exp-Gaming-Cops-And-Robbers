@@ -60,7 +60,9 @@ static bool:Holdup_IsStoreActorType(type)
 
 // Find the nearest robbable store-clerk actor to the player (same interior/VW,
 // within HOLDUP_ACTOR_RANGE). Returns the ActorInfo slot index, or -1 if none.
-static Holdup_NearestStore(playerid)
+// NOTE (M5): no longer static — the M5 robbery module (/shoplift, robbery.inc)
+// reuses this store-clerk proximity gate.
+Holdup_NearestStore(playerid)
 {
 	new Float:x, Float:y, Float:z;
 	GetPlayerPos(playerid, x, y, z);
@@ -127,28 +129,37 @@ FUNCTION Holdup_Tick(playerid)
 
 	PlayerInfo[playerid][pHoldupStage]++;
 
+	// M5 (§5.7) — a crowbar shortens the clerk wait by a couple of seconds AND
+	// raises the per-second register take. Holdup_CrowbarEquipped lives in
+	// robbery.inc (which owns the crowbar item); it is included after this module
+	// but the FUNCTION public is resolvable via CallLocalFunction at call time.
+	new bool:crowbar = (CallLocalFunction("Holdup_CrowbarEquipped", "d", playerid) != 0);
+	new clerkWait = HOLDUP_CLERK_WAIT;
+	if(crowbar) clerkWait -= CROWBAR_WAIT_REDUCTION;
+	if(clerkWait < 3) clerkWait = 3;
+
 	// Clerk still opening the register (stage <= wait seconds).
-	if(PlayerInfo[playerid][pHoldupStage] < HOLDUP_CLERK_WAIT)
+	if(PlayerInfo[playerid][pHoldupStage] < clerkWait)
 	{
-		new left = HOLDUP_CLERK_WAIT - PlayerInfo[playerid][pHoldupStage];
+		new left = clerkWait - PlayerInfo[playerid][pHoldupStage];
 		new gt[48];
 		format(gt, sizeof(gt), "~r~HOLDUP~n~~w~clerk opening register... %d", left);
 		GameTextForPlayer(playerid, gt, 1200, 5);
 		return 1;
 	}
 
-	// Register open — pay a random per-second amount for HOLDUP_PAYOUT_SECS.
-	new payingSecond = PlayerInfo[playerid][pHoldupStage] - HOLDUP_CLERK_WAIT + 1;	// 1..PAYOUT_SECS
-	new take = HOLDUP_RATE_MIN + random(HOLDUP_RATE_MAX - HOLDUP_RATE_MIN + 1);
+	// Register open — pay a random per-second amount for HOLDUP_PAYOUT_SECS. A
+	// crowbar raises the rate band (§5.7 higher register take).
+	new payingSecond = PlayerInfo[playerid][pHoldupStage] - clerkWait + 1;	// 1..PAYOUT_SECS
+	new rateMin = crowbar ? CROWBAR_RATE_MIN : HOLDUP_RATE_MIN;
+	new rateMax = crowbar ? CROWBAR_RATE_MAX : HOLDUP_RATE_MAX;
+	new take = rateMin + random(rateMax - rateMin + 1);
 	Bank_GiveCash(playerid, take);
 	if(PlayerInfo[playerid][pHoldupTake] <= MAX_MONEY - take) PlayerInfo[playerid][pHoldupTake] += take;
 
 	new msg[128];
 	format(msg, sizeof(msg), ""COL_GREEN"* Register: "COL_WHITE"+$%d"COL_GREEN" (total $%d)."COL_WHITE, take, PlayerInfo[playerid][pHoldupTake]);
 	SendClientMessage(playerid, COLOR_SERVER_INFO, msg);
-
-	// TODO(M5): a crowbar raises the per-second payout (§5.7 HIGH_REGISTER_RATE)
-	// and cuts the clerk wait; the cop mid-holdup interrupt/arrest also lands M5.
 
 	if(payingSecond >= HOLDUP_PAYOUT_SECS)
 	{
@@ -178,6 +189,18 @@ FUNCTION Holdup_OnDisconnect(playerid)
 		PlayerInfo[playerid][pHoldupTimer] = -1;
 	}
 	PlayerInfo[playerid][pHoldingUp] = false;
+	return 1;
+}
+
+// M5 (§5.2) — a cop mid-holdup interrupt ends the holdup with nothing (the
+// robbery.inc /stoprobbery command calls this for a nearby robber). Also called
+// if the robber is shot while holding up (Holdup_OnPlayerDeath already aborts on
+// death). The robber keeps whatever the register already paid — it's cash at risk.
+FUNCTION Holdup_CopInterrupt(playerid)
+{
+	if(!PlayerInfo[playerid][pHoldingUp]) return 0;
+	SendClientMessage(playerid, COLOR_ERROR, ""COL_RED"* The police interrupted your holdup!"COL_WHITE);
+	Holdup_End(playerid, false);
 	return 1;
 }
 
@@ -219,6 +242,9 @@ CMD:holdup(playerid, params[])
 
 	// Instantly +7 wanted (Felon — into Warrant range). §5.2 VERIFIED.
 	GivePlayerWanted(playerid, HOLDUP_WANTED, "Store holdup");
+	// M5 (§5.7) — record a holdup on the robbery history so the crowbar is
+	// confiscated on a later arrest (robbery.inc owns the bitmask + persistence).
+	CallLocalFunction("Robbery_MarkHoldupHistory", "d", playerid);
 
 	if(PlayerInfo[playerid][pHoldupTimer] != -1) KillTimer(PlayerInfo[playerid][pHoldupTimer]);
 	PlayerInfo[playerid][pHoldupTimer] = SetTimerEx("Holdup_Tick", 1000, true, "d", playerid);

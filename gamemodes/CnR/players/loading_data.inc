@@ -100,6 +100,16 @@ FUNCTION LoadUserData(playerid)
 	// all rows (online + offline) by the bulk UPDATE in Lotto_Draw(); loading a
 	// non-zero value here means the draw has not yet run this game-day.
 	cache_get_value_int(0, "LottoNumber",PlayerInfo[playerid][pLottoNumber]);
+	// M5 (stage 2) — crowbar equip flag + robbery-history bitmask (§5.7). Persisted
+	// so an equipped crowbar survives relogs and the confiscation flag is durable.
+	cache_get_value_bool(0, "CrowbarEquipped",PlayerInfo[playerid][pCrowbarEquipped]);
+	cache_get_value_int(0, "RobberyHistory",PlayerInfo[playerid][pRobberyHistory]);
+	// M5 (stage 3) — the houses.ID this player spawns at (/sethousespawn, §9.1). -1 =
+	// default city spawn. House_OnPlayerLogin resolves it to a house index + tallies
+	// how many houses this account owns (own-cap enforcement). housing.inc is
+	// included after this module, so it is reached via CallLocalFunction.
+	cache_get_value_int(0, "HouseSpawnID",PlayerInfo[playerid][pHouseSpawn]);
+	CallLocalFunction("House_OnPlayerLogin", "d", playerid);
 	// M4 (stage 3) — mission cooldowns: one packed '|'-delimited column of per-mission
 	// game-hour completion stamps (§6). Parse into the per-mission stamp array.
 	new missionCd[128];

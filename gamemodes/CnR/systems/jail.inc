@@ -105,14 +105,15 @@ static Jail_Place(playerid)
 FUNCTION Jail_SavePlayer(playerid)
 {
 	if(!PlayerInfo[playerid][pLoggedIn]) return 0;
-	new string[448];	// headroom for Money/Bank/Tax + RefillPoints + LottoNumber + a 64-char (escaped) JailReason
+	new string[544];	// headroom for Money/Bank/Tax + RefillPoints + LottoNumber + Crowbar/RobHistory + HouseSpawnID + a 64-char (escaped) JailReason
 	mysql_format(g_SQL, string, sizeof(string),
-		"UPDATE "TABLE_PLAYERS_C" SET Money=%d, BankMoney=%d, TaxOwed=%d, LifeInsurance=%d, HealthInsExpiry=%d, Score=%d, CopRank=%d, RefillPoints=%d, SeriousCrimes=%d, Jailed=%d, JailUntil=%d, Bail=%d, JailReason='%e', EscapeChained=%d, LottoNumber=%d WHERE aID=%d LIMIT 1",
+		"UPDATE "TABLE_PLAYERS_C" SET Money=%d, BankMoney=%d, TaxOwed=%d, LifeInsurance=%d, HealthInsExpiry=%d, Score=%d, CopRank=%d, RefillPoints=%d, SeriousCrimes=%d, Jailed=%d, JailUntil=%d, Bail=%d, JailReason='%e', EscapeChained=%d, LottoNumber=%d, CrowbarEquipped=%d, RobberyHistory=%d, HouseSpawnID=%d WHERE aID=%d LIMIT 1",
 		PlayerInfo[playerid][pMoney],
 		PlayerInfo[playerid][pBankMoney], PlayerInfo[playerid][pTaxOwed], PlayerInfo[playerid][pLifeInsurance], PlayerInfo[playerid][pHealthInsExpiry],
 		PlayerInfo[playerid][pScore], PlayerInfo[playerid][pCopRank], PlayerInfo[playerid][pRefillPoints], PlayerInfo[playerid][pSeriousCrimes],
 		PlayerInfo[playerid][pJailed] ? 1 : 0, PlayerInfo[playerid][pJailUntil], PlayerInfo[playerid][pJailBail],
-		PlayerInfo[playerid][pJailReason], PlayerInfo[playerid][pEscapeChained] ? 1 : 0, PlayerInfo[playerid][pLottoNumber], PlayerInfo[playerid][pID]);
+		PlayerInfo[playerid][pJailReason], PlayerInfo[playerid][pEscapeChained] ? 1 : 0, PlayerInfo[playerid][pLottoNumber],
+		PlayerInfo[playerid][pCrowbarEquipped] ? 1 : 0, PlayerInfo[playerid][pRobberyHistory], PlayerInfo[playerid][pHouseSpawn], PlayerInfo[playerid][pID]);
 	mysql_pquery(g_SQL, string);
 	return 1;
 }
@@ -176,7 +177,15 @@ FUNCTION Jail_SendToJail(suspectid, wantedAtArrest, const reason[], serious)
 
 	Jail_Place(suspectid);
 	Jail_ArmTimer(suspectid);
-	Jail_SavePlayer(suspectid);
+	// M5 (stage 2) — arrest confiscates the crowbar if the suspect's RobberyHistory
+	// carries a robbery flag (§5.7). This is the ARREST path — it always confiscates
+	// (the "killed by a cop keeps the crowbar" exception lives in the death path).
+	// robbery.inc is included after jail.inc, so reach it via CallLocalFunction; it
+	// aborts any running safe-crack, clears the flag, and calls Jail_SavePlayer.
+	CallLocalFunction("Robbery_OnArrest", "d", suspectid);
+	// M5 (stage 4) — a jailed kidnapper releases any victim they were holding (§4.4).
+	// kidnap.inc is included after jail.inc, so reach it via CallLocalFunction.
+	CallLocalFunction("Kidnap_OnArrest", "d", suspectid);
 
 	new string[144];
 	format(string, sizeof(string), ""COL_RED"* You have been jailed: %s. "COL_WHITE"Sentence "COL_YELLOW"%d:%02d"COL_WHITE", bail "COL_GREEN"$%d"COL_WHITE".", PlayerInfo[suspectid][pJailReason], secs / 60, secs % 60, PlayerInfo[suspectid][pJailBail]);
