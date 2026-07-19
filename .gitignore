@@ -15,3 +15,6 @@ log.txt
 # Runtime state
 saves/*
 !saves/.gitkeep
+
+# House/vehicle research scratch (raw third-party dumps + cloned data)
+scriptfiles/_house_research/

@@ -557,7 +557,7 @@ enum
 //  house robbery MOVES house-storage money into the robber's hand (no mint).
 // ============================================================================
 
-#define MAX_HOUSES				512			// hard array bound (DB `houses` rows loaded on init)
+#define MAX_HOUSES				900			// hard array bound (DB `houses` rows loaded on init; 621 seeded LS+countryside)
 #define MAX_OWNED_HOUSES		2			// own-cap (§9.1 VERIFIED — own 2 / co-own 8 / rent 10)
 #define HOUSE_ENTER_RANGE		2.5			// on-foot reach at an entrance pickup for /enter//buyhouse (§9.1)
 #define HOUSE_PICKUP_MODEL		1273		// green house pickup at the entrance (money-house icon)

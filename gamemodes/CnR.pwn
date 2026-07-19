@@ -362,9 +362,9 @@ public OnGameModeInit()
 	mysql_format(g_SQL,string,sizeof(string),"SELECT *, UNIX_TIMESTAMP(BankRobLastLS) AS BankRobUnixLS, UNIX_TIMESTAMP(BankRobLastSF) AS BankRobUnixSF, UNIX_TIMESTAMP(BankRobLastLV) AS BankRobUnixLV FROM `server_data` WHERE Version=%d",STATS_VERSION);
 	mysql_pquery(g_SQL, string, "OnServerDataLoad","");
 	
-	DaysOfWeek= TextDrawCreate(505.000000, 5.083323, WeekDays[GameDay]);
+	DaysOfWeek= TextDrawCreate(470.000000, 5.083323, WeekDays[GameDay]);
 	TextDrawLetterSize(DaysOfWeek, 0.418272, 1.705000);
-	TextDrawAlignment(DaysOfWeek, 1);
+	TextDrawAlignment(DaysOfWeek, 2);
 	TextDrawColor(DaysOfWeek, -1);
 	TextDrawSetShadow(DaysOfWeek, 1);
 	TextDrawSetOutline(DaysOfWeek, 0);
@@ -439,9 +439,11 @@ public OnPlayerConnect(playerid)
 {
 	new string[75];
 	ClearPlayerVariables(playerid);
-	// Built-in HUD clock disabled - it overlapped the DaysOfWeek textdraw, which
-	// now shows the weekday + time together in the top-right (see GameModeClock).
-	TogglePlayerClock(playerid,false);
+	// Native HUD clock ON: the client auto-advances world time between server
+	// syncs, giving smooth dawn/dusk lighting + weather transitions. We only push
+	// the exact time on spawn and once per game-hour (drift correction), not every
+	// tick. The DaysOfWeek textdraw shows just the weekday, left of the clock.
+	TogglePlayerClock(playerid,true);
 	if(!IsPlayerNPC(playerid))
 	{
 		TogglePlayerSpectating(playerid, true);
@@ -638,6 +640,9 @@ public OnPlayerSpawn(playerid)
 	SetPlayerInterior(playerid,0);
 	SetPlayerVirtualWorld(playerid,0);
 	SetCameraBehindPlayer(playerid);
+	// Seed the world time once on spawn; the native clock auto-advances it from
+	// here, and GameModeClock re-syncs everyone each game-hour (drift correction).
+	SetPlayerTime(playerid, GameHour, GameMinute);
 	if(PlayerInfo[playerid][pClassSelection])
 	{
 		HidePlayerClassTD(playerid);
@@ -1207,17 +1212,13 @@ FUNCTION GameModeClock()
 			format(string, sizeof(string), "%s",WeekDays[GameDay]);
 			TextDrawSetString(DaysOfWeek, string);
 		}
-	}
 
-	// Weekday + time in one top-right HUD textdraw (the built-in clock is off - it
-	// overlapped this). Refreshed every tick so the minutes advance.
-	format(string, sizeof(string), "%s %02d:%02d", WeekDays[GameDay], GameHour, GameMinute);
-	TextDrawSetString(DaysOfWeek, string);
-
-	for(new playerid=0; playerid < MAX_PLAYERS; playerid++)
-	{
-		if(!IsPlayerConnected(playerid)) continue;
-		SetPlayerTime(playerid, GameHour, GameMinute);
+		// Drift-correct every player's world time once per game-hour. The native
+		// HUD clock auto-advances the minutes smoothly between these syncs (that is
+		// what keeps the dawn/dusk lighting + weather transitions smooth); new
+		// joiners are seeded in OnPlayerSpawn. /atime re-syncs everyone itself.
+		for(new i = 0; i < MAX_PLAYERS; i++)
+			if(IsPlayerConnected(i)) SetPlayerTime(i, GameHour, GameMinute);
 	}
 
 	// M3 - wanted-level decay runs on this 1-second tick (no new global timer, §2.4).
