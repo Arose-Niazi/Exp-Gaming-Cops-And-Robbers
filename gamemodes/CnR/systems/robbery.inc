@@ -164,6 +164,19 @@ FUNCTION Robbery_MarkHoldupHistory(playerid)
 	return 1;
 }
 
+// Stage A (FEATURE-EXPANSION-PLAN §1.5) - the shared success incrementer. Every
+// robbery success/reward path calls this exactly once: climb the grind counter
+// (which raises the Rob_SuccessChance curve for future robberies) and persist via
+// the shared LSplayers UPDATE (no competing query). Modules included before this
+// one (crime.inc /rob, holdup.inc Holdup_End) reach it via CallLocalFunction; the
+// robbery.inc success sites (safe delivery, /shoplift) and housing.inc call it too.
+FUNCTION Rob_RecordSuccess(playerid)
+{
+	PlayerInfo[playerid][pSuccessfulRobberies]++;
+	Jail_SavePlayer(playerid);	// shared LSplayers UPDATE (no competing query)
+	return 1;
+}
+
 // The shared crime gate (mirrors holdup.inc): cop/jailed/spawn-protected/DM-zone
 // all block a robbery. Returns 1 if BLOCKED (and messages the player), 0 if clear.
 static Robbery_CrimeGateBlocked(playerid)
@@ -177,17 +190,13 @@ static Robbery_CrimeGateBlocked(playerid)
 }
 
 // Alert all cops (radar-range heads-up mirrors the holdup announce). §5 alarm.
-static Robbery_AlertCops(playerid, const what[])
+// Stage B (§3.2) - this now delegates to the central Dispatch_Alert (dispatch.inc,
+// included before this module) so the robbery alarm is one high-signal [DISPATCH]
+// event feed. Callers pass a 10-code + short text; the zone/origin is derived from
+// the robber. Kept as a thin wrapper so the existing call sites don't change shape.
+static Robbery_AlertCops(playerid, priority, const code[], const what[])
 {
-	new string[160], zoneName[MAX_ZONE_NAME];
-	if(isNull(PlayerInfo[playerid][pZoneName])) format(zoneName, sizeof(zoneName), "the city");
-	else format(zoneName, sizeof(zoneName), "%s", PlayerInfo[playerid][pZoneName]);
-	format(string, sizeof(string), ""COL_ORANGE"[ROBBERY] "COL_WHITE"%s (%d) - %s near %s! Respond!", PlayerInfo[playerid][pUserName], playerid, what, zoneName);
-	for(new i = 0; i < MAX_PLAYERS; i++)
-	{
-		if(!IsPlayerConnected(i) || IsPlayerNPC(i) || i == playerid) continue;
-		if(IsCop(i)) SendClientMessage(i, COLOR_WANTED_ORANGE, string);
-	}
+	Dispatch_Alert(playerid, priority, code, what, DISPATCH_ALL);
 }
 
 //==============================================================================
@@ -308,7 +317,10 @@ static Robbery_BeginCarry(playerid)
 	new msg[160];
 	format(msg, sizeof(msg), ""COL_GREEN"* Safe cracked! "COL_WHITE"Get the safe to the marked hideout within "COL_YELLOW"%d minutes"COL_WHITE" - the cops are on you!", mins);
 	SendClientMessage(playerid, COLOR_SERVER_INFO, msg);
-	Robbery_AlertCops(playerid, "is fleeing with a cracked safe");
+	// Stage B (§3.2) - carrying the safe fires a 10-99 (Wanted/Stolen) dispatch.
+	new carrytext[128];
+	format(carrytext, sizeof(carrytext), "Suspect carrying stolen safe - %s (%d)", PlayerInfo[playerid][pUserName], playerid);
+	Robbery_AlertCops(playerid, DISPATCH_HIGH, "10-99", carrytext);
 }
 
 // Per-second crack countdown (pRobTimer). When it lapses, move to carry phase.
@@ -330,11 +342,19 @@ FUNCTION Robbery_CrackTick(playerid)
 	if(PlayerInfo[playerid][pRobCrackLeft] <= 0)
 	{
 		if(PlayerInfo[playerid][pRobTimer] != -1) { KillTimer(PlayerInfo[playerid][pRobTimer]); PlayerInfo[playerid][pRobTimer] = -1; }
-		// Success roll (§5.7 - a crowbar RAISES the chance of a successful crack).
-		// Base ROB_CRACK_BASE_SUCCESS%, +CROWBAR_SUCCESS_BONUS% with a crowbar.
-		new chance = ROB_CRACK_BASE_SUCCESS + (PlayerInfo[playerid][pCrowbarEquipped] ? CROWBAR_SUCCESS_BONUS : 0);
+		// Success roll. Stage A (FEATURE-EXPANSION-PLAN §1.3): the base is now the
+		// Rob_SuccessChance grind curve (base 45 -> cap 90, driven by SuccessfulRobberies)
+		// instead of the flat ROB_CRACK_BASE_SUCCESS; the crowbar bonus (§5.7) still
+		// stacks additively on top, final clamped to 97 so nothing is a guaranteed crack.
+		new chance = Rob_SuccessChance(45, 90, PlayerInfo[playerid][pSuccessfulRobberies]);
+		if(PlayerInfo[playerid][pCrowbarEquipped]) chance += CROWBAR_SUCCESS_BONUS;
+		if(chance > 97) chance = 97;
 		if(random(100) >= chance)
 		{
+			// Stage A (§1.4): a failed crack counts toward FailedRobberies (the
+			// start-of-crack WL6 wanted is punishment enough - no extra penalty).
+			PlayerInfo[playerid][pFailedRobberies]++;
+			Jail_SavePlayer(playerid);
 			Robbery_Abort(playerid, true, "the safe jammed - the crack failed. Try again.");
 			return 1;
 		}
@@ -375,7 +395,18 @@ static Robbery_StartCrack(playerid, s)
 	new msg[176];
 	format(msg, sizeof(msg), ""COL_RED"* ROBBERY! "COL_WHITE"Cracking the %s safe - hold position for "COL_YELLOW"~%d seconds"COL_WHITE".%s", g_RobSites[s][rsName], secs, PlayerInfo[playerid][pCrowbarEquipped] ? " (crowbar: faster)" : "");
 	SendClientMessage(playerid, COLOR_SERVER_INFO, msg);
-	Robbery_AlertCops(playerid, "is cracking a safe");
+
+	// Stage B (§3.2) - the safe-crack start fires a kind-specific dispatch: bank
+	// 10-132 (Bank Robbery), casino 10-131 (Casino Robbery), special 10-17 (Robbery).
+	new dcode[8], dtext[128];
+	switch(g_RobSites[s][rsKind])
+	{
+		case ROBKIND_BANK:   format(dcode, sizeof(dcode), "10-132");
+		case ROBKIND_CASINO: format(dcode, sizeof(dcode), "10-131");
+		default:             format(dcode, sizeof(dcode), "10-17");
+	}
+	format(dtext, sizeof(dtext), "%s - %s (%d)", g_RobSites[s][rsName], PlayerInfo[playerid][pUserName], playerid);
+	Robbery_AlertCops(playerid, DISPATCH_HIGH, dcode, dtext);
 }
 
 //==============================================================================
@@ -482,6 +513,7 @@ static Robbery_Deliver(playerid)
 	DisablePlayerCheckpoint(playerid);
 	PlayerInfo[playerid][pScore] += 1;	// each completed robbery = +1 score (§5)
 	Robbery_FlagHistory(playerid, histFlag);
+	Rob_RecordSuccess(playerid);		// Stage A (§1.5): safe delivered - climb the grind counter + persist
 
 	new msg[176];
 	if(take > 0) format(msg, sizeof(msg), ""COL_GREEN"* Robbery complete! "COL_WHITE"You cracked the safe for "COL_GREEN"$%d"COL_WHITE". +1 score. Lie low!", take);
@@ -662,6 +694,20 @@ CMD:shoplift(playerid, params[])
 	if(Holdup_NearestStore(playerid) == -1)
 		return SendClientMessage(playerid, COLOR_ERROR, "You must be standing at a store clerk (24-7, food shop, clothes store, ...) to shoplift.");
 
+	// Stage A (FEATURE-EXPANSION-PLAN §1.3): an entry success roll the shoplift
+	// previously lacked - base 65 -> cap 95 on the grind curve. On a FAIL there is
+	// no cash, the +2 shoplift wanted still applies (you were spotted), and only a
+	// shorter SHOPLIFT_FAIL_CD retry cooldown is set (a grind-tax, not a lockout).
+	if(random(100) >= Rob_SuccessChance(65, 95, PlayerInfo[playerid][pSuccessfulRobberies]))
+	{
+		PlayerInfo[playerid][pShopliftCooldown] = gettime() + SHOPLIFT_FAIL_CD;
+		GivePlayerWanted(playerid, SHOPLIFT_WANTED, "Attempted shoplifting");	// +2 (suppressed in safe zones)
+		PlayerInfo[playerid][pFailedRobberies]++;
+		Jail_SavePlayer(playerid);
+		SendClientMessage(playerid, COLOR_ERROR, ""COL_RED"* Shoplift failed! "COL_WHITE"The clerk spotted you - you got nothing and slipped out empty-handed.");
+		return 1;
+	}
+
 	PlayerInfo[playerid][pShopliftCooldown] = gettime() + SHOPLIFT_CD;
 
 	// Low-risk: small chance of getting caught (a bump to wanted); otherwise a
@@ -670,6 +716,7 @@ CMD:shoplift(playerid, params[])
 	Bank_GiveCash(playerid, loot);
 	GivePlayerWanted(playerid, SHOPLIFT_WANTED, "Shoplifting");	// +2 (suppressed in safe zones)
 	Robbery_FlagHistory(playerid, ROB_HOLDUP);	// petty theft counts toward the crowbar rule
+	Rob_RecordSuccess(playerid);	// Stage A (§1.5): successful shoplift - climb the grind counter + persist
 
 	new msg[144];
 	format(msg, sizeof(msg), ""COL_GREEN"* Shoplifted! "COL_WHITE"You pocketed an item worth "COL_GREEN"$%d"COL_WHITE" and slipped out.", loot);
@@ -805,6 +852,10 @@ CMD:houserob(playerid, params[])
 	PlayerInfo[playerid][pHouseRobCooldown] = gettime() + HOUSEROB_CD;
 	GivePlayerWanted(playerid, HOUSEROB_WANTED, "House robbery");	// +6 warrant (§5.5)
 	Robbery_FlagHistory(playerid, ROB_HOUSE);						// crowbar-confiscation + record (§5.7/§5.8)
+	// Stage B (§3.2) - a house robbery fires a 10-17 (Robbery) dispatch, server-wide.
+	new hdtext[128];
+	format(hdtext, sizeof(hdtext), "House break-in - %s (%d)", PlayerInfo[playerid][pUserName], playerid);
+	Robbery_AlertCops(playerid, DISPATCH_NORMAL, "10-17", hdtext);
 	House_RobSteal(playerid, house);								// steal (money moves, no mint) or get foiled
 	return 1;
 }

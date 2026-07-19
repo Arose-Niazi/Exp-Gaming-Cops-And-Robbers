@@ -116,15 +116,19 @@ static Crime_RobCapFor(playerid)
 }
 
 // Rob success chance % for a player's skill tier (§4.1 - Pickpocket very high,
-// Con Artist moderate, everyone else the base rate).
+// Con Artist moderate, everyone else the base rate). Stage A (FEATURE-EXPANSION-PLAN
+// §1.3) replaces the flat rates with the diminishing-returns grind curve
+// Rob_SuccessChance(base,cap,n) driven by pSuccessfulRobberies - you fail more
+// often early and grind toward the per-skill cap over hundreds of robberies.
 static Crime_RobSuccessFor(playerid)
 {
+	new n = PlayerInfo[playerid][pSuccessfulRobberies];
 	switch(PlayerInfo[playerid][pSkill])
 	{
-		case SKILL_PICKPOCKET: return 90;	// "very high success"
-		case SKILL_CONARTIST:  return 60;	// "moderate success"
+		case SKILL_PICKPOCKET: return Rob_SuccessChance(65, 95, n);	// base 65 -> cap 95
+		case SKILL_CONARTIST:  return Rob_SuccessChance(45, 88, n);	// base 45 -> cap 88
 	}
-	return 70;								// base
+	return Rob_SuccessChance(55, 90, n);							// base 55 -> cap 90
 }
 
 //==============================================================================
@@ -186,6 +190,10 @@ CMD:rob(playerid, params[])
 		SendClientMessage(playerid, COLOR_ERROR, ""COL_RED"* The robbery failed! "COL_WHITE"They shrugged you off and you got nothing.");
 		SendClientMessage(targetid, COLOR_WANTED_YELLOW, ""COL_YELLOW"* Someone just tried to rob you "COL_WHITE"but you fought them off.");
 		GivePlayerWanted(playerid, ROB_WANTED, "Attempted robbery");
+		// Stage A (§1.4): a failed rob-type crime counts toward FailedRobberies
+		// telemetry and persists immediately (the ROB_CD retry cooldown already ran).
+		PlayerInfo[playerid][pFailedRobberies]++;
+		Jail_SavePlayer(playerid);
 		return 1;
 	}
 
@@ -202,6 +210,9 @@ CMD:rob(playerid, params[])
 	PlayerInfo[playerid][pMoney] += amount;
 	UpdateMoney(playerid);
 	PlayerInfo[playerid][pScore] += ROB_SCORE;
+	// Stage A (§1.5): a successful rob climbs the grind counter + persists. Rob_RecordSuccess
+	// lives in robbery.inc (included after this module) - reach it via CallLocalFunction.
+	CallLocalFunction("Rob_RecordSuccess", "d", playerid);
 
 	new string[144];
 	format(string, sizeof(string), ""COL_GREEN"* Robbery: "COL_WHITE"you stole "COL_GREEN"$%d"COL_WHITE" from %s (%d). +%d score.", amount, PlayerInfo[targetid][pUserName], targetid, ROB_SCORE);

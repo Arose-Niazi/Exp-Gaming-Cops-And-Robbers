@@ -159,6 +159,12 @@ enum pInfo
 	pDonutCarry,				// /donut heals carried (reset at donut shop), max DONUT_CARRY_MAX
 	pSeriousCrimes,				// count of serious (murder/violent) crimes — blocks appeal (LSplayers.SeriousCrimes)
 
+	// ---- Stage B : full cop system (FEATURE-EXPANSION-PLAN §3) --------------
+	bool:pCopChatOn,			// department-channel (/d) + non-critical dispatch receive toggle (LSplayers.CopChatOn, default 1). Loaded in loading_data, saved via Jail_SavePlayer.
+	pCrimeLog[5],				// session-only ring buffer: gettime() of the last 5 crimes (paired with g_CrimeLogWhat) — /crimes reads it (§3.4)
+	pCrimeLogHead,				// next write index into the pCrimeLog ring (0..4)
+	pCrimeLogCount,				// number of crimes recorded so far this session (caps at 5 for display)
+
 	// ticket (issued by a cop, WL1-5); escalates to a warrant if unpaid in time
 	pTicketAmount,				// outstanding fine ($) — 0 = no ticket
 	pTicketByCop,				// cop id that issued the ticket (-1 = none)
@@ -244,6 +250,14 @@ enum pInfo
 	pRobDeadline,				// gettime() the carry-to-hideout window expires (0 = not carrying)
 	pRobHideout,				// hideout-site index the safe must be delivered to while carrying
 	pShopliftCooldown,			// gettime() the player may /shoplift again (§5.1)
+
+	// ---- Stage A : robbery success grind (FEATURE-EXPANSION-PLAN §1) --------
+	// Persisted per-account counters (LSplayers.SuccessfulRobberies/FailedRobberies).
+	// pSuccessfulRobberies is the grind counter that drives Rob_SuccessChance;
+	// pFailedRobberies is anti-farm telemetry only. Both loaded in loading_data and
+	// saved via the shared Jail_SavePlayer UPDATE.
+	pSuccessfulRobberies,		// count of successful robberies (drives the success % curve, §1.2)
+	pFailedRobberies,			// count of failed robberies (informational telemetry, §1.1)
 
 	// ---- M4 (stage 3) : reusable mission framework (design §6) --------------
 	pOnMission,					// active mission id (index into MissionReg[]), or -1 = none
@@ -353,6 +367,12 @@ enum pInfo
 // pIgnored[a][b>>5] bit (b & 31). Reset per-connect in ClearPlayerVariables.
 new pIgnored[MAX_PLAYERS][(MAX_PLAYERS + 31) / 32];
 
+// Stage B (§3.4) - the crime-log reason strings, paired with PlayerInfo[..][pCrimeLog]
+// (their timestamps). A standalone 2D global (Pawn enums can't hold a 2D field);
+// g_CrimeLogWhat[playerid][slot] is one of the 5 ring entries. Reset per-connect
+// in ClearPlayerVariables. Read by a cop's /crimes.
+new g_CrimeLogWhat[MAX_PLAYERS][5][40];
+
 new PlayerInfo[MAX_PLAYERS][pInfo];
 
 
@@ -443,6 +463,14 @@ FUNCTION ClearPlayerVariables(playerid)
 	PlayerInfo[playerid][pRefillCooldown]=PlayerInfo[playerid][pDonutCarry]=PlayerInfo[playerid][pSeriousCrimes]=0;
 	PlayerInfo[playerid][pTicketAmount]=PlayerInfo[playerid][pTicketExpiry]=0;
 	PlayerInfo[playerid][pTicketByCop]=-1;
+
+	// ---- Stage B : full cop system (FEATURE-EXPANSION-PLAN §3) --------------
+	// pCopChatOn is loaded from the DB in loading_data; default it ON on a fresh
+	// connect (default-on channel) so a not-yet-loaded slot receives dispatch. The
+	// crime log ring is session-only - clear it here.
+	PlayerInfo[playerid][pCopChatOn]=true;
+	PlayerInfo[playerid][pCrimeLogHead]=PlayerInfo[playerid][pCrimeLogCount]=0;
+	for(new i=0; i<5; i++) { PlayerInfo[playerid][pCrimeLog][i]=0; strdel(g_CrimeLogWhat[playerid][i],0,40); }
 	if(PlayerInfo[playerid][pJailTimer] != -1) KillTimer(PlayerInfo[playerid][pJailTimer]);
 	PlayerInfo[playerid][pJailTimer]=-1;
 	PlayerInfo[playerid][pJailed]=PlayerInfo[playerid][pEscapeChained]=false;
@@ -505,6 +533,9 @@ FUNCTION ClearPlayerVariables(playerid)
 	PlayerInfo[playerid][pRobStage]=ROBSTAGE_NONE;
 	PlayerInfo[playerid][pRobKind]=PlayerInfo[playerid][pRobSite]=PlayerInfo[playerid][pRobCrackLeft]=0;
 	PlayerInfo[playerid][pRobDeadline]=PlayerInfo[playerid][pRobHideout]=PlayerInfo[playerid][pShopliftCooldown]=0;
+	// Stage A robbery grind counters are loaded from the DB in loading_data; zero
+	// them on a fresh connect so a not-yet-loaded slot can't read stale data.
+	PlayerInfo[playerid][pSuccessfulRobberies]=PlayerInfo[playerid][pFailedRobberies]=0;
 
 	// ---- M5 (stage 3) : housing system (design §9.1/§5.5) ------------------
 	// pHouseSpawn is loaded from the DB in loading_data; zero the session slots on

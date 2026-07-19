@@ -78,6 +78,9 @@ FUNCTION LoadUserData(playerid)
 	cache_get_value_int(0, "CopRank",PlayerInfo[playerid][pCopRank]);
 	cache_get_value_int(0, "RefillPoints",PlayerInfo[playerid][pRefillPoints]);	// M3 — cop /refill points (§3.1)
 	cache_get_value_int(0, "SeriousCrimes",PlayerInfo[playerid][pSeriousCrimes]);
+	// Stage B (FEATURE-EXPANSION-PLAN §3.1) — the department-channel (/d) + dispatch
+	// receive toggle. Persisted TINYINT default 1 (channel-on); saved via Jail_SavePlayer.
+	cache_get_value_bool(0, "CopChatOn",PlayerInfo[playerid][pCopChatOn]);
 	cache_get_value_bool(0, "EscapeChained",PlayerInfo[playerid][pEscapeChained]);
 	cache_get_value_int(0, "Bail",PlayerInfo[playerid][pJailBail]);
 	cache_get_value_name(0, "JailReason", PlayerInfo[playerid][pJailReason],64);
@@ -131,6 +134,11 @@ FUNCTION LoadUserData(playerid)
 	cache_get_value_int(0, "CoolerCount",PlayerInfo[playerid][pCoolerCount]);
 	cache_get_value_int(0, "CoolerWeight",PlayerInfo[playerid][pCoolerWeight]);
 	cache_get_value_int(0, "CoolerValue",PlayerInfo[playerid][pCoolerValue]);
+	// Stage A (FEATURE-EXPANSION-PLAN §1) — robbery success-grind counters. The
+	// successful count drives Rob_SuccessChance (the per-type success % curve); the
+	// failed count is anti-farm telemetry. Both persist via the shared Jail_SavePlayer.
+	cache_get_value_int(0, "SuccessfulRobberies",PlayerInfo[playerid][pSuccessfulRobberies]);
+	cache_get_value_int(0, "FailedRobberies",PlayerInfo[playerid][pFailedRobberies]);
 	CallLocalFunction("Farm_OnPlayerLogin", "d", playerid);
 	// M7 — load this player's stock holdings from stock_holdings (async, race-guarded).
 	// stocks.inc is included after this module, so it is reached via CallLocalFunction.

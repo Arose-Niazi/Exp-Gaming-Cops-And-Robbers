@@ -976,8 +976,11 @@ FUNCTION House_RobSteal(playerid, house)
 
 	// Break-in success roll: base %, minus super-lock / pet penalties, plus the
 	// crowbar bonus (a crowbar improves success - §5.7). Read the crowbar flag
-	// directly (housing sees PlayerInfo).
-	new chance = HOUSEROB_BASE_SUCCESS;
+	// directly (housing sees PlayerInfo). Stage A (FEATURE-EXPANSION-PLAN §1.3):
+	// the base is now the Rob_SuccessChance grind curve (base 40 -> cap 85, driven
+	// by SuccessfulRobberies) instead of the flat HOUSEROB_BASE_SUCCESS; the
+	// super-lock/pet penalties and crowbar bonus still apply on top of it.
+	new chance = Rob_SuccessChance(40, 85, PlayerInfo[playerid][pSuccessfulRobberies]);
 	if(gHouseInfo[house][hSuperLock]) chance -= HOUSEROB_SUPERLOCK_PEN;
 	if(gHouseInfo[house][hHasPet]) chance -= HOUSEROB_PET_PEN;
 	if(PlayerInfo[playerid][pCrowbarEquipped]) chance += CROWBAR_SUCCESS_BONUS;
@@ -1001,6 +1004,10 @@ FUNCTION House_RobSteal(playerid, house)
 			SendClientMessage(playerid, COLOR_ERROR, ""COL_RED"* The house pet attacked you! "COL_WHITE"The break-in failed.");
 		}
 		else SendClientMessage(playerid, COLOR_ERROR, ""COL_RED"* The lock held - the break-in failed."COL_WHITE);
+		// Stage A (§1.4): a foiled break-in counts toward FailedRobberies telemetry
+		// (the +6 house-rob warrant already applied by the caller is punishment enough).
+		PlayerInfo[playerid][pFailedRobberies]++;
+		Jail_SavePlayer(playerid);
 		return -1;
 	}
 
@@ -1016,6 +1023,10 @@ FUNCTION House_RobSteal(playerid, house)
 	if(itemsTaken > 0) gHouseInfo[house][hStorageItems] -= itemsTaken;
 
 	House_Save(house);
+	// Stage A (§1.5): a successful break-in climbs the grind counter + persists.
+	// Rob_RecordSuccess lives in robbery.inc (included after housing.inc) - reach it
+	// via CallLocalFunction (it also runs the shared Jail_SavePlayer UPDATE).
+	CallLocalFunction("Rob_RecordSuccess", "d", playerid);
 
 	new msg[176];
 	if(take > 0 || itemsTaken > 0) format(msg, sizeof(msg), ""COL_GREEN"* Break-in! "COL_WHITE"You looted "COL_GREEN"$%d"COL_WHITE" and %d item(s) from house #%d. Run!", take, itemsTaken, gHouseInfo[house][hID]);

@@ -13,7 +13,7 @@
 		ClearDMZone(playerid)              : leave a DM zone (called on death/spawn/other tp)
 
 	Commands:
-		/drylake (/d)         - Dry Lake (DM zone)
+		/drylake (/dl)        - Dry Lake (DM zone)
 		/sfairport (/sfa)     - SF Airport
 		/bayside (/bs)        - Bayside
 		/lossantosdm (/lsadm) - LS DM zone (DM zone, anti-parachute)
@@ -102,7 +102,7 @@ DoTeleport(playerid, tpid)
 }
 
 CMD:drylake(playerid)      return DoTeleport(playerid, 0);
-alias:drylake("d")
+alias:drylake("dl")
 
 CMD:sfairport(playerid)    return DoTeleport(playerid, 1);
 alias:sfairport("sfa")

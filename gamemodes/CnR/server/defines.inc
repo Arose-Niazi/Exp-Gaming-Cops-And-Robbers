@@ -103,7 +103,8 @@ enum
 	HOUSE_MENU_DIALOG,      // M5 (stage 3) — /house owner menu (storage/lock/spawn/sell/rent, §9.1)
 	HOUSE_BUY_DIALOG,       // M5 (stage 3) — /buyhouse confirm prompt (§9.1)
 	HOUSE_STORE_DIALOG,     // M5 (stage 3) — /housestore deposit-money input (§9.1)
-	HOUSE_WITHDRAW_DIALOG   // M5 (stage 3) — /housewithdraw money input (§9.1)
+	HOUSE_WITHDRAW_DIALOG,  // M5 (stage 3) — /housewithdraw money input (§9.1)
+	HELP_DETAIL_DIALOG      // Stage C — feature guide: MSGBOX showing a command's full description + Back
 };
 
 enum
@@ -133,7 +134,9 @@ enum
 	MENU_ADD_ACTOR_TYPE_2,
 	MENU_EDIT_ACTOR_SETTING,
 	MENU_GPS_OPTIONS,
-	MENU_GPS_LIST
+	MENU_GPS_LIST,
+	MENU_HELP_CATS,		// Stage C — feature guide: category list (/help, /info, /hlp, /features)
+	MENU_HELP_CMDS		// Stage C — feature guide: command list for the selected category
 };
 
 enum
@@ -245,6 +248,23 @@ enum
 #define REFILL_WEAPON_COST		3			// refill points spent on a weapon package
 #define DONUT_CARRY_MAX			6			// /donut carry cap (§3.1)
 #define DONUT_HEAL_PCT			50.0		// /donut heal amount (§3.1, +50% HP)
+
+// ---- Stage B : full cop system (FEATURE-EXPANSION-PLAN §3) ----
+// Dispatch priority ladder (§3.2) - drives the [DISPATCH] line colour + whether
+// the pCopChatOn mute toggle is honoured. CRITICAL always delivers (even to muted
+// cops). Here (not dispatch.inc) so wanted.inc - included before dispatch.inc -
+// can pass DISPATCH_CRITICAL to Dispatch_Alert.
+#define DISPATCH_LOW			0			// routine chatter (room for future use)
+#define DISPATCH_NORMAL			1			// standard alert (holdup, house rob, /respond)
+#define DISPATCH_HIGH			2			// serious alert (bank/casino/carry/backup)
+#define DISPATCH_CRITICAL		3			// most-wanted proximity - ignores the mute toggle
+#define DISPATCH_ALL			(-1.0)		// Dispatch_Alert radius sentinel - server-wide
+#define COP_REPAIR_COST			15000		// /vehrepair cost - cop fixes their PD vehicle on foot (§3.4)
+#define VEHREPAIR_RANGE			5.0			// /vehrepair must be on foot within this of the cop's own vehicle (§3.4)
+#define FREEZE_SECS				3			// /freeze brief comply-stop of a WANTED suspect (§3.4, anti-abuse)
+#define FREEZE_RANGE			12.0		// /freeze must be within this of the suspect (§3.4)
+#define DISPATCH_WL9_RADIUS		300.0		// WL9+ most-wanted proximity dispatch reaches cops within this (§3.2, 10-114)
+#define RESPOND_CP_RADIUS		4.0			// /respond red call checkpoint radius at the last dispatch origin (§3.4)
 
 // ---- M3 (stage 2) : jail (design §3.2) ----
 // Real LSPD (Pershing Square) cell interior — isolated in a high virtual world.
@@ -510,6 +530,19 @@ enum
 #define SHOPLIFT_CD				120			// per-player cooldown seconds (§5.1 [OUR DESIGN])
 #define SHOPLIFT_CASH_MIN		200			// petty item resale value floor (§5.1 [OUR DESIGN])
 #define SHOPLIFT_CASH_MAX		900			// petty item resale value ceiling (§5.1 [OUR DESIGN])
+
+// ---- Robbery success grind (Stage A — FEATURE-EXPANSION-PLAN §1) ------------
+// A persisted per-account counter (LSplayers.SuccessfulRobberies, pSuccessfulRobberies)
+// drives Rob_SuccessChance(base,cap,n) — a diminishing-returns curve so early reps
+// matter but the practical cap (within ~2-3%) is only approached near ~250-300
+// successful robberies. Rob_SuccessChance lives in server/misc.inc (stock, callable
+// from every module regardless of include order); the crowbar/skill bonuses stack
+// additively on top of its result (final clamp 97). FailedRobberies is anti-farm
+// telemetry only. A FAILED rob-type crime pays a short cooldown (below), no loot.
+#define ROB_GRIND_K				80			// half-saturation: successful robberies to reach the base->cap midpoint (§1.2)
+#define ROB_FAIL_CD				20			// secs before you can retry after a failed /rob (§1.4 [OUR DESIGN])
+#define HOLDUP_FAIL_CD			30			// secs before you can retry after a refused /holdup (§1.4 [OUR DESIGN])
+#define SHOPLIFT_FAIL_CD		45			// secs before you can retry after a failed /shoplift (§1.4 [OUR DESIGN])
 
 // ---- Bank robbery (§5.3) ---------------------------------------------------
 #define BANKROB_CP_SIZE			3.0			// bank/hideout dynamic checkpoint radius

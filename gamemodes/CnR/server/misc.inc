@@ -39,6 +39,23 @@ stock IsCop(playerid)
 stock IsCivilian(playerid)
 	return (PlayerInfo[playerid][pTeam] == CIVIL);
 
+// Robbery success grind (Stage A — FEATURE-EXPANSION-PLAN §1.2). Returns the
+// success % for `n` successful robberies given a per-type base% (chance at 0
+// successes) and cap% (asymptote). A diminishing-returns curve: the bonus added
+// to base is a saturating function of n, halfway to the cap at n == ROB_GRIND_K.
+// Integer-safe. Lives here (misc.inc, included before crime/holdup/housing/robbery)
+// so every robbery module can call it directly regardless of include order. The
+// crowbar/skill bonuses are added by the caller on top of this result (clamp 97).
+stock Rob_SuccessChance(base, cap, n)
+{
+	if(n < 0) n = 0;
+	new span = cap - base;
+	new bonus = (span * n) / (n + ROB_GRIND_K);		// 0..span, saturating
+	new chance = base + bonus;
+	if(chance > cap) chance = cap;
+	return chance;
+}
+
 InsertTimeStamp()
 {
 	new StrSmall[50];

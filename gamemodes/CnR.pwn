@@ -184,6 +184,11 @@ new Text:ConnectTD[2];
 	// ---- M3 : core CnR loop ----
 	#include "CnR\systems\wanted"
 	#include "CnR\systems\jail"
+	// ---- Stage B : full cop system - dispatch/10-code/cop-chat core (§3) ----
+	// After wanted/jail; BEFORE cop.inc so the cop commands call Dispatch_Alert /
+	// Cop_Expand10Code directly. holdup/robbery/housing/wanted are included later and
+	// fire dispatch via CallLocalFunction("Dispatch_Alert", ...).
+	#include "CnR\systems\dispatch"
 	#include "CnR\cmds\cop"
 	// ---- M3 (stage 3) : player crime commands (std/drugs before crime.inc) ----
 	#include "CnR\systems\std"
@@ -223,6 +228,8 @@ new Text:ConnectTD[2];
 	// bank/jail (trading money via Bank_*, holdings persisted with the shared UPDATE).
 	#include "CnR\systems\stocks"
 	#include "CnR\cmds\player"
+	// ---- Stage C : feature/help browser (menu-based categorised command guide) ----
+	#include "CnR\cmds\help"
 	// ---- M6 (stage 3) : DM/sniper/duel arenas, DJ radio (§9.6/§8.1) ----
 	// (after teleport.inc - arenas reuse StripParachute; after bank/jail/missions/
 	// wanted - arenas call Bank_*/Jail_IsJailed/Mission_IsOnMission/ClearPlayerWanted.)
@@ -265,6 +272,11 @@ new Text:ConnectTD[2];
 	// ---- M3 : core CnR loop ----
 	#include "CnR/systems/wanted"
 	#include "CnR/systems/jail"
+	// ---- Stage B : full cop system - dispatch/10-code/cop-chat core (§3) ----
+	// After wanted/jail; BEFORE cop.inc so the cop commands call Dispatch_Alert /
+	// Cop_Expand10Code directly. holdup/robbery/housing/wanted are included later and
+	// fire dispatch via CallLocalFunction("Dispatch_Alert", ...).
+	#include "CnR/systems/dispatch"
 	#include "CnR/cmds/cop"
 	// ---- M3 (stage 3) : player crime commands (std/drugs before crime.inc) ----
 	#include "CnR/systems/std"
@@ -304,6 +316,8 @@ new Text:ConnectTD[2];
 	// bank/jail (trading money via Bank_*, holdings persisted with the shared UPDATE).
 	#include "CnR/systems/stocks"
 	#include "CnR/cmds/player"
+	// ---- Stage C : feature/help browser (menu-based categorised command guide) ----
+	#include "CnR/cmds/help"
 	// ---- M6 (stage 3) : DM/sniper/duel arenas, DJ radio (§9.6/§8.1) ----
 	// (after teleport.inc - arenas reuse StripParachute; after bank/jail/missions/
 	// wanted - arenas call Bank_*/Jail_IsJailed/Mission_IsOnMission/ClearPlayerWanted.)
@@ -510,6 +524,8 @@ public OnPlayerDisconnect(playerid,reason)
 		Jail_OnDisconnect(playerid);
 		// M3 (stage 2) - reset the cop /report undo state (static per-slot arrays).
 		Cop_OnDisconnect(playerid);
+		// Stage B (§3.1) - reset the per-cop last-suspect ($sus source) global.
+		Dispatch_OnDisconnect(playerid);
 		// M4 (stage 2) - kill any running holdup timer + drop the money-rush seat.
 		Holdup_OnDisconnect(playerid);
 		Moneyrush_OnDisconnect(playerid);
@@ -823,6 +839,13 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 		case HOUSE_MENU_DIALOG, HOUSE_BUY_DIALOG, HOUSE_STORE_DIALOG, HOUSE_WITHDRAW_DIALOG:
 		{
 			House_OnDialogResponse(playerid, dialogid, response, listitem, inputtext);
+		}
+		// Stage C - feature guide MSGBOX detail dialog; button1 (Back) reopens the command list.
+		// Help_ShowCommands is a FUNCTION public in cmds/help.inc; g_HelpLastCat is also there.
+		case HELP_DETAIL_DIALOG:
+		{
+			if(response == 1)
+				CallLocalFunction("Help_ShowCommands", "ii", playerid, Help_GetLastCat(playerid));
 		}
 	}
 	// M6 (stage 1) - /skill picker, /fightstyle picker, /clotheswear menu + skins list.

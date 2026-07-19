@@ -105,12 +105,13 @@ static Jail_Place(playerid)
 FUNCTION Jail_SavePlayer(playerid)
 {
 	if(!PlayerInfo[playerid][pLoggedIn]) return 0;
-	new string[832];	// headroom for Money/Bank/Tax + RefillPoints + LottoNumber + Crowbar/RobHistory + HouseSpawnID + FightStyle + fishing/farming cols + a 64-char (escaped) JailReason
+	new string[1024];	// headroom for Money/Bank/Tax + RefillPoints + LottoNumber + Crowbar/RobHistory + HouseSpawnID + FightStyle + fishing/farming cols + Stage-A grind counters + Stage-B CopChatOn + a 64-char (escaped) JailReason (widened 832->920 for SuccessfulRobberies/FailedRobberies, 920->960 for CopChatOn, 960->1024 for safety margin)
 	mysql_format(g_SQL, string, sizeof(string),
-		"UPDATE "TABLE_PLAYERS_C" SET Money=%d, BankMoney=%d, TaxOwed=%d, LifeInsurance=%d, HealthInsExpiry=%d, Score=%d, CopRank=%d, RefillPoints=%d, SeriousCrimes=%d, Jailed=%d, JailUntil=%d, Bail=%d, JailReason='%e', EscapeChained=%d, LottoNumber=%d, CrowbarEquipped=%d, RobberyHistory=%d, HouseSpawnID=%d, FightStyle=%d, FishPermits=%d, HuntPermits=%d, DrugSeeds=%d, HasFishingRod=%d, HasFishCooler=%d, FishSalesPermit=%d, CoolerCount=%d, CoolerWeight=%d, CoolerValue=%d WHERE aID=%d LIMIT 1",
+		"UPDATE "TABLE_PLAYERS_C" SET Money=%d, BankMoney=%d, TaxOwed=%d, LifeInsurance=%d, HealthInsExpiry=%d, Score=%d, CopRank=%d, RefillPoints=%d, SeriousCrimes=%d, CopChatOn=%d, Jailed=%d, JailUntil=%d, Bail=%d, JailReason='%e', EscapeChained=%d, LottoNumber=%d, CrowbarEquipped=%d, RobberyHistory=%d, HouseSpawnID=%d, FightStyle=%d, FishPermits=%d, HuntPermits=%d, DrugSeeds=%d, HasFishingRod=%d, HasFishCooler=%d, FishSalesPermit=%d, CoolerCount=%d, CoolerWeight=%d, CoolerValue=%d, SuccessfulRobberies=%d, FailedRobberies=%d WHERE aID=%d LIMIT 1",
 		PlayerInfo[playerid][pMoney],
 		PlayerInfo[playerid][pBankMoney], PlayerInfo[playerid][pTaxOwed], PlayerInfo[playerid][pLifeInsurance], PlayerInfo[playerid][pHealthInsExpiry],
 		PlayerInfo[playerid][pScore], PlayerInfo[playerid][pCopRank], PlayerInfo[playerid][pRefillPoints], PlayerInfo[playerid][pSeriousCrimes],
+		PlayerInfo[playerid][pCopChatOn] ? 1 : 0,	// Stage B (§3.1) - department-channel receive toggle
 		PlayerInfo[playerid][pJailed] ? 1 : 0, PlayerInfo[playerid][pJailUntil], PlayerInfo[playerid][pJailBail],
 		PlayerInfo[playerid][pJailReason], PlayerInfo[playerid][pEscapeChained] ? 1 : 0, PlayerInfo[playerid][pLottoNumber],
 		PlayerInfo[playerid][pCrowbarEquipped] ? 1 : 0, PlayerInfo[playerid][pRobberyHistory], PlayerInfo[playerid][pHouseSpawn], PlayerInfo[playerid][pFightStyle],
@@ -118,6 +119,8 @@ FUNCTION Jail_SavePlayer(playerid)
 		PlayerInfo[playerid][pFishPermits], PlayerInfo[playerid][pHuntPermits], PlayerInfo[playerid][pDrugSeeds],
 		PlayerInfo[playerid][pHasFishingRod] ? 1 : 0, PlayerInfo[playerid][pHasFishCooler] ? 1 : 0, PlayerInfo[playerid][pHasFishSalesPermit] ? 1 : 0,
 		PlayerInfo[playerid][pCoolerCount], PlayerInfo[playerid][pCoolerWeight], PlayerInfo[playerid][pCoolerValue],
+		// Stage A (FEATURE-EXPANSION-PLAN §1) - robbery success-grind counters.
+		PlayerInfo[playerid][pSuccessfulRobberies], PlayerInfo[playerid][pFailedRobberies],
 		PlayerInfo[playerid][pID]);
 	mysql_pquery(g_SQL, string);
 	return 1;

@@ -80,6 +80,27 @@ static Cop_NearestSuspect(copid, Float:range, wlMin, wlMax)
 static bool:Cop_OnFoot(playerid)
 	return (!IsPlayerInAnyVehicle(playerid));
 
+// Stage B (§3.5) - the cop rank-title ladder (0-10 Recruit->Commissioner). Shared
+// by /d, /coprank, and the arrest promotion message. index = pCopRank.
+static const g_CopRankTitle[][] =
+{
+	"Recruit", "Officer", "Officer II", "Officer III", "Senior Officer",
+	"Sergeant", "Lieutenant", "Captain", "Commander", "Deputy Chief", "Commissioner"
+};
+
+// Stage B (§3.5) - a short label for the current /refill weapon kit (tiers unlock
+// at ranks 3 Shotgun / 6 MP5 / 9 M4, see Refill_OnDialogResponse). Used by /coprank
+// + the promotion message. Returns a string literal.
+Cop_RefillTierLabel(rank)
+{
+	new label[40];
+	if(rank >= 9) format(label, sizeof(label), "Deagle + Shotgun + MP5 + M4");
+	else if(rank >= 6) format(label, sizeof(label), "Deagle + Shotgun + MP5");
+	else if(rank >= 3) format(label, sizeof(label), "Deagle + Shotgun");
+	else format(label, sizeof(label), "Deagle");
+	return label;
+}
+
 //==============================================================================
 //	/arrest (/ar) - design §3.1 / §4.2
 //==============================================================================
@@ -122,6 +143,8 @@ CMD:arrest(playerid, params[])
 	if(!Jail_SendToJail(targetid, wl, "Arrested by police", serious))
 		return SendClientMessage(playerid, COLOR_ERROR, "That suspect cannot be arrested right now.");
 
+	Dispatch_SetLastSuspect(playerid, targetid);	// Stage B (§3.3) - $sus source
+
 	// Cop reward: +1 score + WL-scaled cash (§3.1). Cop rank climbs with arrests.
 	new bonus = wl * ARREST_CASH_PER_WL;
 	PlayerInfo[playerid][pScore] += ARREST_SCORE;
@@ -129,8 +152,21 @@ CMD:arrest(playerid, params[])
 	UpdateMoney(playerid);
 	// M7 - arrest cash feeds the GOVERNMENT stock pool (§10.2, factor 0.1).
 	StockMarket_UpdateEarnings(E_STOCK_GOVERNMENT, bonus, STOCK_FACTOR_GOV);
+	new oldRank = PlayerInfo[playerid][pCopRank];
 	if(PlayerInfo[playerid][pCopRank] < 10) PlayerInfo[playerid][pCopRank]++;
 	if(PlayerInfo[playerid][pRefillPoints] < REFILL_POINTS_MAX) PlayerInfo[playerid][pRefillPoints]++;
+
+	// Stage B (§3.5) - a promotion milestone message at ranks that unlock a new
+	// /refill weapon tier (3=Shotgun, 6=MP5, 9=M4). Pure UX; the rank is already
+	// persisted by the disconnect/state save (CopRank column). Announced once, only
+	// when the rank actually advanced this arrest.
+	new newRank = PlayerInfo[playerid][pCopRank];
+	if(newRank > oldRank && (newRank == 3 || newRank == 6 || newRank == 9))
+	{
+		new promo[176];
+		format(promo, sizeof(promo), ""COL_GREEN"* Promoted to %s! "COL_WHITE"Your /refill now issues: "COL_YELLOW"%s"COL_WHITE".", g_CopRankTitle[newRank], Cop_RefillTierLabel(newRank));
+		SendClientMessage(playerid, COLOR_SERVER_INFO, promo);
+	}
 
 	new string[160];
 	format(string, sizeof(string), ""COL_GREEN"* Arrest: "COL_WHITE"you jailed %s (%d) at WL%d. "COL_GREEN"+$%d, +%d score.", PlayerInfo[targetid][pUserName], targetid, wl, bonus, ARREST_SCORE);
@@ -174,6 +210,8 @@ CMD:ticket(playerid, params[])
 
 	if(PlayerInfo[targetid][pTicketAmount] > 0)
 		return SendClientMessage(playerid, COLOR_ERROR, "That suspect already has an outstanding ticket.");
+
+	Dispatch_SetLastSuspect(playerid, targetid);	// Stage B (§3.3) - $sus source
 
 	// Issue the ticket: fine + escalation clock (§2.4). Cop collects +$500 +1.
 	PlayerInfo[targetid][pTicketAmount] = TICKET_FINE;
@@ -242,6 +280,7 @@ CMD:vc(playerid, params[])
 		return SendClientMessage(playerid, COLOR_ERROR, "That player is not a suspect.");
 	if(!SetVisualContact(playerid, targetid))
 		return SendClientMessage(playerid, COLOR_ERROR, "Could not lock visual contact on that player.");
+	Dispatch_SetLastSuspect(playerid, targetid);	// Stage B (§3.3) - $sus source
 
 	new string[144];
 	format(string, sizeof(string), "You have visual contact on %s (%d) - their wanted decay is frozen.", PlayerInfo[targetid][pUserName], targetid);
@@ -270,6 +309,7 @@ CMD:su(playerid, params[])
 	// Mark + pursue: raise WL for the observed crime and freeze their decay.
 	new bool:added = (GivePlayerWanted(targetid, 2, crime) != 0);
 	SetVisualContact(playerid, targetid);
+	Dispatch_SetLastSuspect(playerid, targetid);	// Stage B (§3.3) - $sus source
 	if(added) PlayerInfo[targetid][pSeriousCrimes]++;	// only when a wanted was actually added
 
 	new string[160];
@@ -314,11 +354,16 @@ CMD:report(playerid, params[])
 	PlayerInfo[targetid][pSeriousCrimes]++;
 	gLastReport[playerid] = targetid;
 	gLastReportAmt[playerid] = gained;
+	Dispatch_SetLastSuspect(playerid, targetid);	// Stage B (§3.3) - $sus source
 
-	new string[160];
-	format(string, sizeof(string), "You reported %s (%d) for: %s (WL %d -> %d).", PlayerInfo[targetid][pUserName], targetid, reason, before, GetPlayerWanted(targetid));
+	// Stage B (§3.3) - the reason may carry 10-codes / quick-strings (CB contract).
+	new expanded[176];
+	Cop_Expand10Code(expanded, reason, playerid);
+
+	new string[224];
+	format(string, sizeof(string), "You reported %s (%d) for: %s (WL %d -> %d).", PlayerInfo[targetid][pUserName], targetid, expanded, before, GetPlayerWanted(targetid));
 	SendClientMessage(playerid, COLOR_SERVER_INFO, string);
-	format(string, sizeof(string), ""COL_ORANGE"[REPORT] "COL_WHITE"%s (%d) reported %s (%d): %s.", PlayerInfo[playerid][pUserName], playerid, PlayerInfo[targetid][pUserName], targetid, reason);
+	format(string, sizeof(string), ""COL_ORANGE"[REPORT] "COL_WHITE"%s (%d) reported %s (%d): %s.", PlayerInfo[playerid][pUserName], playerid, PlayerInfo[targetid][pUserName], targetid, expanded);
 	Cop_Broadcast(COLOR_WANTED_ORANGE, string);
 	return 1;
 }
@@ -357,6 +402,11 @@ CMD:backup(playerid, params[])
 	GetPlayerPos(playerid, x, y, z);
 	format(zoneName, sizeof(zoneName), "%s", PlayerInfo[playerid][pZoneName]);
 
+	// Expand any 10-codes + quick-strings in the optional message (§3.3).
+	new note[176];
+	if(!isNull(params)) Cop_Expand10Code(note, params, playerid);
+	else note[0] = '\0';
+
 	// Purple backup marker for every other cop (§2.1 backup colour).
 	for(new i = 0; i < MAX_PLAYERS; i++)
 	{
@@ -365,10 +415,16 @@ CMD:backup(playerid, params[])
 		SetPlayerMarkerForPlayer(i, playerid, COLOR_BACKUP_PURPLE);
 	}
 
-	new string[176];
-	format(string, sizeof(string), ""COL_PURPLE"[BACKUP] "COL_WHITE"%s (%d) is requesting backup near %s%s%s.", PlayerInfo[playerid][pUserName], playerid, isNull(zoneName) ? ("their location") : (zoneName), isNull(params) ? ("") : (" - "), isNull(params) ? ("") : (params));
+	new string[224];
+	format(string, sizeof(string), ""COL_PURPLE"[BACKUP] "COL_WHITE"%s (%d) is requesting backup near %s%s%s.", PlayerInfo[playerid][pUserName], playerid, isNull(zoneName) ? ("their location") : (zoneName), isNull(note) ? ("") : (" - "), isNull(note) ? ("") : (note));
 	Cop_Broadcast(COLOR_BACKUP_PURPLE, string);
 	SendClientMessage(playerid, COLOR_SERVER_INFO, "Backup requested - nearby cops see your purple marker.");
+
+	// Stage B (§3.2) - fire a 10-78 (Backup needed) dispatch alert server-wide.
+	new dtext[144];
+	format(dtext, sizeof(dtext), "Backup needed - %s (%d)%s%s", PlayerInfo[playerid][pUserName], playerid, isNull(note) ? ("") : (" - "), isNull(note) ? ("") : (note));
+	Dispatch_Alert(playerid, DISPATCH_HIGH, "10-78", dtext, DISPATCH_ALL);
+
 	// Auto-clear the marker after the window so it doesn't linger.
 	SetTimerEx("Cop_ClearBackupMarker", BACKUP_MARKER_SECS * 1000, false, "d", playerid);
 	return 1;
@@ -384,19 +440,71 @@ FUNCTION Cop_ClearBackupMarker(playerid)
 }
 
 //==============================================================================
-//	/copmsg (/cm) - private cop channel (design §3.1 / §4.1)
+//	Department radio (§3.1) - the cop chat channel + mute toggle
 //==============================================================================
 
+// Broadcast one department-channel line to cops who have the channel ON. Mirrors
+// Cop_Broadcast but honours the pCopChatOn mute toggle (§3.1).
+static Cop_DeptBroadcast(colour, const text[])
+{
+	for(new i = 0; i < MAX_PLAYERS; i++)
+	{
+		if(!IsPlayerConnected(i) || IsPlayerNPC(i) || !PlayerInfo[i][pLoggedIn]) continue;
+		if(!IsCop(i) || !PlayerInfo[i][pCopChatOn]) continue;
+		SendClientMessage(i, colour, text);
+	}
+	return 1;
+}
+
+// Shared /d //copmsg body: expand 10-codes + quick-strings, then fan the
+// [DEPT] {rank} Name: <text> line to the department channel (§3.1/§3.3).
+static Cop_SendDept(playerid, const rawtext[])
+{
+	new expanded[176], string[224];
+	Cop_Expand10Code(expanded, rawtext, playerid);
+	format(string, sizeof(string), ""COL_LIGHTBLUE"[DEPT] "COL_WHITE"%s %s: %s", g_CopRankTitle[PlayerInfo[playerid][pCopRank]], PlayerInfo[playerid][pUserName], expanded);
+	Cop_DeptBroadcast(COLOR_COP_BLIP, string);
+	// A cop with the channel muted still sees their own outgoing line.
+	if(!PlayerInfo[playerid][pCopChatOn]) SendClientMessage(playerid, COLOR_COP_BLIP, string);
+	return 1;
+}
+
+CMD:d(playerid, params[])
+{
+	if(!IsCop(playerid)) return SendClientMessage(playerid, COLOR_ERROR, "Only law enforcement can use the department channel.");
+	if(isNull(params)) return SendClientMessage(playerid, COLOR_SERVER_INFO, "USAGE: /d [message]  (10-codes + $loc/$sus/$veh/$time supported)");
+	return Cop_SendDept(playerid, params);
+}
+alias:d("dept", "copchat")
+
+// /copmsg (/cm) routes to the same department channel (§3.1).
 CMD:copmsg(playerid, params[])
 {
 	if(!IsCop(playerid)) return SendClientMessage(playerid, COLOR_ERROR, "Only law enforcement can use the cop channel.");
-	if(isNull(params)) return SendClientMessage(playerid, COLOR_SERVER_INFO, "USAGE: /copmsg [message]");
-	new string[176];
-	format(string, sizeof(string), ""COL_BLUE"[COP] "COL_WHITE"%s (%d): %s", PlayerInfo[playerid][pUserName], playerid, params);
-	Cop_Broadcast(COLOR_COP_BLIP, string);
-	return 1;
+	if(isNull(params)) return SendClientMessage(playerid, COLOR_SERVER_INFO, "USAGE: /copmsg [message]  (routes to /d)");
+	return Cop_SendDept(playerid, params);
 }
 alias:copmsg("cm")
+
+CMD:copchaton(playerid, params[])
+{
+	#pragma unused params
+	if(!IsCop(playerid)) return SendClientMessage(playerid, COLOR_ERROR, "Only law enforcement can toggle the department channel.");
+	PlayerInfo[playerid][pCopChatOn] = true;
+	Jail_SavePlayer(playerid);	// persist the toggle (shared LSplayers UPDATE)
+	SendClientMessage(playerid, COLOR_SERVER_INFO, ""COL_GREEN"* Department channel ON."COL_WHITE" You receive /d chatter and dispatch alerts.");
+	return 1;
+}
+
+CMD:copchatoff(playerid, params[])
+{
+	#pragma unused params
+	if(!IsCop(playerid)) return SendClientMessage(playerid, COLOR_ERROR, "Only law enforcement can toggle the department channel.");
+	PlayerInfo[playerid][pCopChatOn] = false;
+	Jail_SavePlayer(playerid);
+	SendClientMessage(playerid, COLOR_SERVER_INFO, ""COL_ORANGE"* Department channel OFF."COL_WHITE" You still receive Most-Wanted (critical) alerts. Use /copchaton to re-enable.");
+	return 1;
+}
 
 //==============================================================================
 //	Suspect / warrant / most-wanted / jail lists (design §3.1 / §4.1)
@@ -676,6 +784,233 @@ CMD:donut(playerid, params[])
 	new string[96];
 	format(string, sizeof(string), "You ate a donut (+%.0f%% HP). %d left.", DONUT_HEAL_PCT, PlayerInfo[playerid][pDonutCarry]);
 	SendClientMessage(playerid, COLOR_SERVER_INFO, string);
+	return 1;
+}
+
+//==============================================================================
+//	Stage B (§3.4) - /respond (/yes) : respond to the last dispatch call
+//==============================================================================
+
+// Fires a 10-23 (responding) dispatch + sets a RED call checkpoint on the last
+// dispatch origin (g_LastDispatchPos, set by Dispatch_Alert). Cop-only.
+CMD:respond(playerid, params[])
+{
+	if(!IsCop(playerid)) return SendClientMessage(playerid, COLOR_ERROR, "Only law enforcement can respond to dispatch.");
+	if(g_LastDispatchPos[0] == 0.0 && g_LastDispatchPos[1] == 0.0 && g_LastDispatchPos[2] == 0.0)
+		return SendClientMessage(playerid, COLOR_ERROR, "There is no active dispatch call to respond to.");
+
+	// Optional message on the response line (10-codes + quick-strings supported).
+	new note[176];
+	if(!isNull(params)) Cop_Expand10Code(note, params, playerid);
+	else note[0] = '\0';
+
+	// Red call checkpoint on the last dispatch origin so the responder can drive to it.
+	SetPlayerCheckpoint(playerid, g_LastDispatchPos[0], g_LastDispatchPos[1], g_LastDispatchPos[2], RESPOND_CP_RADIUS);
+
+	new dtext[224];
+	format(dtext, sizeof(dtext), "%s (%d) responding%s%s", PlayerInfo[playerid][pUserName], playerid, isNull(note) ? ("") : (" - "), isNull(note) ? ("") : (note));
+	// Location-less line (the responder's own position isn't the call site) - use -1
+	// origin so the "- zone" tail reads "the city" and the checkpoint stays intact.
+	Dispatch_Alert(-1, DISPATCH_NORMAL, "10-23", dtext, DISPATCH_ALL);
+	SendClientMessage(playerid, COLOR_SERVER_INFO, ""COL_GREEN"* Responding. "COL_WHITE"A red call checkpoint marks the last dispatch location.");
+	return 1;
+}
+alias:respond("yes")
+
+//==============================================================================
+//	Stage B (§3.4) - /robberies (/robs) : in-progress robberies/holdups
+//==============================================================================
+
+// Scan every player for an active holdup or safe-type robbery/carry and list the
+// type + zone + suspect. Reads the real robbery/holdup state vars (pHoldingUp,
+// pRobStage/pRobKind). Cop-only.
+CMD:robberies(playerid, params[])
+{
+	#pragma unused params
+	if(!IsCop(playerid)) return SendClientMessage(playerid, COLOR_ERROR, "Only law enforcement can view active robberies.");
+	new list[1600], row[128], count = 0, zone[MAX_ZONE_NAME], what[40];
+	strcat(list, "{FFFF00}Type\tSuspect\tZone\n");
+	for(new i = 0; i < MAX_PLAYERS; i++)
+	{
+		if(!IsPlayerConnected(i) || IsPlayerNPC(i) || !PlayerInfo[i][pLoggedIn]) continue;
+		if(!PlayerInfo[i][pHoldingUp] && PlayerInfo[i][pRobStage] == ROBSTAGE_NONE) continue;
+
+		// Classify the in-progress crime by its real state.
+		if(PlayerInfo[i][pHoldingUp]) format(what, sizeof(what), "Store Holdup");
+		else if(PlayerInfo[i][pRobStage] == ROBSTAGE_CARRYING) format(what, sizeof(what), "Carrying Safe");
+		else
+		{
+			switch(PlayerInfo[i][pRobKind])
+			{
+				case ROBKIND_BANK:   format(what, sizeof(what), "Bank Robbery");
+				case ROBKIND_CASINO: format(what, sizeof(what), "Casino Robbery");
+				default:             format(what, sizeof(what), "Robbery");
+			}
+		}
+		if(isNull(PlayerInfo[i][pZoneName])) format(zone, sizeof(zone), "unknown");
+		else format(zone, sizeof(zone), "%s", PlayerInfo[i][pZoneName]);
+		format(row, sizeof(row), "{FFFFFF}%s\t%s (%d)\t%s\n", what, PlayerInfo[i][pUserName], i, zone);
+		strcat(list, row);
+		count++;
+	}
+	if(!count) return SendClientMessage(playerid, COLOR_SERVER_INFO, "No robberies or holdups are in progress right now.");
+	ShowPlayerDialog(playerid, COP_INFO_DIALOG, DIALOG_STYLE_TABLIST_HEADERS, "Robberies In Progress", list, "Okay", "");
+	return 1;
+}
+alias:robberies("robs")
+
+//==============================================================================
+//	Stage B (§3.4) - /freeze (/fr /pullover /pu) : order a WANTED suspect to stop
+//==============================================================================
+
+// Order the nearest WANTED (WL1+) suspect within range to comply: a brief
+// FREEZE_SECS control lock (TogglePlayerControllable), never on an innocent
+// (anti-abuse), both parties messaged. The lift is scheduled by a one-shot timer.
+CMD:freeze(playerid, params[])
+{
+	#pragma unused params
+	if(!IsCop(playerid)) return SendClientMessage(playerid, COLOR_ERROR, "Only law enforcement can order a suspect to stop.");
+	if(Jail_IsJailed(playerid)) return SendClientMessage(playerid, COLOR_ERROR, "You cannot do that right now.");
+
+	// Nearest suspect WL1+ within FREEZE_RANGE (Cop_NearestSuspect already skips
+	// cops/DM-zone/jailed/protected targets). Wanted-only is enforced by the wlMin.
+	new targetid = Cop_NearestSuspect(playerid, FREEZE_RANGE, WANTED_SUSPECT_MIN, MAX_WANTED);
+	if(targetid == -1) return SendClientMessage(playerid, COLOR_ERROR, "No wanted suspect within range to order to stop.");
+
+	// Brief comply-stop. TogglePlayerControllable(false) freezes; the one-shot timer
+	// releases them after FREEZE_SECS so it is a "pull over" beat, not a lockdown.
+	TogglePlayerControllable(targetid, false);
+	SetTimerEx("Cop_UnfreezeSuspect", FREEZE_SECS * 1000, false, "d", targetid);
+
+	new string[144];
+	format(string, sizeof(string), ""COL_ORANGE"* You ordered %s (%d) to STOP. "COL_WHITE"They are frozen for %d seconds - close in and /arrest or /ticket.", PlayerInfo[targetid][pUserName], targetid, FREEZE_SECS);
+	SendClientMessage(playerid, COLOR_SERVER_INFO, string);
+	format(string, sizeof(string), ""COL_RED"* FREEZE! "COL_WHITE"%s (%d) ordered you to stop - you are held for %d seconds. Comply or flee once released.", PlayerInfo[playerid][pUserName], playerid, FREEZE_SECS);
+	SendClientMessage(targetid, COLOR_ERROR, string);
+	Dispatch_SetLastSuspect(playerid, targetid);	// $sus source
+	return 1;
+}
+alias:freeze("fr", "pullover", "pu")
+
+// One-shot unfreeze (from the /freeze timer). Guards a disconnect/jail race so it
+// never re-enables control on a jailed suspect (jail freezes them separately).
+FUNCTION Cop_UnfreezeSuspect(playerid)
+{
+	if(!IsPlayerConnected(playerid)) return 0;
+	if(Jail_IsJailed(playerid)) return 0;	// jail owns the freeze if they were arrested meanwhile
+	TogglePlayerControllable(playerid, true);
+	return 1;
+}
+
+//==============================================================================
+//	Stage B (§3.4) - /crimes (/crime) : a suspect's last 5 crimes
+//==============================================================================
+
+// Show a target's last 5 crimes from their pCrimeLog ring buffer (written by
+// GivePlayerWanted). Cop-only. Blank target = nearest suspect, else an explicit id.
+CMD:crimes(playerid, params[])
+{
+	if(!IsCop(playerid)) return SendClientMessage(playerid, COLOR_ERROR, "Only law enforcement can pull a rap sheet.");
+	new targetid;
+	if(!isNull(params))
+	{
+		if(sscanf(params, "d", targetid)) return SendClientMessage(playerid, COLOR_SERVER_INFO, "USAGE: /crimes [playerid] (or blank for nearest suspect)");
+		if(targetid == INVALID_PLAYER_ID || !IsPlayerConnected(targetid) || IsPlayerNPC(targetid))
+			return SendClientMessage(playerid, COLOR_ERROR, "That is not a valid player.");
+	}
+	else
+	{
+		targetid = Cop_NearestSuspect(playerid, VC_RANGE, WANTED_SUSPECT_MIN, MAX_WANTED);
+		if(targetid == -1) return SendClientMessage(playerid, COLOR_ERROR, "No suspect nearby - specify an id: /crimes [playerid].");
+	}
+
+	if(PlayerInfo[targetid][pCrimeLogCount] <= 0)
+		return SendClientMessage(playerid, COLOR_SERVER_INFO, "That player has no recorded crimes this session.");
+
+	new list[512], row[128], title[64];
+	format(title, sizeof(title), "Last crimes - %s (%d)", PlayerInfo[targetid][pUserName], targetid);
+	strcat(list, "{FFFF00}When\tCrime\n");
+	// Walk the ring newest-first: head points at the NEXT write slot, so the most
+	// recent entry is at head-1. Show up to 5.
+	new shown = (PlayerInfo[targetid][pCrimeLogCount] < 5) ? PlayerInfo[targetid][pCrimeLogCount] : 5;
+	for(new k = 0; k < shown; k++)
+	{
+		new idx = (PlayerInfo[targetid][pCrimeLogHead] - 1 - k + 5) % 5;
+		new ago = gettime() - PlayerInfo[targetid][pCrimeLog][idx];
+		if(ago < 0) ago = 0;
+		format(row, sizeof(row), "{FFFFFF}%d:%02d ago\t%s\n", ago / 60, ago % 60, g_CrimeLogWhat[targetid][idx]);
+		strcat(list, row);
+	}
+	ShowPlayerDialog(playerid, COP_INFO_DIALOG, DIALOG_STYLE_TABLIST_HEADERS, title, list, "Okay", "");
+	return 1;
+}
+alias:crimes("crime")
+
+//==============================================================================
+//	Stage B (§3.4) - /vehrepair (/vehfix) : repair the cop's own PD vehicle
+//==============================================================================
+
+// A cop on foot next to their own last-driven vehicle repairs it for
+// COP_REPAIR_COST (Bank_TakeCash + RepairVehicle). Cop-only.
+CMD:vehrepair(playerid, params[])
+{
+	#pragma unused params
+	if(!IsCop(playerid)) return SendClientMessage(playerid, COLOR_ERROR, "Only law enforcement can buy a vehicle repair kit.");
+	if(Jail_IsJailed(playerid)) return SendClientMessage(playerid, COLOR_ERROR, "You cannot do that right now.");
+	if(IsPlayerInAnyVehicle(playerid)) return SendClientMessage(playerid, COLOR_ERROR, "Get out of the vehicle first, then stand next to it to repair it.");
+
+	new vid = PlayerInfo[playerid][pLastVehicle];
+	if(vid == INVALID_VEHICLE_ID || !IsValidVehicle(vid))
+		return SendClientMessage(playerid, COLOR_ERROR, "You have no recent vehicle to repair. Drive one first.");
+
+	new Float:vx, Float:vy, Float:vz;
+	GetVehiclePos(vid, vx, vy, vz);
+	if(!IsPlayerInRangeOfPoint(playerid, VEHREPAIR_RANGE, vx, vy, vz))
+		return SendClientMessage(playerid, COLOR_ERROR, "You must be standing next to your vehicle to repair it.");
+
+	if(PlayerInfo[playerid][pMoney] < COP_REPAIR_COST)
+	{
+		new err[112];
+		format(err, sizeof(err), "A repair kit costs "COL_GREEN"$%d"COL_WHITE" cash - you cannot afford it.", COP_REPAIR_COST);
+		return SendClientMessage(playerid, COLOR_ERROR, err);
+	}
+	if(!Bank_TakeCash(playerid, COP_REPAIR_COST)) return SendClientMessage(playerid, COLOR_ERROR, "Payment failed.");
+
+	RepairVehicle(vid);
+	new string[112];
+	format(string, sizeof(string), ""COL_GREEN"* Vehicle repaired "COL_WHITE"($%d)"COL_GREEN"."COL_WHITE" Full health + fixed panels.", COP_REPAIR_COST);
+	SendClientMessage(playerid, COLOR_SERVER_INFO, string);
+	return 1;
+}
+alias:vehrepair("vehfix")
+
+//==============================================================================
+//	Stage B (§3.5) - /coprank : own rank, arrests-to-next, current /refill tier
+//==============================================================================
+
+// Read-only: show pCopRank (0-10 Recruit->Commissioner), the next weapon-tier
+// unlock, and the current /refill weapon kit. No state change.
+CMD:coprank(playerid, params[])
+{
+	#pragma unused params
+	if(!IsCop(playerid)) return SendClientMessage(playerid, COLOR_ERROR, "Only law enforcement have a cop rank.");
+	new rank = PlayerInfo[playerid][pCopRank], string[176];
+	format(string, sizeof(string), ""COL_LIGHTBLUE"* Cop Rank: "COL_WHITE"%d - %s"COL_LIGHTBLUE".", rank, g_CopRankTitle[rank]);
+	SendClientMessage(playerid, COLOR_SERVER_INFO, string);
+	format(string, sizeof(string), "Current /refill weapon kit: "COL_YELLOW"%s"COL_WHITE".", Cop_RefillTierLabel(rank));
+	SendClientMessage(playerid, COLOR_SERVER_INFO, string);
+
+	// Next weapon-tier unlock (ranks 3/6/9). Each arrest = +1 rank (max 10).
+	new nextTier = -1;
+	if(rank < 3) nextTier = 3;
+	else if(rank < 6) nextTier = 6;
+	else if(rank < 9) nextTier = 9;
+	if(nextTier != -1)
+	{
+		format(string, sizeof(string), "Next weapon-tier unlock at rank "COL_YELLOW"%d (%s)"COL_WHITE" - "COL_YELLOW"%d"COL_WHITE" more arrest(s).", nextTier, g_CopRankTitle[nextTier], nextTier - rank);
+		SendClientMessage(playerid, COLOR_SERVER_INFO, string);
+	}
+	else SendClientMessage(playerid, COLOR_SERVER_INFO, "You have unlocked every /refill weapon tier.");
 	return 1;
 }
 

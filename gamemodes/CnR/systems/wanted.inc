@@ -129,6 +129,22 @@ static Wanted_ReportTier(playerid, oldTier)
 	return 1;
 }
 
+// Stage B (§3.4) - append a crime to the suspect's session ring buffer (used by
+// a cop's /crimes). Head points at the next write slot; count caps the display
+// window. Defined here (before GivePlayerWanted) per the module's define-before-use
+// convention.
+static Wanted_LogCrime(playerid, const reason[])
+{
+	if(isNull(reason)) return 0;
+	new h = PlayerInfo[playerid][pCrimeLogHead];
+	if(h < 0 || h > 4) h = 0;
+	PlayerInfo[playerid][pCrimeLog][h] = gettime();
+	format(g_CrimeLogWhat[playerid][h], 40, "%s", reason);
+	PlayerInfo[playerid][pCrimeLogHead] = (h + 1) % 5;
+	if(PlayerInfo[playerid][pCrimeLogCount] < 5) PlayerInfo[playerid][pCrimeLogCount]++;
+	return 1;
+}
+
 //==============================================================================
 //	Public API (design §2.2)
 //==============================================================================
@@ -174,9 +190,25 @@ FUNCTION GivePlayerWanted(playerid, amount, const reason[])
 	if(PlayerInfo[playerid][pWanted] > MAX_WANTED) PlayerInfo[playerid][pWanted] = MAX_WANTED;
 	PlayerInfo[playerid][pWantedDecayCounter] = 0;	// reset decay on fresh crime
 
+	// Stage B (§3.4) - record this crime in the suspect's session rap sheet (a 5-slot
+	// ring buffer of reason[] + gettime()), read back by a cop's /crimes. Only real
+	// crimes reach here (the suppression checks above already returned for safe zones).
+	Wanted_LogCrime(playerid, reason);
+
 	Wanted_ApplyColour(playerid);
 	Wanted_AnnounceCrime(playerid, reason, amount);
 	Wanted_ReportTier(playerid, oldTier);
+
+	// Stage B (§3.2) - reaching Most Wanted (WL9+) fires a 10-114 dispatch alert to
+	// cops within DISPATCH_WL9_RADIUS of the suspect. This is a CRITICAL priority so
+	// it reaches even cops who muted the department channel. Only fires on the
+	// TRANSITION into WL9+ (not on every WL9+ crime) via the tier change.
+	if(oldTier != WANTED_TIER_MOSTWANTED && WantedTierOf(PlayerInfo[playerid][pWanted]) == WANTED_TIER_MOSTWANTED)
+	{
+		new dtext[128];
+		format(dtext, sizeof(dtext), "Most Wanted nearby - %s (%d) WL%d", PlayerInfo[playerid][pUserName], playerid, PlayerInfo[playerid][pWanted]);
+		CallLocalFunction("Dispatch_Alert", "ddssf", playerid, DISPATCH_CRITICAL, "10-114", dtext, DISPATCH_WL9_RADIUS);
+	}
 	return 1;
 }
 

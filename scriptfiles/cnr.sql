@@ -59,6 +59,7 @@ CREATE TABLE IF NOT EXISTS `LSplayers` (
     `CopRank`         INT           NOT NULL DEFAULT 0,      -- cop rank ladder 0-10 Recruit->Commissioner
     `RefillPoints`    INT           NOT NULL DEFAULT 0,      -- M3: cop /refill points (§3.1)
     `SeriousCrimes`   INT           NOT NULL DEFAULT 0,      -- violent/murder charge count (blocks appeal)
+    `CopChatOn`       TINYINT(1)    NOT NULL DEFAULT 1,      -- Stage B (§3.1): department-channel (/d) + non-critical dispatch receive toggle (1=on)
     `Jailed`          TINYINT(1)    NOT NULL DEFAULT 0,      -- currently cop-jailed
     `JailUntil`       INT           NOT NULL DEFAULT 0,      -- unix time the cop-jail sentence ends (0 = free)
     `Bail`            INT           NOT NULL DEFAULT 0,      -- bail cost to buy out of jail
@@ -101,6 +102,9 @@ CREATE TABLE IF NOT EXISTS `LSplayers` (
     `CoolerCount`     INT           NOT NULL DEFAULT 0,      -- fish currently in the cooler (0..cap)
     `CoolerWeight`    INT           NOT NULL DEFAULT 0,      -- total pounds of fish in the cooler
     `CoolerValue`     INT           NOT NULL DEFAULT 0,      -- accumulated base sale value of the cooler contents ($, pre-market-mult)
+    -- Stage A (post-M7): robbery success grind (FEATURE-EXPANSION-PLAN §1.1)
+    `SuccessfulRobberies` INT       NOT NULL DEFAULT 0,      -- the grind counter — drives the per-type success % curve (Rob_SuccessChance)
+    `FailedRobberies`     INT       NOT NULL DEFAULT 0,      -- informational / anti-farm telemetry (incremented on a failed rob-type crime)
     PRIMARY KEY (`aID`),
     CONSTRAINT `fk_LSplayers_aID` FOREIGN KEY (`aID`)
         REFERENCES `players` (`aID`) ON DELETE CASCADE
@@ -166,6 +170,13 @@ CREATE TABLE IF NOT EXISTS `LSplayers` (
 --     ADD `CoolerCount`     INT        NOT NULL DEFAULT 0,
 --     ADD `CoolerWeight`    INT        NOT NULL DEFAULT 0,
 --     ADD `CoolerValue`     INT        NOT NULL DEFAULT 0;
+-- Stage A (post-M7) robbery success-grind columns (FEATURE-EXPANSION-PLAN §1.1):
+--   ALTER TABLE `LSplayers`
+--     ADD `SuccessfulRobberies` INT NOT NULL DEFAULT 0,
+--     ADD `FailedRobberies`     INT NOT NULL DEFAULT 0;
+-- Stage B (post-M7) cop-chat toggle column (FEATURE-EXPANSION-PLAN §3.1):
+--   ALTER TABLE `LSplayers`
+--     ADD `CopChatOn` TINYINT(1) NOT NULL DEFAULT 1;
 -- (repeat for SFplayers/LVplayers when those cities go live).
 
 -- Per-city persistent vehicles (Los Santos)

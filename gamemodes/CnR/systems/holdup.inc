@@ -99,6 +99,10 @@ static Holdup_End(playerid, bool:announce)
 		if(PlayerInfo[playerid][pHoldupTake] > 0)
 		{
 			PlayerInfo[playerid][pScore] += 1;	// each completed robbery = +1 score (§5)
+			// Stage A (FEATURE-EXPANSION-PLAN §1.5): a holdup that actually paid out
+			// counts as a success - climb the grind counter + persist. Rob_RecordSuccess
+			// lives in robbery.inc (included after this module) - reach it via CallLocalFunction.
+			CallLocalFunction("Rob_RecordSuccess", "d", playerid);
 			new string[144];
 			format(string, sizeof(string), ""COL_GREEN"* Holdup complete: "COL_WHITE"you cleared "COL_GREEN"$%d"COL_WHITE" from the register. +1 score. Get out before the cops arrive!", PlayerInfo[playerid][pHoldupTake]);
 			SendClientMessage(playerid, COLOR_SERVER_INFO, string);
@@ -233,6 +237,21 @@ CMD:holdup(playerid, params[])
 	if(store == -1)
 		return SendClientMessage(playerid, COLOR_ERROR, "You must be standing at a store clerk (24-7, bar, ammunation, food shop, sex shop) to hold it up.");
 
+	// Stage A (FEATURE-EXPANSION-PLAN §1.3): an entry success roll the base holdup
+	// previously lacked - base 60 -> cap 92 on the grind curve. On a FAIL the clerk
+	// refuses / trips a silent alarm: the holdup aborts before the clerk-wait, no
+	// register payout, a +2 "Attempted holdup" wanted, and only a shorter
+	// HOLDUP_FAIL_CD retry cooldown (a grind-tax, not the full HOLDUP_STORE_CD lockout).
+	if(random(100) >= Rob_SuccessChance(60, 92, PlayerInfo[playerid][pSuccessfulRobberies]))
+	{
+		PlayerInfo[playerid][pHoldupCooldown] = gettime() + HOLDUP_FAIL_CD;
+		GivePlayerWanted(playerid, 2, "Attempted holdup");
+		PlayerInfo[playerid][pFailedRobberies]++;
+		Jail_SavePlayer(playerid);
+		SendClientMessage(playerid, COLOR_ERROR, ""COL_RED"* Holdup failed! "COL_WHITE"The clerk refused and hit the silent alarm - you got nothing. Try again shortly.");
+		return 1;
+	}
+
 	// Start the sequence. Lock the store position for the leave-the-zone check.
 	GetPlayerPos(playerid, PlayerInfo[playerid][pHoldupX], PlayerInfo[playerid][pHoldupY], PlayerInfo[playerid][pHoldupZ]);
 	PlayerInfo[playerid][pHoldingUp] = true;
@@ -264,6 +283,14 @@ CMD:holdup(playerid, params[])
 		if(!IsPlayerConnected(i) || IsPlayerNPC(i) || i == playerid) continue;
 		if(IsCop(i)) SendClientMessage(i, COLOR_WANTED_ORANGE, string);
 	}
+
+	// Stage B (§3.2) - a store holdup fires a 10-130 (Robbery/Hold Up) dispatch,
+	// server-wide. dispatch.inc is included after this module, so reach it via
+	// CallLocalFunction. The [DISPATCH] line is the high-signal event feed layered
+	// on top of the [HOLDUP]/[CRIME] proximity announces above.
+	new dtext[128];
+	format(dtext, sizeof(dtext), "in progress - %s (%d)", PlayerInfo[playerid][pUserName], playerid);
+	CallLocalFunction("Dispatch_Alert", "ddssf", playerid, DISPATCH_NORMAL, "10-130", dtext, DISPATCH_ALL);
 	return 1;
 }
 alias:holdup("hup", "storerob", "robstore")

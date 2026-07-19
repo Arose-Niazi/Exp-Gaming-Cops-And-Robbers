@@ -138,7 +138,7 @@ ShowCommandList(playerid)
 	// A representative, paginated command reference (dialog-listed).
 	new list[1400];
 	strcat(list, "{FFFF00}Messaging:{FFFFFF}\n/pm  /reply (/r)  /nopm  /ignore (/mute)\n");
-	strcat(list, "{FFFF00}Teleports:{FFFFFF}\n/drylake (/d)  /sfairport (/sfa)  /bayside (/bs)  /lossantosdm (/lsadm)  /palominocreek (/pc)\n");
+	strcat(list, "{FFFF00}Teleports:{FFFFFF}\n/drylake (/dl)  /sfairport (/sfa)  /bayside (/bs)  /lossantosdm (/lsadm)  /palominocreek (/pc)\n");
 	strcat(list, "{FFFF00}GPS/Info:{FFFFFF}\n/gps  /commands  /showcommands\n");
 	if(PlayerInfo[playerid][pRank] >= SERVER_MODERATOR)
 	{

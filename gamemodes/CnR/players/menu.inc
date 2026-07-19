@@ -541,7 +541,52 @@ OnPlayerEnterTextDrawMenuOption(playerid,const text[])
 
 					OnGPSMenu(playerid,1,Menu_Item_Price[playerid][Option],-1);
 					return 1;
-				}	
+				}
+				else
+				{
+					SendClientMessage(playerid, COLOR_ERROR, "Invalid option.");
+				}
+			}
+			else return 0;
+		}
+		// ---- Stage C : feature guide browser (help.inc) ----
+		// MENU_HELP_CATS: player typed a category number (1..nCats).
+		// Menu_Item[playerid][Option] stores the g_HelpCat index written by Help_ShowCategories.
+		// Help_ShowCommands and Help_ShowDetailDialog are defined in cmds/help.inc (included after
+		// menu.inc), so they are called via CallLocalFunction to avoid forward-reference errors.
+		case MENU_HELP_CATS:
+		{
+			if (Option != -1)
+			{
+				if (Option >= 1 && Option <= Menu_Options[playerid])
+				{
+					HideTextDrawMenu(playerid, 0);
+					new catIndex = Menu_Item[playerid][Option];
+					CallLocalFunction("Help_ShowCommands", "ii", playerid, catIndex);
+					return 1;
+				}
+				else
+				{
+					SendClientMessage(playerid, COLOR_ERROR, "Invalid option.");
+				}
+			}
+			else return 0;
+		}
+		// MENU_HELP_CMDS: player typed a command number (1..nCmds in category).
+		// Menu_Item[playerid][Option] stores the g_HelpCmd row index written by Help_ShowCommands.
+		// The full description is shown in a HELP_DETAIL_DIALOG MSGBOX; the dialog response
+		// (OnDialogResponse HELP_DETAIL_DIALOG, button1 = Back) calls Help_ShowCommands again.
+		case MENU_HELP_CMDS:
+		{
+			if (Option != -1)
+			{
+				if (Option >= 1 && Option <= Menu_Options[playerid])
+				{
+					new cmdRow = Menu_Item[playerid][Option];
+					HideTextDrawMenu(playerid, 0);
+					CallLocalFunction("Help_ShowDetailDialog", "ii", playerid, cmdRow);
+					return 1;
+				}
 				else
 				{
 					SendClientMessage(playerid, COLOR_ERROR, "Invalid option.");
